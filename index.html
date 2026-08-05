@@ -211,7 +211,6 @@
         font: inherit;
       }
 
-      button[class]:focus,
       button[class]:focus-visible {
         outline: var(--focusRingWidth) solid var(--colorWashiLight);
         outline-offset: var(--spacingHorizontalXXS);
@@ -434,15 +433,6 @@
         aspect-ratio: auto;
       }
 
-      body[data-mode="release"] .stage-action {
-        border-radius: var(--borderRadiusNone);
-      }
-
-      body[data-mode="release"] .stage-action:hover {
-        border-color: transparent;
-        border-style: solid;
-      }
-
       .mode-panel {
         width: 100%;
         height: 100%;
@@ -462,24 +452,43 @@
       }
 
       .stage-action {
+        position: relative;
         width: 100%;
         height: 100%;
         padding: 0;
         color: var(--colorInk);
         background: transparent;
-        border: var(--strokeMedium) solid transparent;
+        border: 0;
         border-radius: var(--borderRadiusNone);
         cursor: pointer;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
-        transition:
-          transform var(--durationFast) var(--curveEasyEase),
-          border-color var(--durationFast) var(--curveEasyEase);
+        transition: transform var(--durationFast) var(--curveEasyEase);
       }
 
-      .stage-action:hover {
-        border-color: var(--colorInk);
-        border-style: dashed;
+      .stage-action::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: var(--spacingVerticalL);
+        width: var(--spacingHorizontalL);
+        height: var(--spacingVerticalL);
+        opacity: 0;
+        background: var(--colorAccentLime);
+        border: var(--strokeThin) solid var(--colorAccentPurple);
+        clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+        transform: translateX(-50%) scale(0.7);
+        pointer-events: none;
+      }
+
+      button.stage-action:focus-visible {
+        outline: none;
+        box-shadow: none;
+      }
+
+      button.stage-action:focus-visible::after {
+        opacity: 1;
+        animation: stage-focus-beacon var(--rhythmPeriod) var(--curveEasyEase) infinite;
       }
 
       .stage-action:active {
@@ -666,27 +675,48 @@
       .idle-hint {
         position: fixed;
         z-index: 3;
-        top: 50%;
+        top: 57%;
         left: 50%;
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: center;
+        gap: var(--spacingHorizontalS);
         max-width: calc(100vw - var(--spacingHorizontalXXXL));
         margin: 0;
-        padding: var(--spacingVerticalM) var(--spacingHorizontalXXL);
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
         color: var(--colorInk);
-        background: var(--colorWashiDeep);
-        border: var(--strokeMedium) solid var(--colorInk);
-        box-shadow:
-          var(--spacingHorizontalM) var(--spacingVerticalM) 0 var(--colorAccentPurple),
-          calc(0px - var(--spacingHorizontalS)) calc(0px - var(--spacingVerticalS)) 0 var(--colorLake);
-        clip-path: polygon(3% 0, 100% 8%, 96% 100%, 0 88%);
-        transform: translate(-50%, -50%) rotate(-1deg);
-        font-size: var(--fontSizeBase400);
-        line-height: var(--lineHeightBase400);
+        background: var(--colorPaperAlpha);
+        border: 0;
+        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorInkFaintAlpha);
+        clip-path: polygon(3% 0, 100% 9%, 96% 100%, 0 90%);
+        transform: translate(-50%, -50%);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
         font-weight: var(--fontWeightBold);
         letter-spacing: var(--labelTracking);
         text-align: center;
         white-space: nowrap;
         pointer-events: none;
         animation: idle-hint-in var(--durationNormal) var(--curveDecelerateMax);
+      }
+
+      .idle-hint::before {
+        content: "";
+        width: var(--spacingHorizontalXL);
+        height: var(--spacingVerticalXL);
+        background: var(--colorLakeAlpha);
+        border: var(--strokeThin) solid var(--colorAccentPurple);
+        border-radius: var(--borderRadiusCircular);
+        animation: idle-cue-pulse var(--rhythmPeriod) var(--curveEasyEase) infinite;
+      }
+
+      body[data-mode="release"] .idle-hint {
+        top: 66%;
+      }
+
+      body[data-mode="release"] .idle-hint::before {
+        background: var(--colorInkFaintAlpha);
+        border-color: var(--colorAccentPink);
       }
 
       .idle-hint[hidden] {
@@ -1136,11 +1166,37 @@
       @keyframes idle-hint-in {
         from {
           opacity: 0;
-          transform: translate(-50%, -35%) rotate(2deg) scale(0.88);
+          transform: translate(-50%, -35%) scale(0.88);
         }
         to {
           opacity: 1;
-          transform: translate(-50%, -50%) rotate(-1deg) scale(1);
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+
+      @keyframes idle-cue-pulse {
+        0%,
+        100% {
+          opacity: 0.38;
+          transform: scale(0.58);
+          box-shadow: 0 0 0 0 var(--colorInkFaintAlpha);
+        }
+        72% {
+          opacity: 1;
+          transform: scale(1);
+          box-shadow: 0 0 0 var(--spacingHorizontalS) transparent;
+        }
+      }
+
+      @keyframes stage-focus-beacon {
+        0%,
+        100% {
+          opacity: 0.45;
+          transform: translateX(-50%) scale(0.72) rotate(0);
+        }
+        72% {
+          opacity: 1;
+          transform: translateX(-50%) scale(1) rotate(45deg);
         }
       }
 
@@ -1500,10 +1556,14 @@
           box-shadow: none;
         }
 
-        button[class]:focus,
         button[class]:focus-visible {
           outline-color: Highlight;
           box-shadow: none;
+        }
+
+        button.stage-action:focus-visible::after {
+          background: Highlight;
+          border-color: Highlight;
         }
 
         .hc-label {
@@ -1520,7 +1580,7 @@
 
   <body>
     <canvas id="sceneCanvas" aria-hidden="true"></canvas>
-    <p id="idleHint" class="idle-hint" aria-hidden="true" hidden>红圈合拢时敲击</p>
+    <p id="idleHint" class="idle-hint" aria-hidden="true" hidden>轻敲</p>
 
     <main class="screen" data-screen-label="01 佛了 for luck · 功德与放生" data-active="true">
       <header class="topbar">
@@ -2176,11 +2236,17 @@
             return;
           }
           const hint = mode === "merit"
-            ? "红圈合拢时敲击"
-            : "浪线抵达粉色入水点时放生";
-          idleHint.textContent = hint;
+            ? {
+                visual: "轻敲",
+                announcement: "跟随收拢节拍敲击木鱼"
+              }
+            : {
+                visual: "轻放",
+                announcement: "跟随浪线抵达入水点放生"
+              };
+          idleHint.textContent = hint.visual;
           idleHint.hidden = false;
-          announce(`提示：${hint}`);
+          announce(`提示：${hint.announcement}`);
         }
 
         function resetIdleHint() {
