@@ -149,6 +149,9 @@
         --colorPaperAlpha: rgba(255, 255, 255, 0.94);
         --colorInkAlpha: rgba(39, 38, 58, 0.24);
         --colorInkFaintAlpha: rgba(39, 38, 58, 0.12);
+        --colorLakeSoftAlpha: rgba(79, 195, 247, 0.14);
+        --colorAccentPinkSoftAlpha: rgba(255, 92, 168, 0.14);
+        --colorAccentPinkStrongAlpha: rgba(255, 92, 168, 0.3);
         --colorShadowAlpha: rgba(39, 38, 58, 0.24);
         --colorModalBackdrop: rgba(39, 38, 58, 0.9);
         --colorLakeAlpha: rgba(79, 195, 247, 0.3);
@@ -676,6 +679,8 @@
       }
 
       .idle-hint {
+        --idleCueBackgroundSoft: var(--colorLakeSoftAlpha);
+        --idleCueBackgroundStrong: var(--colorLakeAlpha);
         position: fixed;
         z-index: 3;
         top: 57%;
@@ -687,19 +692,23 @@
         margin: 0;
         padding: 0;
         color: var(--colorInk);
-        background: var(--colorPaperAlpha);
+        background: var(--idleCueBackgroundSoft);
         border: var(--strokeThin) solid var(--colorAccentPurple);
         border-radius: var(--borderRadiusCircular);
-        box-shadow: none;
+        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorInkFaintAlpha);
         transform: translate(-50%, -50%);
-        font-size: var(--fontSizeBase200);
-        line-height: var(--lineHeightBase200);
+        transform-origin: center;
+        font-family: var(--fontFamilyInk);
+        font-size: var(--fontSizeBase300);
+        line-height: var(--lineHeightBase300);
         font-weight: var(--fontWeightBold);
         letter-spacing: var(--labelTracking);
         text-align: center;
         white-space: nowrap;
         pointer-events: none;
-        animation: idle-hint-in var(--durationNormal) var(--curveDecelerateMax);
+        animation:
+          idle-hint-in var(--durationNormal) var(--curveDecelerateMax),
+          idle-hint-breathe var(--rhythmPeriod) var(--curveEasyEase) infinite;
       }
 
       .idle-hint::before {
@@ -714,6 +723,8 @@
       }
 
       body[data-mode="release"] .idle-hint {
+        --idleCueBackgroundSoft: var(--colorAccentPinkSoftAlpha);
+        --idleCueBackgroundStrong: var(--colorAccentPinkStrongAlpha);
         top: 66%;
         border-color: var(--colorAccentPink);
       }
@@ -920,8 +931,8 @@
         padding: var(--spacingVerticalM) var(--spacingHorizontalS);
         color: var(--colorWashiLight);
         background: var(--colorRustDeep);
-        border: var(--strokeMedium) solid var(--colorInk);
-        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorLake);
+        border: 0;
+        box-shadow: none;
         font-family: var(--fontFamilyInk);
         font-size: var(--fontSizeFortune);
         line-height: var(--lineHeightFortune);
@@ -1032,7 +1043,6 @@
       .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-title {
         color: var(--colorWashiLight);
         background: var(--colorFortuneDark);
-        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentOrange);
       }
 
       .fortune-fire {
@@ -1231,6 +1241,20 @@
           opacity: 1;
           transform: scale(1);
           box-shadow: 0 0 0 var(--spacingHorizontalS) transparent;
+        }
+      }
+
+      @keyframes idle-hint-breathe {
+        0%,
+        100% {
+          color: var(--colorInkSoft);
+          background-color: var(--idleCueBackgroundSoft);
+          scale: 0.94;
+        }
+        72% {
+          color: var(--colorInk);
+          background-color: var(--idleCueBackgroundStrong);
+          scale: 1.05;
         }
       }
 
@@ -1809,8 +1833,10 @@
         const STORAGE_KEY = "yinian-ritual-state-v2";
         const LEGACY_STORAGE_KEY = "yinian-gongde-state-v1";
         const IDLE_HINT_DELAY = 7000;
-        const PERFECT_FEVER_THRESHOLD = 20;
-        const PERFECT_FEVER_DURATION = 8000;
+        const PERFECT_FEVER_THRESHOLD = 3;
+        const PERFECT_FEVER_DURATION = 10000;
+        const FEVER_RING_CHIP_COUNT = 20;
+        const MISS_FORTUNE_THRESHOLD = 1;
         const WOOD_STRIKE_DURATION = 0.32;
         const WOOD_IMPACT_PHASE = 0.14;
         const FORTUNE_EXIT_DURATION = 500;
@@ -2603,9 +2629,10 @@
         }
 
         function updateCombo(timing) {
+          const feverActive = isFeverActive();
           if (timing.rank === "perfect") {
             comboCount += 1;
-            perfectStreak += 1;
+            if (!feverActive) perfectStreak += 1;
           } else if (timing.rank === "cool") {
             comboCount += 1;
             perfectStreak = 0;
@@ -2613,10 +2640,12 @@
             comboCount = 0;
             perfectStreak = 0;
           }
-          const shouldTriggerFever = perfectStreak > 0
-            && perfectStreak % PERFECT_FEVER_THRESHOLD === 0
-            && !isFeverActive();
-          if (shouldTriggerFever) triggerFever();
+          const shouldTriggerFever = perfectStreak >= PERFECT_FEVER_THRESHOLD
+            && !feverActive;
+          if (shouldTriggerFever) {
+            perfectStreak = 0;
+            triggerFever();
+          }
           return shouldTriggerFever;
         }
 
@@ -2708,7 +2737,7 @@
           playWoodSound(timing.rank === "perfect");
           announce(
             feverTriggered
-              ? "连续二十次 PERFECT，功德时刻开始，持续八秒"
+              ? "连续 3 次 PERFECT，功德时刻开始，持续 10 秒"
               : STRINGS.meritStatus(timing.label, formatter.format(meritTotal), comboCount)
           );
           if (!fromAuto && navigator.vibrate) {
@@ -2755,7 +2784,7 @@
           playWaterSound();
           announce(
             feverTriggered
-              ? "连续二十次 PERFECT，放生时刻开始，持续八秒"
+              ? "连续 3 次 PERFECT，放生时刻开始，持续 10 秒"
               : STRINGS.releaseStatus(timing.label, item.name, formatter.format(releaseTotal), comboCount)
           );
           if (!fromAuto && navigator.vibrate) {
@@ -4191,8 +4220,8 @@
           }
 
           const chipRadius = geometry.size * 0.58 * pulse;
-          for (let chip = 0; chip < PERFECT_FEVER_THRESHOLD; chip += 1) {
-            const angle = (chip / PERFECT_FEVER_THRESHOLD) * Math.PI * 2 - spin * 1.8;
+          for (let chip = 0; chip < FEVER_RING_CHIP_COUNT; chip += 1) {
+            const angle = (chip / FEVER_RING_CHIP_COUNT) * Math.PI * 2 - spin * 1.8;
             const chipSize = Math.max(5, geometry.size * (chip % 2 === 0 ? 0.018 : 0.012));
             context.save();
             context.translate(
@@ -4295,7 +4324,10 @@
           const beatDuration = MODES[mode].autoDelay;
           if (!sessionMissAnchor) sessionMissAnchor = time;
 
-          while (time - sessionMissAnchor >= beatDuration && sessionMissCount < 2) {
+          while (
+            time - sessionMissAnchor >= beatDuration
+            && sessionMissCount < MISS_FORTUNE_THRESHOLD
+          ) {
             sessionMissAnchor += beatDuration;
             sessionMissCount += 1;
             comboCount = 0;
@@ -4303,22 +4335,17 @@
             lastTimingGrade = "MISS";
             addBurst(
               { label: "MISS", rank: "miss" },
-              sessionMissCount === 1 ? "1 / 2" : "2 / 2 · 抽签",
+              `${sessionMissCount} / ${MISS_FORTUNE_THRESHOLD} · 抽签`,
               "",
               geometry,
               mode
             );
             renderUi();
 
-            if (sessionMissCount === 1) {
-              announce("MISS，下一拍仍未操作将自动抽签");
-              continue;
-            }
-
             fortunePending = true;
             window.clearTimeout(idleHintTimer);
             idleHint.hidden = true;
-            announce("连续 MISS 两拍，正在抽签");
+            announce("MISS，正在抽签");
             fortuneTimer = window.setTimeout(
               showFortuneSummary,
               reducedMotion ? 120 : 320
@@ -4497,7 +4524,7 @@
           previewMiss: () => {
             addBurst(
               { label: "MISS", rank: "miss" },
-              "1 / 2",
+              "1 / 1 · 抽签",
               "",
               stageGeometry(),
               mode
