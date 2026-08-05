@@ -191,6 +191,7 @@
         --fortuneTitleLift: -40px;
         --fortuneStickerWidth: 76px;
         --fortuneButtonLift: -8px;
+        --fortuneButtonDepth: 24px;
         --durationReducedMotion: 1ms;
       }
 
@@ -881,10 +882,11 @@
         left: var(--spacingHorizontalXXL);
         width: var(--fortuneStickerWidth);
         height: auto;
-        background: transparent;
+        background: var(--colorInk);
         border: 0;
-        box-shadow: none;
-        filter: drop-shadow(var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk));
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorWashiDeep);
+        clip-path: polygon(5% 1%, 96% 4%, 100% 92%, 90% 100%, 2% 96%, 0 8%);
+        filter: none;
         transform: translateZ(16px) rotate(-6deg);
       }
 
@@ -1077,12 +1079,12 @@
         line-height: var(--lineHeightFortune);
         font-weight: var(--fontWeightBold);
         text-shadow: var(--strokeThin) var(--strokeThin) 0 var(--colorWashiLight);
-        transform: translateY(calc(0px - var(--spacingVerticalSNudge))) rotate(-6deg) scale(1.16);
+        transform: translateY(calc(0px - var(--spacingVerticalXXS))) rotate(-6deg) scale(1.16);
       }
 
       .fortune-continue {
         position: relative;
-        z-index: 6;
+        z-index: 99;
         min-width: 168px;
         min-height: var(--controlMinSize);
         padding: var(--controlPadBlock) var(--spacingHorizontalXXL);
@@ -1092,16 +1094,21 @@
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorLake);
         font-weight: var(--fontWeightBold);
         cursor: pointer;
-        transform: translateY(var(--fortuneButtonLift));
+        transform: translateY(var(--fortuneButtonLift)) translateZ(var(--fortuneButtonDepth));
       }
 
       .fortune-continue:hover {
         background: var(--colorMoss);
-        transform: translateY(calc(var(--fortuneButtonLift) + var(--hoverOffset)));
+        transform:
+          translateY(calc(var(--fortuneButtonLift) + var(--hoverOffset)))
+          translateZ(var(--fortuneButtonDepth));
       }
 
       .fortune-continue:active {
-        transform: translateY(var(--fortuneButtonLift)) scale(var(--pressScale));
+        transform:
+          translateY(var(--fortuneButtonLift))
+          translateZ(var(--fortuneButtonDepth))
+          scale(var(--pressScale));
       }
 
       .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-continue {
