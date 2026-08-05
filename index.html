@@ -118,9 +118,11 @@
         --colorWashi: #fff6df;
         --colorWashiLight: #ffffff;
         --colorWashiDeep: #ffd166;
+        --colorWashiFaintAlpha: rgba(255, 246, 223, 0.12);
         --colorInk: #27263a;
         --colorInkSoft: #3d3c56;
         --colorInkFaint: #5e5d76;
+        --colorFortuneDark: #111019;
         --colorRust: #ff6f61;
         --colorRustDeep: #c13b57;
         --colorMoss: #45d6a9;
@@ -751,6 +753,18 @@
         transform-style: preserve-3d;
       }
 
+      .fortune-paper {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        width: min(100%, 380px);
+        transform-origin: 50% 16%;
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+        animation: fortune-draw var(--durationFortuneMotion) var(--curveDecelerateMax);
+      }
+
       .fortune-aura {
         position: absolute;
         z-index: 1;
@@ -810,10 +824,10 @@
         transform-origin: 50% 16%;
         transform-style: preserve-3d;
         backface-visibility: hidden;
-        animation: fortune-draw var(--durationFortuneMotion) var(--curveDecelerateMax);
         overflow: hidden;
       }
 
+      .fortune-paper,
       .fortune-slip,
       .fortune-continue,
       .fortune-signature {
@@ -918,14 +932,31 @@
       }
 
       .fortune-message {
-        width: 100%;
+        position: absolute;
+        z-index: 4;
+        top: 88%;
+        left: 50%;
+        width: min(88vw, 340px);
         display: grid;
         gap: var(--spacingVerticalXS);
         padding: var(--spacingVerticalM) var(--spacingHorizontalL);
         background: var(--colorWashiLight);
         border: var(--strokeMedium) solid var(--colorInk);
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPurple);
-        transform: rotate(1deg);
+        transform: translate(-53%, -50%) rotate(1deg);
+      }
+
+      .fortune-message::before {
+        content: "";
+        position: absolute;
+        top: calc(0px - var(--spacingVerticalMNudge));
+        left: 38%;
+        width: 34%;
+        height: var(--spacingVerticalL);
+        background: var(--colorAccentPink);
+        border: var(--strokeThin) solid var(--colorInk);
+        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorInk);
+        transform: rotate(-3deg);
       }
 
       .fortune-english {
@@ -987,6 +1018,45 @@
         color: var(--colorWashiLight);
         background: var(--colorRustDeep);
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentOrange);
+      }
+
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-slip {
+        color: var(--colorWashiLight);
+        background-color: var(--colorFortuneDark);
+        background-image: radial-gradient(
+          circle,
+          var(--colorWashiFaintAlpha) 0 1px,
+          transparent 1.2px
+        );
+        border-color: var(--colorWashiLight);
+        box-shadow:
+          var(--spacingHorizontalL) var(--spacingVerticalL) 0 var(--colorAccentPink),
+          calc(0px - var(--spacingHorizontalS)) calc(0px - var(--spacingVerticalS)) 0 var(--colorAccentOrange);
+      }
+
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-kicker,
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-title {
+        color: var(--colorWashiLight);
+      }
+
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-slip::before,
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-slip::after {
+        border-color: var(--colorWashiLight);
+      }
+
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-message {
+        color: var(--colorInk);
+        background: var(--colorAccentPink);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentOrange);
+      }
+
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-english,
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-explanation {
+        color: var(--colorInk);
+      }
+
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-message::before {
+        background: var(--colorWashiDeep);
       }
 
       .fortune-fire {
@@ -1060,7 +1130,7 @@
         }
         100% {
           opacity: 1;
-          transform: translate(0, 0) rotateX(0) rotateZ(-1deg) scale(1);
+          transform: translate(0, 0) rotateX(0) rotateZ(0) scale(1);
         }
       }
 
@@ -1467,6 +1537,12 @@
           background: Canvas;
         }
 
+        .fortune-overlay[data-fortune-tone] .fortune-slip,
+        .fortune-overlay[data-fortune-tone] .fortune-message {
+          background: Canvas !important;
+          border-color: ButtonText;
+        }
+
         #sceneCanvas {
           display: none;
         }
@@ -1540,6 +1616,7 @@
 
         .fortune-aura,
         .fortune-fire,
+        .fortune-message::before,
         .stats-title::before,
         .stats-title::after,
         .tape {
@@ -1713,9 +1790,11 @@
           <span></span>
           <span></span>
         </div>
-        <article class="fortune-slip">
-          <p class="fortune-kicker" id="fortuneMode">本次功德签</p>
-          <h2 class="fortune-title" id="fortuneTitle">大吉</h2>
+        <div class="fortune-paper">
+          <article class="fortune-slip">
+            <p class="fortune-kicker" id="fortuneMode">今日赛博签</p>
+            <h2 class="fortune-title" id="fortuneTitle">大吉</h2>
+          </article>
           <div class="fortune-message">
             <p class="fortune-keyword" id="fortuneKeyword">共赢</p>
             <p class="fortune-english" id="fortuneEnglish">Win-Win</p>
@@ -1723,8 +1802,8 @@
               只要我不内卷，大家都有光明的未来。
             </p>
           </div>
-        </article>
-        <p class="fortune-count" id="fortuneDescription">本次积攒 0 次</p>
+          <p class="fortune-count" id="fortuneDescription">本次积攒 0 次</p>
+        </div>
         <span class="fortune-fire" aria-hidden="true">
           <span>🔥</span><span>🔥</span><span>🔥</span><span>🔥</span>
           <span>🔥</span><span>🔥</span><span>🔥</span><span>🔥</span>
@@ -1760,6 +1839,7 @@
         const WOOD_IMPACT_PHASE = 0.14;
         const FORTUNE_EXIT_DURATION = 500;
         const FORTUNE_BURN_DURATION = 760;
+        const RATING_EFFECT_SCALE = 0.9;
         const MODES = {
           merit: {
             autoLabel: "自动敲",
@@ -2150,7 +2230,7 @@
           ) || FORTUNE_MESSAGES[randomIndex(FORTUNE_MESSAGES.length)];
           const isMerit = mode === "merit";
           fortuneTone = AUSPICIOUS_FORTUNES.has(level) ? "auspicious" : "inauspicious";
-          fortuneMode.textContent = isMerit ? "本次功德签" : "本次放生签";
+          fortuneMode.textContent = "今日赛博签";
           fortuneTitle.textContent = level;
           fortuneKeyword.textContent = message.keyword;
           fortuneEnglish.textContent = message.english;
@@ -3947,7 +4027,7 @@
               : burst.rank === "cool"
                 ? 0.82
                 : 1;
-            const gradeSize = baseGradeSize * gradeScale;
+            const gradeSize = baseGradeSize * gradeScale * RATING_EFFECT_SCALE;
             const gainSize = Math.max(22, gradeSize * 0.46);
             const comboSize = Math.max(19, gradeSize * 0.38);
             const gradePalette = {
