@@ -190,6 +190,7 @@
         --idleCueSize: 72px;
         --fortuneTitleLift: -40px;
         --fortuneStickerWidth: 76px;
+        --fortuneMetaLift: -16px;
         --fortuneButtonLift: -8px;
         --fortuneButtonDepth: 24px;
         --durationReducedMotion: 1ms;
@@ -878,14 +879,13 @@
       .fortune-lab-sticker {
         position: absolute;
         z-index: 5;
-        top: var(--spacingVerticalM);
+        top: calc(var(--spacingVerticalM) + var(--fortuneMetaLift));
         left: var(--spacingHorizontalXXL);
         width: var(--fortuneStickerWidth);
         height: auto;
         background: var(--colorInk);
         border: 0;
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorWashiDeep);
-        clip-path: polygon(5% 1%, 96% 4%, 100% 92%, 90% 100%, 2% 96%, 0 8%);
         filter: none;
         transform: translateZ(16px) rotate(-6deg);
       }
@@ -1043,7 +1043,7 @@
       .fortune-count {
         position: absolute;
         z-index: 3;
-        top: var(--spacingVerticalL);
+        top: calc(var(--spacingVerticalL) + var(--fortuneMetaLift));
         right: var(--spacingHorizontalM);
         min-width: 132px;
         max-width: 132px;
