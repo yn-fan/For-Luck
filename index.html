@@ -8,7 +8,7 @@
       name="description"
       content="佛了 for luck：在原创复古漫画网点风格的木鱼与无边海之间切换，跟随节拍积攒功德，或放生一尾鱼。"
     />
-    <title>佛了 for luck · 此地</title>
+    <title>佛了 for luck · 苏州</title>
 
     <style>
       /*
@@ -190,6 +190,7 @@
         --idleCueSize: 72px;
         --fortuneTitleLift: -40px;
         --fortuneStickerWidth: 76px;
+        --fortuneButtonLift: -8px;
         --durationReducedMotion: 1ms;
       }
 
@@ -282,7 +283,7 @@
         grid-template-columns: auto auto;
         align-items: end;
         justify-content: start;
-        column-gap: var(--spacingHorizontalS);
+        column-gap: var(--spacingHorizontalXXS);
         margin: 0;
       }
 
@@ -879,9 +880,8 @@
         left: var(--spacingHorizontalXXL);
         width: var(--fortuneStickerWidth);
         height: auto;
-        padding: var(--spacingHorizontalXXS);
         background: var(--colorInk);
-        border: var(--strokeMedium) solid var(--colorWashiLight);
+        border: 0;
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorWashiDeep);
         clip-path: polygon(5% 1%, 96% 4%, 100% 92%, 90% 100%, 2% 96%, 0 8%);
         transform: translateZ(16px) rotate(-6deg);
@@ -1057,7 +1057,7 @@
         grid-template-columns: auto auto auto;
         align-items: end;
         justify-content: center;
-        gap: var(--spacingHorizontalXXS);
+        gap: var(--spacingHorizontalS);
         font-size: var(--fontSizeBase100);
         line-height: var(--lineHeightBase200);
         font-weight: var(--fontWeightBold);
@@ -1069,16 +1069,14 @@
         position: relative;
         z-index: 2;
         display: inline-block;
-        margin: calc(0px - var(--spacingVerticalS)) calc(0px - var(--spacingHorizontalXXS));
-        color: var(--colorRustDeep);
+        margin: calc(0px - var(--spacingVerticalS)) 0;
+        color: var(--colorInk);
         font-family: var(--fontFamilyInk);
         font-size: var(--fontSizeHero900);
         line-height: var(--lineHeightFortune);
         font-weight: var(--fontWeightBold);
-        text-shadow:
-          var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorWashiLight),
-          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk);
-        transform: translateY(calc(0px - var(--spacingVerticalM))) rotate(-8deg) scale(1.24);
+        text-shadow: var(--strokeThin) var(--strokeThin) 0 var(--colorWashiLight);
+        transform: translateY(calc(0px - var(--spacingVerticalMNudge))) rotate(-6deg) scale(1.16);
       }
 
       .fortune-continue {
@@ -1091,15 +1089,16 @@
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorLake);
         font-weight: var(--fontWeightBold);
         cursor: pointer;
+        transform: translateY(var(--fortuneButtonLift));
       }
 
       .fortune-continue:hover {
         background: var(--colorMoss);
-        transform: translateY(var(--hoverOffset));
+        transform: translateY(calc(var(--fortuneButtonLift) + var(--hoverOffset)));
       }
 
       .fortune-continue:active {
-        transform: scale(var(--pressScale));
+        transform: translateY(var(--fortuneButtonLift)) scale(var(--pressScale));
       }
 
       .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-continue {
@@ -1745,7 +1744,7 @@
             <span class="brand-name">佛了</span>
             <span class="brand-english" lang="en">for luck</span>
           </h1>
-          <p>在<span id="locationName">正在获取所在地</span>，凡事只求半称心</p>
+          <p>在<span id="locationName">苏州</span>，凡事只求半称心</p>
         </div>
 
         <div class="mode-tabs" role="tablist" aria-label="体验模式">
@@ -1819,7 +1818,7 @@
         <p class="stats-title" id="statsTitle">功德记录</p>
         <div class="tools" role="group" aria-label="体验设置">
           <button class="tool-button" id="autoToggle" type="button" aria-pressed="false">
-            <span class="tool-label" id="autoLabel">自动敲</span>
+            <span class="tool-label" id="autoLabel">赛博代敲</span>
           </button>
           <button class="tool-button" id="soundToggle" type="button" aria-pressed="true">
             <span class="tool-label">声音</span>
@@ -1939,14 +1938,14 @@
         const RATING_EFFECT_SCALE = 0.9;
         const MODES = {
           merit: {
-            autoLabel: "自动敲",
+            autoLabel: "赛博代敲",
             globalLabel: "全球功德",
             personalLabel: "我已积攒的功德",
             globalBase: 1286420,
             autoDelay: 960
           },
           release: {
-            autoLabel: "自动放生",
+            autoLabel: "赛博代放",
             globalLabel: "全球放生",
             personalLabel: "我的放生",
             globalBase: 48216,
@@ -1957,7 +1956,7 @@
           storageUnavailable: "当前浏览器无法保存，关闭页面后记录将清零",
           audioUnavailable: "当前浏览器不支持网页声音，计数仍可正常使用",
           audioBlocked: "浏览器暂时阻止了声音，请再次操作",
-          locationUnavailable: "暂时无法获取所在地，已显示“此地”",
+          locationUnavailable: "暂时无法获取 IP 所在地，已显示“苏州”",
           autoStoppedOnSwitch: "已切换模式，自动操作已关闭",
           modeMerit: "已切换到木鱼模式",
           modeRelease: "已切换到放生模式",
@@ -2441,45 +2440,35 @@
         }
 
         async function resolveLocation() {
+          const fallbackLocation = "苏州";
+          const applyLocation = (label) => {
+            locationName.textContent = label;
+            document.title = `佛了 for luck · ${label}`;
+          };
+          const endpoint = document.documentElement.dataset.locationEndpoint?.trim();
+          if (!endpoint) {
+            applyLocation(fallbackLocation);
+            return;
+          }
           try {
-            const endpoint = document.documentElement.dataset.locationEndpoint?.trim();
-            let label = "";
-            if (endpoint) {
-              const endpointUrl = new URL(endpoint, window.location.origin);
-              if (endpointUrl.origin !== window.location.origin) {
-                throw new Error("Location endpoint must be same-origin");
-              }
-              const response = await window.fetch(endpointUrl, {
-                cache: "no-store",
-                credentials: "same-origin",
-                headers: { Accept: "application/json" }
-              });
-              if (!response.ok) throw new Error(`Location request failed: ${response.status}`);
-              const payload = await response.json();
-              label = [payload.city, payload.region, payload.country]
-                .find((value) => typeof value === "string" && value.trim()) || "";
-            } else {
-              const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-              const knownZones = {
-                "Asia/Shanghai": "上海",
-                "Asia/Hong_Kong": "香港",
-                "Asia/Singapore": "新加坡",
-                "Asia/Tokyo": "东京",
-                "America/Los_Angeles": "洛杉矶",
-                "America/New_York": "纽约",
-                "Europe/London": "伦敦"
-              };
-              label = knownZones[timeZone]
-                || timeZone.split("/").pop()?.replaceAll("_", " ")
-                || "";
+            const endpointUrl = new URL(endpoint, window.location.origin);
+            if (endpointUrl.origin !== window.location.origin) {
+              throw new Error("Location endpoint must be same-origin");
             }
+            const response = await window.fetch(endpointUrl, {
+              cache: "no-store",
+              credentials: "same-origin",
+              headers: { Accept: "application/json" }
+            });
+            if (!response.ok) throw new Error(`Location request failed: ${response.status}`);
+            const payload = await response.json();
+            const label = [payload.city, payload.region, payload.country]
+              .find((value) => typeof value === "string" && value.trim()) || "";
             if (!label) throw new Error("Location response did not include a place name");
-            locationName.textContent = label.trim();
-            document.title = `佛了 for luck · ${label.trim()}`;
+            applyLocation(label.trim());
             announce(`当前所在地：${label.trim()}`);
           } catch (error) {
-            locationName.textContent = "此地";
-            document.title = "佛了 for luck · 此地";
+            applyLocation(fallbackLocation);
             setSystemMessage(STRINGS.locationUnavailable);
             announce(STRINGS.locationUnavailable);
           }
@@ -4029,37 +4018,88 @@
             const travel = (phase + beat * 0.25) % 1;
             const depth = 1 - travel;
             const center = projectSea(x, y, width, height, 0, depth);
-            const halfWidth = width * (0.035 + travel * 0.18);
-            context.strokeStyle = beat === 0 ? colors.pink : colors.washiLight;
-            context.globalAlpha = beat === 0 ? 1 : 0.62;
-            context.lineWidth = Math.max(3, scale * (0.008 + travel * 0.01));
-            context.beginPath();
-            context.moveTo(center.x - halfWidth, center.y - scale * 0.018);
-            context.lineTo(center.x, center.y + scale * 0.025);
-            context.lineTo(center.x + halfWidth, center.y - scale * 0.018);
-            context.stroke();
+            const isLeadArrow = beat === 0;
+            const halfWidth = width * (
+              isLeadArrow
+                ? 0.052 + travel * 0.22
+                : 0.035 + travel * 0.18
+            );
+            const arrowWidth = Math.max(
+              isLeadArrow ? 6 : 3,
+              scale * (
+                isLeadArrow
+                  ? 0.014 + travel * 0.014
+                  : 0.008 + travel * 0.01
+              )
+            );
+            const traceArrow = () => {
+              context.beginPath();
+              if (isLeadArrow) {
+                context.moveTo(center.x, center.y - scale * 0.105);
+                context.lineTo(center.x, center.y + scale * 0.018);
+                context.moveTo(center.x - halfWidth, center.y - scale * 0.012);
+                context.lineTo(center.x, center.y + scale * 0.072);
+                context.lineTo(center.x + halfWidth, center.y - scale * 0.012);
+              } else {
+                context.moveTo(center.x - halfWidth, center.y - scale * 0.018);
+                context.lineTo(center.x, center.y + scale * 0.025);
+                context.lineTo(center.x + halfWidth, center.y - scale * 0.018);
+              }
+            };
+            context.save();
+            context.lineCap = "square";
+            context.lineJoin = "miter";
+            if (isLeadArrow) {
+              context.globalAlpha = 0.94;
+              context.strokeStyle = colors.ink;
+              context.lineWidth = arrowWidth + Math.max(4, scale * 0.01);
+              traceArrow();
+              context.stroke();
+              context.globalAlpha = 1;
+              context.strokeStyle = colors.pink;
+              context.lineWidth = arrowWidth;
+              traceArrow();
+              context.stroke();
+            } else {
+              context.globalAlpha = 0.62;
+              context.strokeStyle = colors.washiLight;
+              context.lineWidth = arrowWidth;
+              traceArrow();
+              context.stroke();
+            }
+            context.restore();
           }
 
           const entry = projectSea(x, y, width, height, 0, 0);
           const targetPulse = 0.7 + phase * 0.3;
-          context.globalAlpha = 0.92;
+          const targetWidth = scale * 0.07 * targetPulse;
+          const targetHeight = scale * 0.06 * targetPulse;
+          const traceTarget = (offsetX = 0, offsetY = 0) => {
+            context.beginPath();
+            context.moveTo(entry.x + offsetX, entry.y - targetHeight + offsetY);
+            context.lineTo(entry.x + targetWidth + offsetX, entry.y + offsetY);
+            context.lineTo(entry.x + offsetX, entry.y + targetHeight + offsetY);
+            context.lineTo(entry.x - targetWidth + offsetX, entry.y + offsetY);
+            context.closePath();
+          };
+          const targetShadow = Math.max(4, scale * 0.012);
+          context.globalAlpha = 0.72;
+          context.fillStyle = colors.ink;
+          traceTarget(targetShadow, targetShadow);
+          context.fill();
+          context.globalAlpha = 1;
           context.strokeStyle = colors.ink;
           context.fillStyle = colors.pink;
           context.lineWidth = Math.max(3, scale * 0.012);
-          context.beginPath();
-          context.moveTo(entry.x, entry.y - scale * 0.052 * targetPulse);
-          context.lineTo(entry.x + scale * 0.052 * targetPulse, entry.y);
-          context.lineTo(entry.x, entry.y + scale * 0.052 * targetPulse);
-          context.lineTo(entry.x - scale * 0.052 * targetPulse, entry.y);
-          context.closePath();
+          traceTarget();
           context.fill();
           context.stroke();
 
           context.globalAlpha = 1;
-          context.font = `${Math.max(26, scale * 0.075)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+          context.font = `${Math.max(22, scale * 0.06)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
           context.textAlign = "center";
-          context.textBaseline = "bottom";
-          context.fillText("🫳", entry.x, entry.y - scale * 0.062);
+          context.textBaseline = "middle";
+          context.fillText("🫳", entry.x, entry.y + scale * 0.004);
 
           updateFish(delta);
           const projectedFish = fishSchool.map((fish) => {
