@@ -118,7 +118,6 @@
         --colorWashi: #fff6df;
         --colorWashiLight: #ffffff;
         --colorWashiDeep: #ffd166;
-        --colorWashiFaintAlpha: rgba(255, 246, 223, 0.12);
         --colorInk: #27263a;
         --colorInkSoft: #3d3c56;
         --colorInkFaint: #5e5d76;
@@ -184,6 +183,8 @@
         --hoverOffset: -2px;
         --pressScale: 0.985;
         --rhythmPeriod: 960ms;
+        --idleCueSize: 72px;
+        --fortuneTitleLift: -40px;
         --durationReducedMotion: 1ms;
       }
 
@@ -680,17 +681,16 @@
         top: 57%;
         left: 50%;
         display: grid;
-        grid-template-columns: auto auto;
-        align-items: center;
-        gap: var(--spacingHorizontalS);
-        max-width: calc(100vw - var(--spacingHorizontalXXXL));
+        place-items: center;
+        width: var(--idleCueSize);
+        aspect-ratio: 1;
         margin: 0;
-        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
+        padding: 0;
         color: var(--colorInk);
         background: var(--colorPaperAlpha);
-        border: 0;
-        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorInkFaintAlpha);
-        clip-path: polygon(3% 0, 100% 9%, 96% 100%, 0 90%);
+        border: var(--strokeThin) solid var(--colorAccentPurple);
+        border-radius: var(--borderRadiusCircular);
+        box-shadow: none;
         transform: translate(-50%, -50%);
         font-size: var(--fontSizeBase200);
         line-height: var(--lineHeightBase200);
@@ -704,9 +704,10 @@
 
       .idle-hint::before {
         content: "";
-        width: var(--spacingHorizontalXL);
-        height: var(--spacingVerticalXL);
-        background: var(--colorLakeAlpha);
+        position: absolute;
+        z-index: -1;
+        inset: calc(0px - var(--spacingHorizontalS));
+        background: transparent;
         border: var(--strokeThin) solid var(--colorAccentPurple);
         border-radius: var(--borderRadiusCircular);
         animation: idle-cue-pulse var(--rhythmPeriod) var(--curveEasyEase) infinite;
@@ -714,10 +715,10 @@
 
       body[data-mode="release"] .idle-hint {
         top: 66%;
+        border-color: var(--colorAccentPink);
       }
 
       body[data-mode="release"] .idle-hint::before {
-        background: var(--colorInkFaintAlpha);
         border-color: var(--colorAccentPink);
       }
 
@@ -913,7 +914,14 @@
       }
 
       .fortune-title {
+        display: grid;
+        place-items: center;
         margin: 0;
+        padding: var(--spacingVerticalM) var(--spacingHorizontalS);
+        color: var(--colorWashiLight);
+        background: var(--colorRustDeep);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorLake);
         font-family: var(--fontFamilyInk);
         font-size: var(--fontSizeFortune);
         line-height: var(--lineHeightFortune);
@@ -921,6 +929,7 @@
         writing-mode: vertical-rl;
         text-orientation: upright;
         letter-spacing: var(--spacingVerticalS);
+        transform: translateY(var(--fortuneTitleLift)) rotate(1deg);
       }
 
       .fortune-keyword {
@@ -1020,43 +1029,10 @@
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentOrange);
       }
 
-      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-slip {
-        color: var(--colorWashiLight);
-        background-color: var(--colorFortuneDark);
-        background-image: radial-gradient(
-          circle,
-          var(--colorWashiFaintAlpha) 0 1px,
-          transparent 1.2px
-        );
-        border-color: var(--colorWashiLight);
-        box-shadow:
-          var(--spacingHorizontalL) var(--spacingVerticalL) 0 var(--colorAccentPink),
-          calc(0px - var(--spacingHorizontalS)) calc(0px - var(--spacingVerticalS)) 0 var(--colorAccentOrange);
-      }
-
-      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-kicker,
       .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-title {
         color: var(--colorWashiLight);
-      }
-
-      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-slip::before,
-      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-slip::after {
-        border-color: var(--colorWashiLight);
-      }
-
-      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-message {
-        color: var(--colorInk);
-        background: var(--colorAccentPink);
+        background: var(--colorFortuneDark);
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentOrange);
-      }
-
-      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-english,
-      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-explanation {
-        color: var(--colorInk);
-      }
-
-      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-message::before {
-        background: var(--colorWashiDeep);
       }
 
       .fortune-fire {
@@ -1538,7 +1514,8 @@
         }
 
         .fortune-overlay[data-fortune-tone] .fortune-slip,
-        .fortune-overlay[data-fortune-tone] .fortune-message {
+        .fortune-overlay[data-fortune-tone] .fortune-message,
+        .fortune-overlay[data-fortune-tone] .fortune-title {
           background: Canvas !important;
           border-color: ButtonText;
         }
@@ -1725,13 +1702,12 @@
             class="stage-action"
             id="releaseAction"
             type="button"
-            aria-describedby="releaseInstruction releaseDetail storagePolicy"
+            aria-describedby="releaseDetail storagePolicy"
           >
             <span class="visually-hidden">向海中放生一尾鱼</span>
             <span class="hc-label" aria-hidden="true">放生一尾鱼</span>
           </button>
           <div class="mode-copy">
-            <p id="releaseInstruction">跟随浪线到岸的节拍，放生一尾</p>
             <p class="mode-detail" id="releaseDetail">鱼儿会从近岸游向远海</p>
           </div>
         </section>
