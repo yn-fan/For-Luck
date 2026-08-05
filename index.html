@@ -766,6 +766,7 @@
 
       .fortune-stage {
         position: relative;
+        top: var(--spacingVerticalS);
         display: grid;
         justify-items: center;
         gap: var(--spacingVerticalL);
@@ -880,10 +881,10 @@
         left: var(--spacingHorizontalXXL);
         width: var(--fortuneStickerWidth);
         height: auto;
-        background: var(--colorInk);
+        background: transparent;
         border: 0;
-        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorWashiDeep);
-        clip-path: polygon(5% 1%, 96% 4%, 100% 92%, 90% 100%, 2% 96%, 0 8%);
+        box-shadow: none;
+        filter: drop-shadow(var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk));
         transform: translateZ(16px) rotate(-6deg);
       }
 
@@ -957,8 +958,8 @@
         color: var(--colorInk);
         background: transparent;
         border: 0;
-        font-size: var(--fontSizeBase200);
-        line-height: var(--lineHeightBase200);
+        font-size: var(--fontSizeBase300);
+        line-height: var(--lineHeightBase300);
         font-weight: var(--fontWeightBold);
         letter-spacing: var(--labelTracking);
         text-align: center;
@@ -1076,10 +1077,12 @@
         line-height: var(--lineHeightFortune);
         font-weight: var(--fontWeightBold);
         text-shadow: var(--strokeThin) var(--strokeThin) 0 var(--colorWashiLight);
-        transform: translateY(calc(0px - var(--spacingVerticalMNudge))) rotate(-6deg) scale(1.16);
+        transform: translateY(calc(0px - var(--spacingVerticalSNudge))) rotate(-6deg) scale(1.16);
       }
 
       .fortune-continue {
+        position: relative;
+        z-index: 6;
         min-width: 168px;
         min-height: var(--controlMinSize);
         padding: var(--controlPadBlock) var(--spacingHorizontalXXL);
