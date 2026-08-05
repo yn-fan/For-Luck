@@ -1,0 +1,4481 @@
+<!doctype html>
+<html lang="zh-CN" data-product="other" data-location-endpoint="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="佛了 for luck：在原创复古漫画网点风格的木鱼与无边海之间切换，跟随节拍积攒功德，或放生一尾鱼。"
+    />
+    <title>佛了 for luck · 此地</title>
+
+    <style>
+      /*
+       * Fluent v9 generic token base.
+       * Source: @fluentui/tokens (Fluent UI React v9) — light theme defaults.
+       */
+      :root {
+        --colorNeutralForeground1: #242424;
+        --colorNeutralForeground2: #424242;
+        --colorNeutralForeground3: #616161;
+        --colorNeutralForeground4: #707070;
+        --colorNeutralForegroundDisabled: #bdbdbd;
+        --colorNeutralBackground1: #ffffff;
+        --colorNeutralBackground2: #fafafa;
+        --colorNeutralBackground3: #f5f5f5;
+        --colorNeutralBackground4: #f0f0f0;
+        --colorNeutralBackground5: #ebebeb;
+        --colorNeutralBackground6: #e6e6e6;
+        --colorBrandBackground: #0f6cbd;
+        --colorBrandBackgroundHover: #115ea3;
+        --colorBrandBackgroundPressed: #0c3b5e;
+        --colorBrandForeground1: #0f6cbd;
+        --colorBrandForeground2: #115ea3;
+        --colorBrandForegroundLink: #0f6cbd;
+        --colorBrandForegroundLinkHover: #115ea3;
+        --colorPaletteRedForeground1: #d13438;
+        --colorPaletteGreenForeground1: #107c10;
+        --colorPaletteYellowForeground1: #bc4b00;
+        --colorPaletteRedBackground1: #fdf3f4;
+        --colorPaletteGreenBackground1: #f1faf1;
+        --colorPaletteYellowBackground1: #fff4ce;
+        --colorNeutralStroke1: #d1d1d1;
+        --colorNeutralStroke2: #e0e0e0;
+        --colorNeutralStroke3: #f0f0f0;
+        --colorNeutralStrokeAccessible: #616161;
+        --spacingHorizontalXXS: 2px;
+        --spacingHorizontalXS: 4px;
+        --spacingHorizontalSNudge: 6px;
+        --spacingHorizontalS: 8px;
+        --spacingHorizontalMNudge: 10px;
+        --spacingHorizontalM: 12px;
+        --spacingHorizontalL: 16px;
+        --spacingHorizontalXL: 20px;
+        --spacingHorizontalXXL: 24px;
+        --spacingHorizontalXXXL: 32px;
+        --spacingVerticalXXS: 2px;
+        --spacingVerticalXS: 4px;
+        --spacingVerticalSNudge: 6px;
+        --spacingVerticalS: 8px;
+        --spacingVerticalMNudge: 10px;
+        --spacingVerticalM: 12px;
+        --spacingVerticalL: 16px;
+        --spacingVerticalXL: 20px;
+        --spacingVerticalXXL: 24px;
+        --spacingVerticalXXXL: 32px;
+        --borderRadiusNone: 0;
+        --borderRadiusSmall: 2px;
+        --borderRadiusMedium: 4px;
+        --borderRadiusLarge: 6px;
+        --borderRadiusXLarge: 8px;
+        --borderRadiusCircular: 10000px;
+        --fontFamilyBase: "Segoe UI", "Segoe UI Variable", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        --fontFamilyMonospace: "Cascadia Code", Consolas, "Courier New", monospace;
+        --fontSizeBase100: 10px;
+        --fontSizeBase200: 12px;
+        --fontSizeBase300: 14px;
+        --fontSizeBase400: 16px;
+        --fontSizeBase500: 20px;
+        --fontSizeBase600: 24px;
+        --fontSizeHero700: 28px;
+        --fontSizeHero800: 32px;
+        --fontSizeHero900: 40px;
+        --fontSizeHero1000: 68px;
+        --lineHeightBase100: 14px;
+        --lineHeightBase200: 16px;
+        --lineHeightBase300: 20px;
+        --lineHeightBase400: 22px;
+        --lineHeightBase500: 28px;
+        --lineHeightBase600: 32px;
+        --lineHeightHero700: 36px;
+        --lineHeightHero800: 40px;
+        --lineHeightHero900: 52px;
+        --lineHeightHero1000: 92px;
+        --fontWeightRegular: 400;
+        --fontWeightMedium: 500;
+        --fontWeightSemibold: 600;
+        --fontWeightBold: 700;
+        --shadow2: 0 1px 2px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+        --shadow4: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+        --shadow8: 0 4px 8px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+        --shadow16: 0 8px 16px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+        --shadow28: 0 14px 28px rgba(0, 0, 0, 0.24), 0 0 8px rgba(0, 0, 0, 0.20);
+        --shadow64: 0 32px 64px rgba(0, 0, 0, 0.24), 0 0 8px rgba(0, 0, 0, 0.20);
+        --durationUltraFast: 50ms;
+        --durationFaster: 100ms;
+        --durationFast: 150ms;
+        --durationNormal: 200ms;
+        --durationSlow: 300ms;
+        --durationSlower: 400ms;
+        --durationFortuneMotion: 500ms;
+        --durationFortuneBurn: 760ms;
+        --curveEasyEase: cubic-bezier(0.33, 0, 0.67, 1);
+        --curveAccelerateMax: cubic-bezier(1, 0, 1, 1);
+        --curveDecelerateMax: cubic-bezier(0, 0, 0, 1);
+
+        /* Original bright Memphis rhythm-game theme overlay. */
+        --colorWashi: #fff6df;
+        --colorWashiLight: #ffffff;
+        --colorWashiDeep: #ffd166;
+        --colorInk: #27263a;
+        --colorInkSoft: #3d3c56;
+        --colorInkFaint: #5e5d76;
+        --colorRust: #ff6f61;
+        --colorRustDeep: #c13b57;
+        --colorMoss: #45d6a9;
+        --colorMossDeep: #158f7c;
+        --colorLake: #4fc3f7;
+        --colorLakeDeep: #3e78d8;
+        --colorLakeLight: #d8f4ff;
+        --colorSand: #ffd166;
+        --colorSandDeep: #e59f32;
+        --colorWood: #b96d48;
+        --colorWoodMid: #8e5039;
+        --colorWoodDeep: #543328;
+        --colorWoodLight: #e7a76d;
+        --colorWoodHighlight: #ffdda4;
+        --colorSteelDark: #26323f;
+        --colorSteelMid: #7f93a1;
+        --colorSteelLight: #dceaf0;
+        --colorSteelBright: #f8fdff;
+        --colorCyberCyan: #4de9ff;
+        --colorCyberGlow: rgba(77, 233, 255, 0.72);
+        --colorAccentPurple: #6548d9;
+        --colorAccentPink: #ff5ca8;
+        --colorAccentLime: #b9e84a;
+        --colorAccentOrange: #ff9f43;
+        --colorPaperAlpha: rgba(255, 255, 255, 0.94);
+        --colorInkAlpha: rgba(39, 38, 58, 0.24);
+        --colorInkFaintAlpha: rgba(39, 38, 58, 0.12);
+        --colorShadowAlpha: rgba(39, 38, 58, 0.24);
+        --colorModalBackdrop: rgba(39, 38, 58, 0.9);
+        --colorLakeAlpha: rgba(79, 195, 247, 0.3);
+        --colorFishKoi: #ff6f61;
+        --colorFishGreen: #2bbd91;
+        --colorFishCrucian: #6548d9;
+        --colorFishGold: #ffb83e;
+        --colorFishBitterling: #ff5ca8;
+        --colorFishSilver: #f7fbff;
+        --fontFamilyBase: "Segoe UI Variable Display", "Segoe UI", sans-serif;
+        --fontFamilyInk: "Kaiti SC", "STKaiti", "KaiTi", "FangSong", serif;
+        --fontSizeFortune: clamp(64px, 18vw, 92px);
+        --fontSizeFortuneKeyword: clamp(30px, 9vw, 42px);
+        --lineHeightFortune: 1;
+        --contentMaxWidth: 1480px;
+        --stageSize: clamp(320px, 64vmin, 660px);
+        --releaseStageMax: 1060px;
+        --controlMinSize: 44px;
+        --safePadTop: calc(var(--spacingVerticalL) + env(safe-area-inset-top));
+        --safePadRight: calc(var(--spacingHorizontalXXL) + env(safe-area-inset-right));
+        --safePadBottom: calc(var(--spacingVerticalL) + env(safe-area-inset-bottom));
+        --safePadLeft: calc(var(--spacingHorizontalXXL) + env(safe-area-inset-left));
+        --focusRingWidth: 3px;
+        --focusRingOffset: 5px;
+        --strokeThin: 2px;
+        --strokeMedium: 3px;
+        --titleTracking: 0;
+        --labelTracking: 0.04em;
+        --microTracking: 0.03em;
+        --controlPadBlock: 10px;
+        --controlPadInline: 15px;
+        --hoverOffset: -2px;
+        --pressScale: 0.985;
+        --rhythmPeriod: 960ms;
+        --durationReducedMotion: 1ms;
+      }
+
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        overflow: hidden;
+        color: var(--colorInk);
+        background: var(--colorWashi);
+        font-family: var(--fontFamilyBase);
+        font-size: var(--fontSizeBase300);
+        line-height: var(--lineHeightBase300);
+        text-wrap: pretty;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button {
+        font: inherit;
+      }
+
+      button[class]:focus,
+      button[class]:focus-visible {
+        outline: var(--focusRingWidth) solid var(--colorWashiLight);
+        outline-offset: var(--spacingHorizontalXXS);
+        box-shadow: 0 0 0 calc(var(--focusRingWidth) + var(--focusRingWidth)) var(--colorInk);
+      }
+
+      #sceneCanvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .screen {
+        position: relative;
+        z-index: 1;
+        min-height: 100svh;
+        display: grid;
+        grid-template-rows: auto 1fr auto auto;
+        gap: var(--spacingVerticalM);
+        width: 100%;
+        max-width: var(--contentMaxWidth);
+        margin: 0 auto;
+        padding:
+          var(--safePadTop)
+          var(--safePadRight)
+          var(--safePadBottom)
+          var(--safePadLeft);
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(230px, 1fr) auto;
+        grid-template-areas: "brand modes";
+        align-items: center;
+        gap: var(--spacingHorizontalXL);
+      }
+
+      .brand {
+        grid-area: brand;
+        display: grid;
+        grid-template-areas:
+          "title"
+          "subtitle";
+        justify-self: start;
+        gap: var(--spacingVerticalXXS);
+        padding: var(--spacingVerticalS) var(--spacingHorizontalL);
+        color: var(--colorWashiLight);
+        background: var(--colorAccentPurple);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow: var(--spacingHorizontalL) var(--spacingVerticalSNudge) 0 var(--colorRust);
+        clip-path: polygon(0 8%, 94% 0, 100% 74%, 92% 100%, 4% 92%);
+        transform: rotate(-1.3deg) skewX(-3deg);
+        max-width: min(34vw, 360px);
+      }
+
+      .brand h1 {
+        grid-area: title;
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: end;
+        justify-content: start;
+        column-gap: var(--spacingHorizontalS);
+        margin: 0;
+      }
+
+      .brand-name {
+        font-size: var(--fontSizeHero800);
+        line-height: var(--lineHeightHero800);
+        font-weight: var(--fontWeightBold);
+        letter-spacing: var(--titleTracking);
+        text-shadow:
+          var(--spacingHorizontalXXS)
+          var(--spacingVerticalXXS)
+          0
+          var(--colorInk);
+      }
+
+      .brand-english {
+        margin-bottom: var(--spacingVerticalXS);
+        padding: 0 var(--spacingHorizontalXS);
+        color: var(--colorInk);
+        background: var(--colorAccentLime);
+        border: var(--strokeThin) solid var(--colorInk);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+        font-weight: var(--fontWeightBold);
+        font-style: italic;
+        letter-spacing: var(--microTracking);
+        white-space: nowrap;
+        transform: rotate(2deg);
+      }
+
+      .brand p {
+        grid-area: subtitle;
+        margin: 0;
+        color: var(--colorWashiLight);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+        font-weight: var(--fontWeightSemibold);
+        letter-spacing: var(--microTracking);
+        text-wrap: balance;
+      }
+
+      .mode-tabs {
+        grid-area: modes;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(76px, 1fr));
+        gap: var(--spacingHorizontalXXS);
+        padding: var(--spacingVerticalXS);
+        background: var(--colorWashiDeep);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow: calc(0px - var(--spacingHorizontalXS)) var(--spacingVerticalXS) 0 var(--colorLakeDeep);
+        clip-path: polygon(2% 0, 100% 8%, 96% 100%, 0 92%);
+        transform: rotate(0.8deg) skewX(-2deg);
+      }
+
+      .mode-tab {
+        min-height: var(--controlMinSize);
+        padding: var(--spacingVerticalS) var(--spacingHorizontalL);
+        color: var(--colorInkSoft);
+        background: transparent;
+        border: 0;
+        border: var(--strokeThin) solid transparent;
+        border-radius: var(--borderRadiusNone);
+        cursor: pointer;
+        font-weight: var(--fontWeightSemibold);
+        letter-spacing: var(--labelTracking);
+        transition:
+          color var(--durationFast) var(--curveEasyEase),
+          background var(--durationFast) var(--curveEasyEase);
+      }
+
+      .mode-tab:hover {
+        color: var(--colorInk);
+        background: var(--colorMoss);
+        border-color: var(--colorInk);
+      }
+
+      .mode-tab[aria-selected="true"] {
+        color: var(--colorWashiLight);
+        background: var(--colorAccentPurple);
+        border-color: var(--colorInk);
+        font-weight: var(--fontWeightBold);
+        text-decoration: none;
+        box-shadow: inset 0 calc(0px - var(--spacingVerticalXS)) 0 var(--colorAccentPink);
+      }
+
+      .tools {
+        display: grid;
+        grid-template-columns: repeat(2, max-content);
+        gap: var(--spacingHorizontalS);
+      }
+
+      .tool-button {
+        min-height: var(--controlMinSize);
+        display: grid;
+        grid-template-columns: auto var(--spacingHorizontalM);
+        align-items: center;
+        gap: var(--spacingHorizontalS);
+        padding: var(--controlPadBlock) var(--controlPadInline);
+        color: var(--colorInk);
+        background: var(--colorWashiDeep);
+        border: var(--strokeMedium) solid var(--colorInk);
+        border-radius: var(--borderRadiusNone);
+        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorAccentPurple);
+        cursor: pointer;
+        font-weight: var(--fontWeightSemibold);
+        transition:
+          transform var(--durationFast) var(--curveEasyEase),
+          color var(--durationFast) var(--curveEasyEase),
+          background var(--durationFast) var(--curveEasyEase);
+      }
+
+      .tool-button::after {
+        content: "";
+        width: var(--spacingHorizontalS);
+        height: var(--spacingHorizontalS);
+        background: transparent;
+        border: var(--strokeThin) solid currentColor;
+        transform: rotate(0);
+        transition:
+          transform var(--durationFast) var(--curveEasyEase),
+          background var(--durationFast) var(--curveEasyEase);
+      }
+
+      .tool-button:hover {
+        transform: translateY(var(--hoverOffset));
+        color: var(--colorInk);
+        background: var(--colorWashiDeep);
+      }
+
+      .tool-button:active {
+        transform: scale(var(--pressScale));
+      }
+
+      .tool-button[aria-pressed="true"] {
+        color: var(--colorWashiLight);
+        background: var(--colorAccentPurple);
+        border-color: var(--colorInk);
+      }
+
+      .tool-button[aria-pressed="true"]::after {
+        background: currentColor;
+        transform: rotate(45deg);
+      }
+
+      .stage {
+        position: relative;
+        align-self: center;
+        justify-self: center;
+        width: var(--stageSize);
+        aspect-ratio: 1;
+      }
+
+      body[data-mode="release"] .stage {
+        width: min(calc(100vw - var(--spacingHorizontalXXL)), 1280px);
+        height: clamp(430px, 58vh, 720px);
+        aspect-ratio: auto;
+      }
+
+      body[data-mode="release"] .stage-action {
+        border-radius: var(--borderRadiusNone);
+      }
+
+      body[data-mode="release"] .stage-action:hover {
+        border-color: transparent;
+        border-style: solid;
+      }
+
+      .mode-panel {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        place-items: center;
+        gap: var(--spacingVerticalM);
+      }
+
+      #meritPanel {
+        grid-template-rows: 1fr;
+        gap: 0;
+      }
+
+      .mode-panel[hidden] {
+        display: none;
+      }
+
+      .stage-action {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        color: var(--colorInk);
+        background: transparent;
+        border: var(--strokeMedium) solid transparent;
+        border-radius: var(--borderRadiusNone);
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          transform var(--durationFast) var(--curveEasyEase),
+          border-color var(--durationFast) var(--curveEasyEase);
+      }
+
+      .stage-action:hover {
+        border-color: var(--colorInk);
+        border-style: dashed;
+      }
+
+      .stage-action:active {
+        transform: scale(var(--pressScale));
+      }
+
+      .mode-copy {
+        min-height: var(--lineHeightBase500);
+        display: grid;
+        place-items: center;
+        gap: var(--spacingVerticalXS);
+        text-align: center;
+      }
+
+      .mode-copy p {
+        margin: 0;
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
+        color: var(--colorInk);
+        background: var(--colorWashiLight);
+        border: var(--strokeMedium) solid var(--colorInk);
+        font-size: var(--fontSizeBase300);
+        line-height: var(--lineHeightBase300);
+        font-weight: var(--fontWeightSemibold);
+        letter-spacing: var(--labelTracking);
+        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorAccentPink);
+        clip-path: polygon(2% 0, 100% 7%, 96% 100%, 0 90%);
+        transform: rotate(-0.5deg);
+      }
+
+      .mode-copy .mode-detail {
+        color: var(--colorWashiLight);
+        background: var(--colorAccentPurple);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+        letter-spacing: var(--microTracking);
+        box-shadow: calc(0px - var(--spacingHorizontalXS)) var(--spacingVerticalXS) 0 var(--colorLake);
+        transform: rotate(0.8deg);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: auto minmax(360px, 1fr);
+        grid-template-areas:
+          "title tools"
+          "title data";
+        align-items: center;
+        gap: var(--spacingVerticalS) var(--spacingHorizontalXL);
+        padding: var(--spacingVerticalM);
+        background: var(--colorWashiLight);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow: var(--spacingHorizontalL) var(--spacingVerticalSNudge) 0 var(--colorAccentLime);
+        clip-path: polygon(0 5%, 98% 0, 100% 88%, 2% 100%);
+      }
+
+      .stats-title {
+        grid-area: title;
+        position: relative;
+        isolation: isolate;
+        justify-self: start;
+        margin: 0;
+        padding: var(--spacingVerticalS) var(--spacingHorizontalXL);
+        color: var(--colorWashiLight);
+        background: var(--colorInk);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow:
+          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPink),
+          calc(0px - var(--spacingHorizontalXS)) calc(0px - var(--spacingVerticalXS)) 0 var(--colorLake);
+        font-size: clamp(var(--fontSizeBase500), 2.8vw, var(--fontSizeHero800));
+        line-height: 1.05;
+        font-weight: var(--fontWeightBold);
+        font-style: italic;
+        letter-spacing: var(--labelTracking);
+        white-space: nowrap;
+        text-align: left;
+        transform: rotate(-2deg) skewX(-5deg);
+      }
+
+      .stats-title::before {
+        content: "";
+        position: absolute;
+        z-index: 1;
+        top: calc(0px - var(--spacingVerticalMNudge));
+        left: var(--spacingHorizontalM);
+        width: 42%;
+        height: var(--spacingVerticalM);
+        background: var(--colorAccentLime);
+        border: var(--strokeThin) solid var(--colorInk);
+        transform: rotate(4deg) skewX(18deg);
+      }
+
+      .stats-title::after {
+        content: "";
+        position: absolute;
+        right: var(--spacingHorizontalL);
+        bottom: calc(0px - var(--spacingVerticalL));
+        width: var(--spacingHorizontalXXXL);
+        height: var(--spacingVerticalXL);
+        background: var(--colorInk);
+        clip-path: polygon(0 0, 100% 0, 18% 100%);
+        transform: rotate(-7deg);
+      }
+
+      .stats-grid {
+        grid-area: data;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--spacingHorizontalXXL);
+        width: 100%;
+        margin: 0;
+      }
+
+      .stats > .tools {
+        grid-area: tools;
+        justify-self: end;
+      }
+
+      .stat {
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: baseline;
+        justify-content: end;
+        gap: var(--spacingHorizontalS);
+        padding: var(--spacingVerticalS) var(--spacingHorizontalM);
+        border: var(--strokeThin) solid var(--colorInk);
+        background: var(--colorAccentLime);
+        transform: skewX(-3deg);
+      }
+
+      .stat:nth-child(2) {
+        color: var(--colorInk);
+        background: var(--colorLake);
+      }
+
+      .stat dt {
+        color: var(--colorInk);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+        font-weight: var(--fontWeightSemibold);
+        letter-spacing: var(--microTracking);
+      }
+
+      .stat dd {
+        margin: 0;
+        color: var(--colorInk);
+        font-size: var(--fontSizeBase500);
+        line-height: var(--lineHeightBase500);
+        font-weight: var(--fontWeightBold);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .stat-unit {
+        margin-left: var(--spacingHorizontalXS);
+        color: var(--colorInk);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+      }
+
+      .footer-note {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--spacingHorizontalL);
+        color: var(--colorInk);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+      }
+
+      .footer-note p {
+        margin: 0;
+      }
+
+      .signature-line {
+        font-weight: var(--fontWeightSemibold);
+        letter-spacing: var(--microTracking);
+        text-wrap: balance;
+      }
+
+      .system-note {
+        color: var(--colorInk);
+        font-weight: var(--fontWeightSemibold);
+        text-align: right;
+      }
+
+      .idle-hint {
+        position: fixed;
+        z-index: 3;
+        top: 50%;
+        left: 50%;
+        max-width: calc(100vw - var(--spacingHorizontalXXXL));
+        margin: 0;
+        padding: var(--spacingVerticalM) var(--spacingHorizontalXXL);
+        color: var(--colorInk);
+        background: var(--colorWashiDeep);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow:
+          var(--spacingHorizontalM) var(--spacingVerticalM) 0 var(--colorAccentPurple),
+          calc(0px - var(--spacingHorizontalS)) calc(0px - var(--spacingVerticalS)) 0 var(--colorLake);
+        clip-path: polygon(3% 0, 100% 8%, 96% 100%, 0 88%);
+        transform: translate(-50%, -50%) rotate(-1deg);
+        font-size: var(--fontSizeBase400);
+        line-height: var(--lineHeightBase400);
+        font-weight: var(--fontWeightBold);
+        letter-spacing: var(--labelTracking);
+        text-align: center;
+        white-space: nowrap;
+        pointer-events: none;
+        animation: idle-hint-in var(--durationNormal) var(--curveDecelerateMax);
+      }
+
+      .idle-hint[hidden] {
+        display: none;
+      }
+
+      .fortune-overlay {
+        position: fixed;
+        z-index: 5;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding:
+          calc(var(--spacingVerticalXL) + env(safe-area-inset-top))
+          calc(var(--spacingHorizontalXL) + env(safe-area-inset-right))
+          calc(var(--spacingVerticalXL) + env(safe-area-inset-bottom))
+          calc(var(--spacingHorizontalXL) + env(safe-area-inset-left));
+        background: var(--colorModalBackdrop);
+      }
+
+      .fortune-overlay[hidden] {
+        display: none;
+      }
+
+      .fortune-stage {
+        position: relative;
+        display: grid;
+        justify-items: center;
+        gap: var(--spacingVerticalL);
+        width: min(100%, 380px);
+        perspective: 900px;
+        transform-style: preserve-3d;
+      }
+
+      .fortune-aura {
+        position: absolute;
+        z-index: 1;
+        inset: -5% -18% 8%;
+        pointer-events: none;
+      }
+
+      .fortune-aura span {
+        position: absolute;
+        display: grid;
+        place-items: center;
+        width: clamp(44px, 14vw, 72px);
+        aspect-ratio: 1;
+        font-size: clamp(34px, 11vw, 58px);
+        line-height: 1;
+        opacity: 0;
+        filter: drop-shadow(var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorInk));
+        animation: fortune-aura-pop
+          calc(var(--durationFortuneMotion) + var(--durationSlow))
+          var(--curveDecelerateMax)
+          forwards;
+      }
+
+      .fortune-aura span:nth-child(1) { top: 0; left: 2%; }
+      .fortune-aura span:nth-child(2) { top: 8%; right: -2%; animation-delay: 40ms; }
+      .fortune-aura span:nth-child(3) { top: 30%; left: -7%; animation-delay: 80ms; }
+      .fortune-aura span:nth-child(4) { top: 38%; right: -8%; animation-delay: 120ms; }
+      .fortune-aura span:nth-child(5) { bottom: 30%; left: -4%; animation-delay: 160ms; }
+      .fortune-aura span:nth-child(6) { right: -3%; bottom: 23%; animation-delay: 200ms; }
+      .fortune-aura span:nth-child(7) { bottom: 3%; left: 10%; animation-delay: 240ms; }
+      .fortune-aura span:nth-child(8) { right: 8%; bottom: 1%; animation-delay: 280ms; }
+
+      .fortune-slip {
+        position: relative;
+        width: min(78vw, 320px);
+        min-height: min(62svh, 540px);
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        justify-items: center;
+        align-items: center;
+        gap: var(--spacingVerticalM);
+        padding: var(--spacingVerticalXXL) var(--spacingHorizontalXXL);
+        color: var(--colorInk);
+        background-color: var(--colorWashi);
+        background-image: radial-gradient(
+          circle,
+          var(--colorInkFaintAlpha) 0 1px,
+          transparent 1.2px
+        );
+        background-size: var(--spacingHorizontalS) var(--spacingVerticalS);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow:
+          var(--spacingHorizontalL) var(--spacingVerticalL) 0 var(--colorAccentPink),
+          calc(0px - var(--spacingHorizontalS)) calc(0px - var(--spacingVerticalS)) 0 var(--colorWashiDeep);
+        clip-path: polygon(6% 0, 96% 2%, 100% 92%, 88% 100%, 4% 97%, 0 7%);
+        transform: rotate(-1deg);
+        transform-origin: 50% 16%;
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+        animation: fortune-draw var(--durationFortuneMotion) var(--curveDecelerateMax);
+        overflow: hidden;
+      }
+
+      .fortune-slip,
+      .fortune-continue,
+      .fortune-signature {
+        position: relative;
+        z-index: 2;
+      }
+
+      .fortune-signature {
+        width: min(92vw, 380px);
+        margin: calc(0px - var(--spacingVerticalS)) 0 0;
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
+        color: var(--colorWashiLight);
+        background: var(--colorInk);
+        border: var(--strokeThin) solid var(--colorInk);
+        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorLake);
+        clip-path: polygon(2% 0, 100% 8%, 97% 100%, 0 90%);
+        font-size: var(--fontSizeBase100);
+        line-height: var(--lineHeightBase100);
+        font-weight: var(--fontWeightSemibold);
+        letter-spacing: var(--microTracking);
+        text-align: center;
+        text-wrap: balance;
+        transform: rotate(0.6deg);
+      }
+
+      .fortune-slip::before,
+      .fortune-slip::after {
+        content: "";
+        position: absolute;
+        z-index: 0;
+        border: var(--strokeThin) solid var(--colorInk);
+      }
+
+      .fortune-slip > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .fortune-slip::before {
+        top: var(--spacingVerticalL);
+        right: calc(0px - var(--spacingHorizontalL));
+        width: 42%;
+        height: var(--spacingVerticalXXXL);
+        background: var(--colorLake);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk);
+        transform: rotate(7deg);
+      }
+
+      .fortune-slip::after {
+        bottom: var(--spacingVerticalXXL);
+        left: calc(0px - var(--spacingHorizontalL));
+        width: 48%;
+        height: var(--spacingVerticalXXL);
+        background: var(--colorAccentPink);
+        box-shadow:
+          calc(0px - var(--spacingHorizontalS))
+          var(--spacingVerticalS)
+          0
+          var(--colorInk);
+        transform: rotate(-6deg);
+      }
+
+      .fortune-kicker,
+      .fortune-count,
+      .fortune-keyword,
+      .fortune-english,
+      .fortune-explanation {
+        margin: 0;
+      }
+
+      .fortune-kicker {
+        justify-self: start;
+        align-self: start;
+        padding: 0;
+        color: var(--colorInk);
+        background: transparent;
+        border: 0;
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+        font-weight: var(--fontWeightBold);
+        letter-spacing: var(--labelTracking);
+        transform: rotate(-1.5deg);
+      }
+
+      .fortune-title {
+        margin: 0;
+        font-family: var(--fontFamilyInk);
+        font-size: var(--fontSizeFortune);
+        line-height: var(--lineHeightFortune);
+        font-weight: var(--fontWeightSemibold);
+        writing-mode: vertical-rl;
+        text-orientation: upright;
+        letter-spacing: var(--spacingVerticalS);
+      }
+
+      .fortune-keyword {
+        font-family: var(--fontFamilyInk);
+        font-size: var(--fontSizeFortuneKeyword);
+        line-height: var(--lineHeightFortune);
+        font-weight: var(--fontWeightSemibold);
+        letter-spacing: var(--spacingHorizontalXS);
+      }
+
+      .fortune-message {
+        width: 100%;
+        display: grid;
+        gap: var(--spacingVerticalXS);
+        padding: var(--spacingVerticalM) var(--spacingHorizontalL);
+        background: var(--colorWashiLight);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPurple);
+        transform: rotate(1deg);
+      }
+
+      .fortune-english {
+        color: var(--colorRustDeep);
+        font-size: var(--fontSizeBase300);
+        line-height: var(--lineHeightBase300);
+        font-weight: var(--fontWeightBold);
+        letter-spacing: var(--labelTracking);
+      }
+
+      .fortune-explanation {
+        color: var(--colorInkSoft);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase300);
+        font-weight: var(--fontWeightSemibold);
+        text-align: left;
+        text-wrap: pretty;
+      }
+
+      .fortune-count {
+        position: absolute;
+        z-index: 3;
+        top: var(--spacingVerticalL);
+        right: 0;
+        max-width: 122px;
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalS);
+        background: var(--colorAccentLime);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk);
+        font-size: var(--fontSizeBase100);
+        line-height: var(--lineHeightBase200);
+        font-weight: var(--fontWeightBold);
+        text-align: center;
+        transform: rotate(5deg);
+      }
+
+      .fortune-continue {
+        min-width: 168px;
+        min-height: var(--controlMinSize);
+        padding: var(--controlPadBlock) var(--spacingHorizontalXXL);
+        color: var(--colorInk);
+        background: var(--colorWashiDeep);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorLake);
+        font-weight: var(--fontWeightBold);
+        cursor: pointer;
+      }
+
+      .fortune-continue:hover {
+        background: var(--colorMoss);
+        transform: translateY(var(--hoverOffset));
+      }
+
+      .fortune-continue:active {
+        transform: scale(var(--pressScale));
+      }
+
+      .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-continue {
+        color: var(--colorWashiLight);
+        background: var(--colorRustDeep);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentOrange);
+      }
+
+      .fortune-fire {
+        position: absolute;
+        z-index: 4;
+        inset: -8% -22% 10%;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        place-items: center;
+        color: var(--colorAccentOrange);
+        font-size: clamp(52px, 16vw, 88px);
+        line-height: 1;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(18%) scale(0.38);
+      }
+
+      .fortune-fire span {
+        opacity: 0;
+        text-shadow:
+          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk),
+          calc(0px - var(--spacingHorizontalXS)) calc(0px - var(--spacingVerticalXS)) 0 var(--colorWashiDeep);
+      }
+
+      .fortune-overlay[data-exit="keep"] .fortune-stage {
+        animation: fortune-keep-exit var(--durationFortuneMotion) var(--curveAccelerateMax) forwards;
+      }
+
+      .fortune-overlay[data-exit="burn"] .fortune-stage {
+        animation: fortune-burn-exit var(--durationFortuneBurn) var(--curveAccelerateMax) forwards;
+      }
+
+      .fortune-overlay[data-exit="burn"] .fortune-fire {
+        animation: fortune-fire-burst var(--durationFortuneBurn) var(--curveDecelerateMax) forwards;
+      }
+
+      .fortune-overlay[data-exit="burn"] .fortune-fire span {
+        opacity: 1;
+        animation: fortune-flame-lick 150ms var(--curveEasyEase) infinite alternate;
+      }
+
+      .fortune-overlay[data-exit="burn"] .fortune-fire span:nth-child(3n + 2) {
+        animation-delay: 70ms;
+        animation-duration: 190ms;
+      }
+
+      .fortune-overlay[data-exit="burn"] .fortune-fire span:nth-child(3n) {
+        animation-delay: 110ms;
+        animation-duration: 220ms;
+      }
+
+      .fortune-overlay[data-exit="burn"] {
+        animation: fortune-burn-backdrop var(--durationFortuneBurn) var(--curveEasyEase) forwards;
+      }
+
+      @keyframes fortune-draw {
+        0% {
+          opacity: 0;
+          transform: translateY(12vh) rotateX(-82deg) rotateZ(5deg) scale(0.72);
+        }
+        48% {
+          opacity: 1;
+          transform: translateY(-2vh) rotateX(9deg) rotateZ(-2deg) scale(1.06);
+        }
+        64% {
+          transform: translateX(calc(0px - var(--spacingHorizontalS))) rotateX(-3deg) rotateZ(1deg) scale(0.985);
+        }
+        78% {
+          transform: translateX(var(--spacingHorizontalS)) rotateX(1deg) rotateZ(-2deg) scale(1.015);
+        }
+        100% {
+          opacity: 1;
+          transform: translate(0, 0) rotateX(0) rotateZ(-1deg) scale(1);
+        }
+      }
+
+      @keyframes fortune-keep-exit {
+        0% {
+          opacity: 1;
+          transform: translateY(0) rotate(0) scale(1);
+        }
+        20% {
+          transform: translateY(calc(0px - var(--spacingVerticalS))) rotate(-1deg) scale(1.02);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(115vh) rotate(9deg) scale(0.94);
+        }
+      }
+
+      @keyframes fortune-burn-exit {
+        0% {
+          opacity: 1;
+          filter: saturate(1) sepia(0);
+          transform: translateY(0) rotate(0) scale(1);
+        }
+        24% {
+          opacity: 1;
+          filter: saturate(1.9) sepia(0.42) contrast(1.08);
+          transform: translateY(var(--spacingVerticalS)) rotate(-3deg) scale(1.12);
+        }
+        58% {
+          opacity: 0.78;
+          filter: saturate(2.3) sepia(0.62) contrast(1.18);
+          transform: translateY(calc(0px - var(--spacingVerticalM))) rotate(3deg) scale(1.34);
+        }
+        100% {
+          opacity: 0;
+          filter: saturate(2.7) sepia(0.84) contrast(1.35);
+          transform: translateY(-7vh) rotate(-7deg) scale(2.12);
+        }
+      }
+
+      @keyframes fortune-fire-burst {
+        0% {
+          opacity: 0;
+          transform: translateY(22%) scale(0.38);
+        }
+        18% {
+          opacity: 1;
+          transform: translateY(8%) scale(0.82);
+        }
+        62% {
+          opacity: 1;
+          transform: translateY(-8%) scale(1.18);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-42%) scale(1.72);
+        }
+      }
+
+      @keyframes fortune-flame-lick {
+        from {
+          transform: translateY(var(--spacingVerticalXS)) rotate(-7deg) scale(0.92);
+        }
+        to {
+          transform: translateY(calc(0px - var(--spacingVerticalM))) rotate(8deg) scale(1.16);
+        }
+      }
+
+      @keyframes fortune-burn-backdrop {
+        0% {
+          background: var(--colorModalBackdrop);
+        }
+        18% {
+          background: var(--colorAccentOrange);
+        }
+        46% {
+          background: var(--colorRustDeep);
+        }
+        100% {
+          background: var(--colorModalBackdrop);
+        }
+      }
+
+      @keyframes fortune-aura-pop {
+        0% {
+          opacity: 0;
+          transform: translateY(var(--spacingVerticalXXL)) rotate(-10deg) scale(0.25);
+        }
+        34% {
+          opacity: 1;
+          transform: translateY(calc(0px - var(--spacingVerticalS))) rotate(6deg) scale(1.16);
+        }
+        68% {
+          opacity: 0.92;
+          transform: translateY(calc(0px - var(--spacingVerticalXXL))) rotate(-3deg) scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(calc(0px - var(--spacingVerticalXXXL))) rotate(4deg) scale(0.86);
+        }
+      }
+
+      @keyframes idle-hint-in {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -35%) rotate(2deg) scale(0.88);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) rotate(-1deg) scale(1);
+        }
+      }
+
+      body[data-hit="perfect"] .topbar,
+      body[data-hit="perfect"] .stats,
+      body[data-hit="perfect"] .footer-note {
+        animation: perfect-ui-hit 240ms var(--curveDecelerateMax);
+      }
+
+      body[data-fever="true"] .topbar,
+      body[data-fever="true"] .stats,
+      body[data-fever="true"] .footer-note {
+        animation: fever-ui-beat var(--rhythmPeriod) var(--curveEasyEase) infinite;
+      }
+
+      @keyframes perfect-ui-hit {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+        34% {
+          transform: translateY(var(--spacingVerticalXS)) scale(1.025);
+        }
+        66% {
+          transform: translateY(calc(0px - var(--spacingVerticalXXS))) scale(0.995);
+        }
+      }
+
+      @keyframes fever-ui-beat {
+        0% {
+          transform: translateY(var(--spacingVerticalXS)) scale(1.018);
+        }
+        18%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .hc-label {
+        display: none;
+      }
+
+      .visually-hidden {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+      }
+
+      @media (max-width: 900px) {
+        :root {
+          --stageSize: clamp(290px, 67vmin, 510px);
+          --safePadRight: calc(var(--spacingHorizontalL) + env(safe-area-inset-right));
+          --safePadLeft: calc(var(--spacingHorizontalL) + env(safe-area-inset-left));
+        }
+
+        body {
+          overflow: auto;
+        }
+
+        .screen {
+          grid-template-rows: auto minmax(0, 1fr) auto auto;
+          gap: var(--spacingVerticalS);
+        }
+
+        .topbar {
+          grid-template-columns: minmax(0, 1fr) minmax(160px, 190px);
+          grid-template-areas: "brand modes";
+          gap: var(--spacingVerticalM) var(--spacingHorizontalM);
+        }
+
+        .mode-tabs {
+          width: 100%;
+          justify-self: end;
+        }
+
+        .brand {
+          max-width: min(46vw, 180px);
+          padding-inline: var(--spacingHorizontalS);
+        }
+
+        body[data-mode="release"] .stage {
+          width: calc(100vw - var(--spacingHorizontalS));
+          height: clamp(400px, 54svh, 620px);
+        }
+
+        .stats {
+          grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+          grid-template-areas:
+            "title tools"
+            "data data";
+          gap: var(--spacingVerticalS) var(--spacingHorizontalM);
+        }
+
+        .stats-title {
+          justify-self: start;
+          text-align: left;
+        }
+
+        .stats > .tools {
+          justify-self: end;
+        }
+
+        .stat {
+          grid-template-columns: 1fr;
+          justify-items: center;
+          gap: var(--spacingVerticalXS);
+          text-align: center;
+        }
+
+        .footer-note {
+          grid-template-columns: 1fr;
+          gap: var(--spacingVerticalXS);
+          text-align: center;
+        }
+
+        .system-note {
+          text-align: center;
+        }
+      }
+
+      @media (max-width: 560px) {
+        :root {
+          --stageSize: clamp(265px, 80vw, 360px);
+          --safePadTop: calc(var(--spacingVerticalM) + env(safe-area-inset-top));
+          --safePadRight: calc(var(--spacingHorizontalL) + env(safe-area-inset-right));
+          --safePadBottom: calc(var(--spacingVerticalM) + env(safe-area-inset-bottom));
+          --safePadLeft: calc(var(--spacingHorizontalL) + env(safe-area-inset-left));
+        }
+
+        .screen {
+          gap: var(--spacingVerticalS);
+        }
+
+        .brand-name {
+          font-size: var(--fontSizeHero700);
+          line-height: var(--lineHeightHero700);
+        }
+
+        .brand-english {
+          margin-bottom: var(--spacingVerticalXXS);
+          font-size: var(--fontSizeBase100);
+          line-height: var(--lineHeightBase100);
+        }
+
+        .brand p {
+          font-size: var(--fontSizeBase100);
+          line-height: var(--lineHeightBase100);
+        }
+
+        .stats > .tools {
+          width: 100%;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: var(--spacingHorizontalXS);
+        }
+
+        .tool-button {
+          min-width: 0;
+          grid-template-columns: minmax(0, auto) var(--spacingHorizontalS);
+          gap: var(--spacingHorizontalXS);
+          padding-inline: var(--spacingHorizontalS);
+          font-size: var(--fontSizeBase200);
+          line-height: var(--lineHeightBase200);
+        }
+
+        .stats {
+          padding: var(--spacingVerticalS);
+        }
+
+        body[data-mode="release"] .stage {
+          width: 100vw;
+          height: clamp(410px, 56svh, 540px);
+          margin-inline: calc(0px - var(--safePadLeft)) calc(0px - var(--safePadRight));
+        }
+
+        .stats-grid {
+          gap: var(--spacingHorizontalM);
+        }
+
+        .stat {
+          padding: var(--spacingVerticalS) var(--spacingHorizontalS);
+        }
+
+        .stat dt {
+          font-size: var(--fontSizeBase100);
+          line-height: var(--lineHeightBase100);
+        }
+
+        .stat dd {
+          font-size: var(--fontSizeBase400);
+          line-height: var(--lineHeightBase400);
+        }
+
+        .footer-note {
+          font-size: var(--fontSizeBase100);
+          line-height: var(--lineHeightBase100);
+        }
+      }
+
+      @media (min-width: 390px) and (max-width: 460px) and (min-height: 830px) {
+        .topbar {
+          grid-template-columns: minmax(0, 1fr) minmax(190px, 224px);
+          grid-template-areas: "brand modes";
+          gap: var(--spacingVerticalS) var(--spacingHorizontalS);
+        }
+
+        .brand {
+          max-width: min(43vw, 168px);
+        }
+
+        .mode-tabs {
+          width: 100%;
+          justify-self: end;
+        }
+
+        .tool-button {
+          padding-inline: var(--spacingHorizontalS);
+          font-size: var(--fontSizeBase200);
+          line-height: var(--lineHeightBase200);
+        }
+      }
+
+      @media (min-width: 390px) and (max-width: 420px) and (min-height: 830px) {
+        :root {
+          --stageSize: min(82vw, 330px);
+        }
+
+        body[data-mode="release"] .stage {
+          height: clamp(440px, 54svh, 470px);
+        }
+      }
+
+      @media (min-width: 421px) and (max-width: 460px) and (min-height: 900px) {
+        :root {
+          --stageSize: min(82vw, 360px);
+        }
+
+        body[data-mode="release"] .stage {
+          height: clamp(480px, 54svh, 510px);
+        }
+      }
+
+      @media (max-height: 720px) and (min-width: 901px) {
+        :root {
+          --stageSize: clamp(280px, 63vh, 500px);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: var(--durationReducedMotion) !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: var(--durationReducedMotion) !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      @media (forced-colors: active) {
+        body {
+          color: CanvasText;
+          background: Canvas;
+        }
+
+        #sceneCanvas {
+          display: none;
+        }
+
+        .mode-tab[aria-selected="true"],
+        .tool-button[aria-pressed="true"] {
+          color: HighlightText;
+          background: Highlight;
+          border-color: Highlight;
+        }
+
+        .brand h1,
+        .brand-name,
+        .brand-english,
+        .brand p,
+        .mode-tab,
+        .tool-button,
+        .mode-copy p,
+        .idle-hint,
+        .fortune-slip,
+        .fortune-kicker,
+        .fortune-title,
+        .fortune-keyword,
+        .fortune-english,
+        .fortune-explanation,
+        .fortune-count,
+        .fortune-message,
+        .fortune-continue,
+        .fortune-signature,
+        .stats-title,
+        .stat dt,
+        .stat dd,
+        .stat-unit,
+        .footer-note,
+        .system-note {
+          color: CanvasText !important;
+        }
+
+        .mode-tabs,
+        .brand-english,
+        .tool-button,
+        .stats,
+        .stats-title,
+        .stat,
+        .mode-copy p,
+        .idle-hint,
+        .fortune-slip,
+        .fortune-kicker,
+        .fortune-keyword,
+        .fortune-message,
+        .fortune-count,
+        .fortune-continue,
+        .fortune-signature,
+        .stage-action {
+          border-color: ButtonText;
+        }
+
+        .stage-action {
+          color: ButtonText;
+          background: ButtonFace;
+          border-width: var(--strokeMedium);
+        }
+
+        .fortune-overlay,
+        .fortune-slip,
+        .fortune-count,
+        .fortune-message,
+        .fortune-signature {
+          background: Canvas;
+        }
+
+        .fortune-aura,
+        .fortune-fire,
+        .stats-title::before,
+        .stats-title::after,
+        .tape {
+          display: none;
+        }
+
+        .fortune-continue {
+          background: ButtonFace;
+        }
+
+        .fortune-overlay[data-fortune-tone] .fortune-continue {
+          color: ButtonText !important;
+          background: ButtonFace !important;
+          box-shadow: none;
+        }
+
+        button[class]:focus,
+        button[class]:focus-visible {
+          outline-color: Highlight;
+          box-shadow: none;
+        }
+
+        .hc-label {
+          display: grid;
+          place-items: center;
+          width: 100%;
+          height: 100%;
+          font-size: var(--fontSizeBase600);
+          line-height: var(--lineHeightBase600);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="sceneCanvas" aria-hidden="true"></canvas>
+    <p id="idleHint" class="idle-hint" aria-hidden="true" hidden>红圈合拢时敲击</p>
+
+    <main class="screen" data-screen-label="01 佛了 for luck · 功德与放生" data-active="true">
+      <header class="topbar">
+        <div class="brand">
+          <h1>
+            <span class="brand-name">佛了</span>
+            <span class="brand-english" lang="en">for luck</span>
+          </h1>
+          <p>在<span id="locationName">正在获取所在地</span>，凡事只求半称心</p>
+        </div>
+
+        <div class="mode-tabs" role="tablist" aria-label="体验模式">
+          <button
+            class="mode-tab"
+            id="meritTab"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="meritPanel"
+            tabindex="0"
+          >
+            木鱼
+          </button>
+          <button
+            class="mode-tab"
+            id="releaseTab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="releasePanel"
+            tabindex="-1"
+          >
+            放生
+          </button>
+        </div>
+
+      </header>
+
+      <div class="stage">
+        <section
+          class="mode-panel"
+          id="meritPanel"
+          role="tabpanel"
+          aria-labelledby="meritTab"
+        >
+          <button
+            class="stage-action"
+            id="meritAction"
+            type="button"
+            aria-describedby="storagePolicy"
+          >
+            <span class="visually-hidden">敲击木鱼，积攒一份功德</span>
+            <span class="hc-label" aria-hidden="true">敲击木鱼</span>
+          </button>
+        </section>
+
+        <section
+          class="mode-panel"
+          id="releasePanel"
+          role="tabpanel"
+          aria-labelledby="releaseTab"
+          hidden
+        >
+          <button
+            class="stage-action"
+            id="releaseAction"
+            type="button"
+            aria-describedby="releaseInstruction releaseDetail storagePolicy"
+          >
+            <span class="visually-hidden">向海中放生一尾鱼</span>
+            <span class="hc-label" aria-hidden="true">放生一尾鱼</span>
+          </button>
+          <div class="mode-copy">
+            <p id="releaseInstruction">跟随浪线到岸的节拍，放生一尾</p>
+            <p class="mode-detail" id="releaseDetail">鱼儿会从近岸游向远海</p>
+          </div>
+        </section>
+      </div>
+
+      <aside class="stats" aria-labelledby="statsTitle">
+        <p class="stats-title" id="statsTitle">功德记录</p>
+        <div class="tools" role="group" aria-label="体验设置">
+          <button class="tool-button" id="autoToggle" type="button" aria-pressed="false">
+            <span class="tool-label" id="autoLabel">自动敲</span>
+          </button>
+          <button class="tool-button" id="soundToggle" type="button" aria-pressed="true">
+            <span class="tool-label">声音</span>
+          </button>
+        </div>
+        <dl class="stats-grid">
+          <div class="stat">
+            <dt id="globalLabel">全球功德</dt>
+            <dd id="globalCount">1,286,420</dd>
+          </div>
+          <div class="stat">
+            <dt id="personalLabel">我已积攒的功德</dt>
+            <dd id="personalCount">0</dd>
+          </div>
+        </dl>
+      </aside>
+
+      <footer class="footer-note">
+        <p class="visually-hidden" id="storagePolicy">
+          个人功德与放生记录只存于此设备；全球数字为交互演示
+        </p>
+        <p class="signature-line">
+          <span lang="en">Love from Suzhou</span> 爱来自苏州 @乱讲实验室 @黑糖不是黑桃
+        </p>
+        <p class="system-note" id="systemNote" hidden></p>
+      </footer>
+    </main>
+
+    <section
+      class="fortune-overlay"
+      id="fortuneOverlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="fortuneMode fortuneTitle"
+      aria-describedby="fortuneKeyword fortuneEnglish fortuneExplanation fortuneDescription"
+      hidden
+    >
+      <div class="fortune-stage">
+        <div class="fortune-aura" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <article class="fortune-slip">
+          <p class="fortune-kicker" id="fortuneMode">本次功德签</p>
+          <h2 class="fortune-title" id="fortuneTitle">大吉</h2>
+          <div class="fortune-message">
+            <p class="fortune-keyword" id="fortuneKeyword">共赢</p>
+            <p class="fortune-english" id="fortuneEnglish">Win-Win</p>
+            <p class="fortune-explanation" id="fortuneExplanation">
+              只要我不内卷，大家都有光明的未来。
+            </p>
+          </div>
+        </article>
+        <p class="fortune-count" id="fortuneDescription">本次积攒 0 次</p>
+        <span class="fortune-fire" aria-hidden="true">
+          <span>🔥</span><span>🔥</span><span>🔥</span><span>🔥</span>
+          <span>🔥</span><span>🔥</span><span>🔥</span><span>🔥</span>
+          <span>🔥</span><span>🔥</span><span>🔥</span><span>🔥</span>
+        </span>
+        <button class="fortune-continue" id="fortuneContinue" type="button">
+          收好，继续积攒
+        </button>
+        <p class="fortune-signature">
+          <span lang="en">Love from Suzhou</span> 爱来自苏州 @乱讲实验室 @黑糖不是黑桃
+        </p>
+      </div>
+    </section>
+
+    <div
+      class="visually-hidden"
+      id="liveStatus"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
+    <script>
+      (() => {
+        "use strict";
+
+        const STORAGE_KEY = "yinian-ritual-state-v2";
+        const LEGACY_STORAGE_KEY = "yinian-gongde-state-v1";
+        const IDLE_HINT_DELAY = 7000;
+        const PERFECT_FEVER_THRESHOLD = 20;
+        const PERFECT_FEVER_DURATION = 8000;
+        const WOOD_STRIKE_DURATION = 0.32;
+        const WOOD_IMPACT_PHASE = 0.14;
+        const FORTUNE_EXIT_DURATION = 500;
+        const FORTUNE_BURN_DURATION = 760;
+        const MODES = {
+          merit: {
+            autoLabel: "自动敲",
+            globalLabel: "全球功德",
+            personalLabel: "我已积攒的功德",
+            globalBase: 1286420,
+            autoDelay: 960
+          },
+          release: {
+            autoLabel: "自动放生",
+            globalLabel: "全球放生",
+            personalLabel: "我的放生",
+            globalBase: 48216,
+            autoDelay: 1280
+          }
+        };
+        const STRINGS = {
+          storageUnavailable: "当前浏览器无法保存，关闭页面后记录将清零",
+          audioUnavailable: "当前浏览器不支持网页声音，计数仍可正常使用",
+          audioBlocked: "浏览器暂时阻止了声音，请再次操作",
+          locationUnavailable: "暂时无法获取所在地，已显示“此地”",
+          autoStoppedOnSwitch: "已切换模式，自动操作已关闭",
+          modeMerit: "已切换到木鱼模式",
+          modeRelease: "已切换到放生模式",
+          meritStatus: (grade, personal, combo) =>
+            `${grade}，功德加一${combo > 1 ? `，连续 ${combo} 次` : ""}，我已积攒的功德 ${personal}`,
+          releaseStatus: (grade, species, personal, combo) =>
+            `${grade}，已放生${species}一尾${combo > 1 ? `，连续 ${combo} 次` : ""}，我的放生 ${personal}`
+        };
+        const MANUAL_STRIKE_EMOJIS = Object.freeze([
+          "🙏",
+          "✨",
+          "🌸",
+          "🪷",
+          "🍀",
+          "🌈",
+          "💫",
+          "💖",
+          "🧧",
+          "☯️"
+        ]);
+        const AUTO_STRIKE_EMOJIS = Object.freeze(["💵", "💰"]);
+        const FORTUNE_LEVELS = ["大吉", "中吉", "小吉", "小凶", "中凶", "大凶"];
+        const AUSPICIOUS_FORTUNES = new Set(["大吉", "中吉", "小吉"]);
+        const FORTUNE_MESSAGES = [
+          {
+            keyword: "松弛",
+            english: "Layback",
+            description: "别抢拍子，让命运的子弹跟着鼓点先飞一会儿。"
+          },
+          {
+            keyword: "慎独",
+            english: "Solitude",
+            description: "拔掉网线的时候，更要学着放过自己。"
+          },
+          {
+            keyword: "知止",
+            english: "Know to Stop",
+            description: "适可而止，见好就收。"
+          },
+          {
+            keyword: "即兴",
+            english: "Freestyle",
+            description: "扔掉人生剧本，没准备好就是最好的准备。"
+          },
+          {
+            keyword: "采样",
+            english: "Sampling",
+            description: "截取别人的一段好运，混音进自己的日常。"
+          },
+          {
+            keyword: "顺流",
+            english: "Flow",
+            description: "别逆天改命了，踩准当下的节奏顺其自然吧。"
+          },
+          {
+            keyword: "半满",
+            english: "Half Full",
+            description: "50% 的进度条，也是一种绝佳的圆满。"
+          },
+          {
+            keyword: "留白",
+            english: "Blank Space",
+            description: "运势加载中，剩下的画布由你自己填空。"
+          },
+          {
+            keyword: "如常",
+            english: "As Is",
+            description: "没有惊喜也没有惊吓，已是最高级的平稳。"
+          },
+          {
+            keyword: "无明",
+            english: "Unknowing",
+            description: "有些事不用看得太通透，难得糊涂。"
+          },
+          {
+            keyword: "共赢",
+            english: "Win-Win",
+            description: "只要我不内卷，大家都有光明的未来。"
+          },
+          {
+            keyword: "对齐",
+            english: "Align",
+            description: "放弃抵抗，和这个世界的荒谬达成共识。"
+          },
+          {
+            keyword: "闭环",
+            english: "Closed Loop",
+            description: "把今天的烂摊子，原封不动地交还给明天。"
+          },
+          {
+            keyword: "赋能",
+            english: "Empower",
+            description: "给自己画的饼，含着泪也要咽下去。"
+          },
+          {
+            keyword: "颗粒度",
+            english: "Granularity",
+            description: "别盯得太细，命运的像素放大看全是马赛克。"
+          },
+          {
+            keyword: "挂起",
+            english: "Suspend",
+            description: "解决不了的烦恼，统统扔进后台进程。"
+          },
+          {
+            keyword: "旁观",
+            english: "Spectate",
+            description: "只要不亲自下场，人生的 Bug 就与你无关。"
+          },
+          {
+            keyword: "兼容",
+            english: "Compatible",
+            description: "允许一切发生，反正你也拦不住。"
+          },
+          {
+            keyword: "复盘",
+            english: "Review",
+            description: "过去的倒霉已成定局，仅供日后避雷参考。"
+          },
+          {
+            keyword: "迭代",
+            english: "Iterate",
+            description: "今天的运气虽烂，但下一个版本肯定会更好。"
+          }
+        ];
+
+        const canvas = document.getElementById("sceneCanvas");
+        const context = canvas.getContext("2d", { alpha: true });
+        const screen = document.querySelector(".screen");
+        const idleHint = document.getElementById("idleHint");
+        const locationName = document.getElementById("locationName");
+        const meritTab = document.getElementById("meritTab");
+        const releaseTab = document.getElementById("releaseTab");
+        const meritPanel = document.getElementById("meritPanel");
+        const releasePanel = document.getElementById("releasePanel");
+        const meritAction = document.getElementById("meritAction");
+        const releaseAction = document.getElementById("releaseAction");
+        const autoToggle = document.getElementById("autoToggle");
+        const autoLabel = document.getElementById("autoLabel");
+        const soundToggle = document.getElementById("soundToggle");
+        const globalLabel = document.getElementById("globalLabel");
+        const globalCount = document.getElementById("globalCount");
+        const personalLabel = document.getElementById("personalLabel");
+        const personalCount = document.getElementById("personalCount");
+        const releaseDetail = document.getElementById("releaseDetail");
+        const storageNote = document.getElementById("storageNote");
+        const systemNote = document.getElementById("systemNote");
+        const liveStatus = document.getElementById("liveStatus");
+        const fortuneOverlay = document.getElementById("fortuneOverlay");
+        const fortuneMode = document.getElementById("fortuneMode");
+        const fortuneTitle = document.getElementById("fortuneTitle");
+        const fortuneKeyword = document.getElementById("fortuneKeyword");
+        const fortuneEnglish = document.getElementById("fortuneEnglish");
+        const fortuneExplanation = document.getElementById("fortuneExplanation");
+        const fortuneDescription = document.getElementById("fortuneDescription");
+        const fortuneContinue = document.getElementById("fortuneContinue");
+        const fortuneAuraItems = [...document.querySelectorAll(".fortune-aura span")];
+        const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+        const formatter = new Intl.NumberFormat("zh-CN");
+        const rootStyles = getComputedStyle(document.documentElement);
+        const cssValue = (name) => rootStyles.getPropertyValue(name).trim();
+        const cssNumber = (name) => Number.parseFloat(cssValue(name)) || 0;
+        const colors = {
+          washi: cssValue("--colorWashi"),
+          washiLight: cssValue("--colorWashiLight"),
+          washiDeep: cssValue("--colorWashiDeep"),
+          ink: cssValue("--colorInk"),
+          inkSoft: cssValue("--colorInkSoft"),
+          inkFaint: cssValue("--colorInkFaint"),
+          inkAlpha: cssValue("--colorInkAlpha"),
+          inkFaintAlpha: cssValue("--colorInkFaintAlpha"),
+          rust: cssValue("--colorRust"),
+          rustDeep: cssValue("--colorRustDeep"),
+          moss: cssValue("--colorMoss"),
+          mossDeep: cssValue("--colorMossDeep"),
+          lake: cssValue("--colorLake"),
+          lakeDeep: cssValue("--colorLakeDeep"),
+          lakeLight: cssValue("--colorLakeLight"),
+          lakeAlpha: cssValue("--colorLakeAlpha"),
+          sand: cssValue("--colorSand"),
+          sandDeep: cssValue("--colorSandDeep"),
+          purple: cssValue("--colorAccentPurple"),
+          pink: cssValue("--colorAccentPink"),
+          lime: cssValue("--colorAccentLime"),
+          orange: cssValue("--colorAccentOrange"),
+          wood: cssValue("--colorWood"),
+          woodMid: cssValue("--colorWoodMid"),
+          woodDeep: cssValue("--colorWoodDeep"),
+          woodLight: cssValue("--colorWoodLight"),
+          woodHighlight: cssValue("--colorWoodHighlight"),
+          steelDark: cssValue("--colorSteelDark"),
+          steelMid: cssValue("--colorSteelMid"),
+          steelLight: cssValue("--colorSteelLight"),
+          steelBright: cssValue("--colorSteelBright"),
+          cyberCyan: cssValue("--colorCyberCyan"),
+          cyberGlow: cssValue("--colorCyberGlow"),
+          shadow: cssValue("--colorShadowAlpha"),
+          fishKoi: cssValue("--colorFishKoi"),
+          fishGreen: cssValue("--colorFishGreen"),
+          fishCrucian: cssValue("--colorFishCrucian"),
+          fishGold: cssValue("--colorFishGold"),
+          fishBitterling: cssValue("--colorFishBitterling"),
+          fishSilver: cssValue("--colorFishSilver")
+        };
+        const species = [
+          { name: "锦鲤", color: colors.fishKoi, accent: colors.washiLight, pattern: "patch" },
+          { name: "青鱼", color: colors.fishGreen, accent: colors.lakeLight, pattern: "plain" },
+          { name: "鲫鱼", color: colors.fishCrucian, accent: colors.washiDeep, pattern: "scale" },
+          { name: "金鱼", color: colors.fishGold, accent: colors.rust, pattern: "fan" },
+          { name: "鳑鲏", color: colors.fishBitterling, accent: colors.washiLight, pattern: "stripe" },
+          { name: "银鱼", color: colors.fishSilver, accent: colors.inkSoft, pattern: "plain" }
+        ];
+
+        let mode = "merit";
+        let meritTotal = 0;
+        let releaseTotal = 0;
+        let soundEnabled = true;
+        let storageAvailable = true;
+        let autoActive = false;
+        let autoTimer = 0;
+        let demoRemoteMerit = 0;
+        let demoRemoteRelease = 0;
+        let demoTick = 0;
+        let reducedMotion = reducedMotionQuery.matches;
+        let audioContext = null;
+        let noiseBuffer = null;
+        let animationFrame = 0;
+        let lastFrame = performance.now();
+        let announcementTimer = 0;
+        let uiHitTimer = 0;
+        let idleHintTimer = 0;
+        let comboCount = 0;
+        let perfectStreak = 0;
+        let feverStarted = 0;
+        let feverUntil = 0;
+        let feverWasActive = false;
+        let sessionActionCount = 0;
+        let sessionMissCount = 0;
+        let sessionMissAnchor = 0;
+        let fortuneOpen = false;
+        let fortunePending = false;
+        let fortuneClosing = false;
+        let fortuneTone = "auspicious";
+        let fortuneTimer = 0;
+        let focusBeforeFortune = null;
+        let pixelRatio = 1;
+        let canvasWidth = 0;
+        let canvasHeight = 0;
+        const backgroundCanvas = document.createElement("canvas");
+        const backgroundContext = backgroundCanvas.getContext("2d");
+        let ripples = [];
+        let bursts = [];
+        let meritImprints = [];
+        let fishSchool = [];
+        let woodStrikeStarted = Number.NEGATIVE_INFINITY;
+        let woodStrikeFromAuto = false;
+        let strikeEmojiParticles = [];
+        let strikeEmojiAnchor = {
+          x: 0,
+          y: 0,
+          strikeStarted: Number.NEGATIVE_INFINITY
+        };
+        let rhythmEpoch = performance.now();
+        let rhythmBeatIndex = 0;
+        let lastTimingGrade = "READY";
+        let woodHovered = false;
+        let pointerX = 0;
+        let pointerY = 0;
+
+        function seededRandomFactory(seed) {
+          let value = seed >>> 0;
+          return () => {
+            value += 0x6d2b79f5;
+            let mixed = value;
+            mixed = Math.imul(mixed ^ (mixed >>> 15), mixed | 1);
+            mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
+            return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
+          };
+        }
+
+        function setSystemMessage(message) {
+          systemNote.textContent = message;
+          systemNote.hidden = !message;
+        }
+
+        function announce(message) {
+          liveStatus.textContent = "";
+          window.clearTimeout(announcementTimer);
+          announcementTimer = window.setTimeout(() => {
+            liveStatus.textContent = message;
+          }, 220);
+        }
+
+        function triggerUiHit(timing) {
+          if (timing.rank !== "perfect") return;
+          document.body.removeAttribute("data-hit");
+          void document.body.offsetWidth;
+          document.body.dataset.hit = "perfect";
+          window.clearTimeout(uiHitTimer);
+          uiHitTimer = window.setTimeout(() => {
+            document.body.removeAttribute("data-hit");
+          }, 260);
+        }
+
+        function randomIndex(length) {
+          if (window.crypto?.getRandomValues) {
+            const value = new Uint32Array(1);
+            window.crypto.getRandomValues(value);
+            return value[0] % length;
+          }
+          return Math.floor(Math.random() * length);
+        }
+
+        function makeStrikeEmojiParticles(fromAuto) {
+          const count = reducedMotion ? 2 : 7;
+          const pool = fromAuto ? AUTO_STRIKE_EMOJIS : MANUAL_STRIKE_EMOJIS;
+          const extras = fromAuto ? pool : pool.slice(1);
+          return Array.from({ length: count }, (_, index) => ({
+            icon: index === 0
+              ? pool[0]
+              : extras[randomIndex(extras.length)],
+            angle: Math.random() * Math.PI * 2,
+            radius: 0.055 + Math.random() * 0.13,
+            driftX: (Math.random() - 0.5) * 0.16,
+            lift: 0.12 + Math.random() * 0.14,
+            rotation: (Math.random() - 0.5) * 0.72,
+            scale: 0.82 + Math.random() * 0.42,
+            delay: reducedMotion ? 0 : Math.random() * 0.09
+          }));
+        }
+
+        function resetSessionCycle() {
+          window.clearTimeout(fortuneTimer);
+          fortuneTimer = 0;
+          fortunePending = false;
+          sessionActionCount = 0;
+          sessionMissCount = 0;
+          sessionMissAnchor = 0;
+        }
+
+        function registerSessionAction(time = performance.now()) {
+          window.clearTimeout(fortuneTimer);
+          fortuneTimer = 0;
+          fortunePending = false;
+          sessionActionCount += 1;
+          sessionMissCount = 0;
+          sessionMissAnchor = time;
+        }
+
+        function showFortuneSummary(forcedLevel = "", forcedKeyword = "") {
+          if (fortuneOpen || sessionActionCount < 1) return;
+          fortuneOpen = true;
+          fortunePending = false;
+          fortuneClosing = false;
+          fortuneTimer = 0;
+          stopAuto(false);
+          window.clearTimeout(idleHintTimer);
+          idleHint.hidden = true;
+          focusBeforeFortune = activeAction();
+
+          const level = FORTUNE_LEVELS.includes(forcedLevel)
+            ? forcedLevel
+            : FORTUNE_LEVELS[randomIndex(FORTUNE_LEVELS.length)];
+          const message = FORTUNE_MESSAGES.find(
+            (item) => item.keyword === forcedKeyword
+          ) || FORTUNE_MESSAGES[randomIndex(FORTUNE_MESSAGES.length)];
+          const isMerit = mode === "merit";
+          fortuneTone = AUSPICIOUS_FORTUNES.has(level) ? "auspicious" : "inauspicious";
+          fortuneMode.textContent = isMerit ? "本次功德签" : "本次放生签";
+          fortuneTitle.textContent = level;
+          fortuneKeyword.textContent = message.keyword;
+          fortuneEnglish.textContent = message.english;
+          fortuneExplanation.textContent = message.description;
+          fortuneDescription.textContent = isMerit
+            ? `本次积攒 ${sessionActionCount} 次`
+            : `本次放生 ${sessionActionCount} 尾`;
+          const auraIcons = fortuneTone === "auspicious" ? ["👍", "🌹"] : ["❓", "😱"];
+          fortuneAuraItems.forEach((item, index) => {
+            item.textContent = auraIcons[index % auraIcons.length];
+          });
+          fortuneContinue.textContent = fortuneTone === "auspicious"
+            ? "🫴 收好 继续积攒"
+            : "🔥 立刻化解";
+          fortuneContinue.removeAttribute("aria-disabled");
+
+          document.body.dataset.fortune = "true";
+          fortuneOverlay.dataset.fortuneTone = fortuneTone;
+          fortuneOverlay.removeAttribute("data-exit");
+          window.clearTimeout(announcementTimer);
+          liveStatus.textContent = "";
+          fortuneOverlay.hidden = false;
+          fortuneContinue.focus();
+          screen.inert = true;
+          screen.setAttribute("aria-hidden", "true");
+        }
+
+        function closeFortuneSummary() {
+          if (!fortuneOpen || fortuneClosing) return;
+          fortuneClosing = true;
+          fortuneOverlay.dataset.exit = fortuneTone === "auspicious" ? "keep" : "burn";
+          fortuneContinue.setAttribute("aria-disabled", "true");
+          window.clearTimeout(fortuneTimer);
+          fortuneTimer = window.setTimeout(
+            finishFortuneSummary,
+            reducedMotion
+              ? 20
+              : fortuneTone === "auspicious"
+                ? FORTUNE_EXIT_DURATION
+                : FORTUNE_BURN_DURATION
+          );
+        }
+
+        function finishFortuneSummary() {
+          if (!fortuneOpen) return;
+          const completedTone = fortuneTone;
+          screen.inert = false;
+          screen.removeAttribute("aria-hidden");
+          fortuneOverlay.hidden = true;
+          fortuneOverlay.removeAttribute("data-exit");
+          fortuneOverlay.removeAttribute("data-fortune-tone");
+          fortuneContinue.removeAttribute("aria-disabled");
+          document.body.removeAttribute("data-fortune");
+          fortuneOpen = false;
+          fortuneClosing = false;
+          comboCount = 0;
+          perfectStreak = 0;
+          lastTimingGrade = "READY";
+          feverStarted = 0;
+          feverUntil = 0;
+          feverWasActive = false;
+          document.body.removeAttribute("data-fever");
+          rhythmBeatIndex = 0;
+          rhythmEpoch = performance.now();
+          resetSessionCycle();
+          resetIdleHint();
+          renderUi();
+          const focusTarget = focusBeforeFortune?.isConnected
+            ? focusBeforeFortune
+            : activeAction();
+          focusBeforeFortune = null;
+          focusTarget.focus();
+          const nextAction = mode === "merit" ? "积攒" : "放生";
+          announce(
+            completedTone === "auspicious"
+              ? `签文已收好，可以继续${nextAction}`
+              : `凶签已化解，可以继续${nextAction}`
+          );
+        }
+
+        function showIdleHint() {
+          if (autoActive || fortuneOpen || fortunePending || document.hidden) {
+            return;
+          }
+          const hint = mode === "merit"
+            ? "红圈合拢时敲击"
+            : "浪线抵达粉色入水点时放生";
+          idleHint.textContent = hint;
+          idleHint.hidden = false;
+          announce(`提示：${hint}`);
+        }
+
+        function resetIdleHint() {
+          window.clearTimeout(idleHintTimer);
+          idleHint.hidden = true;
+          if (!autoActive && !fortuneOpen && !fortunePending && !document.hidden) {
+            idleHintTimer = window.setTimeout(showIdleHint, IDLE_HINT_DELAY);
+          }
+        }
+
+        async function resolveLocation() {
+          try {
+            const endpoint = document.documentElement.dataset.locationEndpoint?.trim();
+            let label = "";
+            if (endpoint) {
+              const endpointUrl = new URL(endpoint, window.location.origin);
+              if (endpointUrl.origin !== window.location.origin) {
+                throw new Error("Location endpoint must be same-origin");
+              }
+              const response = await window.fetch(endpointUrl, {
+                cache: "no-store",
+                credentials: "same-origin",
+                headers: { Accept: "application/json" }
+              });
+              if (!response.ok) throw new Error(`Location request failed: ${response.status}`);
+              const payload = await response.json();
+              label = [payload.city, payload.region, payload.country]
+                .find((value) => typeof value === "string" && value.trim()) || "";
+            } else {
+              const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+              const knownZones = {
+                "Asia/Shanghai": "上海",
+                "Asia/Hong_Kong": "香港",
+                "Asia/Singapore": "新加坡",
+                "Asia/Tokyo": "东京",
+                "America/Los_Angeles": "洛杉矶",
+                "America/New_York": "纽约",
+                "Europe/London": "伦敦"
+              };
+              label = knownZones[timeZone]
+                || timeZone.split("/").pop()?.replaceAll("_", " ")
+                || "";
+            }
+            if (!label) throw new Error("Location response did not include a place name");
+            locationName.textContent = label.trim();
+            document.title = `佛了 for luck · ${label.trim()}`;
+            announce(`当前所在地：${label.trim()}`);
+          } catch (error) {
+            locationName.textContent = "此地";
+            document.title = "佛了 for luck · 此地";
+            setSystemMessage(STRINGS.locationUnavailable);
+            announce(STRINGS.locationUnavailable);
+          }
+        }
+
+        function reportStorageFailure() {
+          if (!storageAvailable) return;
+          storageAvailable = false;
+          storageNote.textContent = STRINGS.storageUnavailable;
+          setSystemMessage(STRINGS.storageUnavailable);
+        }
+
+        function loadState() {
+          try {
+            const raw = window.localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+              const saved = JSON.parse(raw);
+              meritTotal = Number.isFinite(saved.merit) ? Math.max(0, saved.merit) : 0;
+              releaseTotal = Number.isFinite(saved.release) ? Math.max(0, saved.release) : 0;
+              soundEnabled = saved.sound !== false;
+              return;
+            }
+
+            const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+            if (legacyRaw) {
+              const legacy = JSON.parse(legacyRaw);
+              meritTotal = Number.isFinite(legacy.total) ? Math.max(0, legacy.total) : 0;
+              soundEnabled = legacy.sound !== false;
+            }
+          } catch (error) {
+            reportStorageFailure();
+          }
+        }
+
+        function saveState() {
+          if (!storageAvailable) return;
+          try {
+            window.localStorage.setItem(
+              STORAGE_KEY,
+              JSON.stringify({
+                merit: meritTotal,
+                release: releaseTotal,
+                sound: soundEnabled
+              })
+            );
+          } catch (error) {
+            reportStorageFailure();
+          }
+        }
+
+        function getPersonalTotal() {
+          return mode === "merit" ? meritTotal : releaseTotal;
+        }
+
+        function getDemoGlobal() {
+          const remote = mode === "merit" ? demoRemoteMerit : demoRemoteRelease;
+          return MODES[mode].globalBase + getPersonalTotal() + remote;
+        }
+
+        function renderUi() {
+          const config = MODES[mode];
+          document.body.dataset.mode = mode;
+          document.body.style.setProperty("--rhythmPeriod", `${config.autoDelay}ms`);
+          meritTab.setAttribute("aria-selected", String(mode === "merit"));
+          meritTab.tabIndex = mode === "merit" ? 0 : -1;
+          releaseTab.setAttribute("aria-selected", String(mode === "release"));
+          releaseTab.tabIndex = mode === "release" ? 0 : -1;
+          meritPanel.hidden = mode !== "merit";
+          releasePanel.hidden = mode !== "release";
+          meritAction.tabIndex = mode === "merit" ? 0 : -1;
+          releaseAction.tabIndex = mode === "release" ? 0 : -1;
+
+          autoLabel.textContent = config.autoLabel;
+          autoToggle.setAttribute("aria-pressed", String(autoActive));
+          soundToggle.setAttribute("aria-pressed", String(soundEnabled));
+
+          globalLabel.textContent = config.globalLabel;
+          globalCount.textContent = formatter.format(getDemoGlobal());
+          personalLabel.textContent = config.personalLabel;
+          personalCount.textContent = formatter.format(getPersonalTotal());
+        }
+
+        function makeNoiseBuffer(audio) {
+          const duration = 0.09;
+          const frameCount = Math.max(1, Math.floor(audio.sampleRate * duration));
+          const buffer = audio.createBuffer(1, frameCount, audio.sampleRate);
+          const channel = buffer.getChannelData(0);
+          for (let index = 0; index < frameCount; index += 1) {
+            const envelope = 1 - index / frameCount;
+            channel[index] = (Math.random() * 2 - 1) * envelope;
+          }
+          return buffer;
+        }
+
+        async function ensureAudio() {
+          if (!soundEnabled) return null;
+          const AudioEngine = window.AudioContext || window.webkitAudioContext;
+          if (!AudioEngine) {
+            setSystemMessage(STRINGS.audioUnavailable);
+            return null;
+          }
+          if (!audioContext) {
+            audioContext = new AudioEngine();
+            noiseBuffer = makeNoiseBuffer(audioContext);
+          }
+          if (audioContext.state === "suspended") {
+            try {
+              await audioContext.resume();
+            } catch (error) {
+              setSystemMessage(STRINGS.audioBlocked);
+              return null;
+            }
+          }
+          return audioContext;
+        }
+
+        async function playWoodSound(isPerfect = false) {
+          const audio = await ensureAudio();
+          if (!audio || !soundEnabled) return;
+          const now = audio.currentTime;
+          const output = audio.createGain();
+          output.gain.setValueAtTime(0.0001, now);
+          output.gain.exponentialRampToValueAtTime(isPerfect ? 0.46 : 0.38, now + 0.004);
+          output.gain.exponentialRampToValueAtTime(0.0001, now + (isPerfect ? 0.34 : 0.27));
+          output.connect(audio.destination);
+
+          const tone = audio.createOscillator();
+          const filter = audio.createBiquadFilter();
+          tone.type = "triangle";
+          tone.frequency.setValueAtTime((isPerfect ? 560 : 470) + Math.random() * 18, now);
+          tone.frequency.exponentialRampToValueAtTime(isPerfect ? 360 : 310, now + 0.2);
+          filter.type = "bandpass";
+          filter.frequency.value = isPerfect ? 920 : 760;
+          filter.Q.value = isPerfect ? 2.8 : 2.3;
+          tone.connect(filter);
+          filter.connect(output);
+          tone.start(now);
+          tone.stop(now + (isPerfect ? 0.35 : 0.28));
+
+          const noise = audio.createBufferSource();
+          const noiseFilter = audio.createBiquadFilter();
+          const noiseGain = audio.createGain();
+          noise.buffer = noiseBuffer;
+          noiseFilter.type = "bandpass";
+          noiseFilter.frequency.value = 1320;
+          noiseFilter.Q.value = 1.7;
+          noiseGain.gain.setValueAtTime(isPerfect ? 0.22 : 0.16, now);
+          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
+          noise.connect(noiseFilter);
+          noiseFilter.connect(noiseGain);
+          noiseGain.connect(output);
+          noise.start(now);
+          noise.stop(now + 0.085);
+
+          if (isPerfect) {
+            const overtone = audio.createOscillator();
+            const overtoneGain = audio.createGain();
+            overtone.type = "sine";
+            overtone.frequency.setValueAtTime(880, now + 0.008);
+            overtone.frequency.exponentialRampToValueAtTime(640, now + 0.22);
+            overtoneGain.gain.setValueAtTime(0.0001, now);
+            overtoneGain.gain.exponentialRampToValueAtTime(0.12, now + 0.018);
+            overtoneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
+            overtone.connect(overtoneGain);
+            overtoneGain.connect(audio.destination);
+            overtone.start(now + 0.008);
+            overtone.stop(now + 0.28);
+          }
+        }
+
+        async function playWaterSound() {
+          const audio = await ensureAudio();
+          if (!audio || !soundEnabled) return;
+          const now = audio.currentTime;
+
+          const noise = audio.createBufferSource();
+          const filter = audio.createBiquadFilter();
+          const gain = audio.createGain();
+          noise.buffer = noiseBuffer;
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(1800, now);
+          filter.frequency.exponentialRampToValueAtTime(540, now + 0.28);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(audio.destination);
+          noise.start(now);
+          noise.stop(now + 0.34);
+
+          const bubble = audio.createOscillator();
+          const bubbleGain = audio.createGain();
+          bubble.type = "sine";
+          bubble.frequency.setValueAtTime(320, now + 0.03);
+          bubble.frequency.exponentialRampToValueAtTime(710, now + 0.16);
+          bubbleGain.gain.setValueAtTime(0.0001, now);
+          bubbleGain.gain.exponentialRampToValueAtTime(0.12, now + 0.035);
+          bubbleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+          bubble.connect(bubbleGain);
+          bubbleGain.connect(audio.destination);
+          bubble.start(now);
+          bubble.stop(now + 0.22);
+        }
+
+        function activeAction() {
+          return mode === "merit" ? meritAction : releaseAction;
+        }
+
+        function getRhythmPhase(time = performance.now()) {
+          const period = MODES[mode].autoDelay;
+          return ((((time - rhythmEpoch) % period) + period) % period) / period;
+        }
+
+        function getTimingGrade(time = performance.now(), fromAuto = false) {
+          if (fromAuto) return { label: "PERFECT", rank: "perfect" };
+          const phase = getRhythmPhase(time);
+          const distance = Math.min(phase, 1 - phase);
+          if (distance <= 0.075) return { label: "PERFECT", rank: "perfect" };
+          if (distance <= 0.18) return { label: "COOL", rank: "cool" };
+          return { label: "GOOD", rank: "good" };
+        }
+
+        function stageGeometry() {
+          const bounds = activeAction().getBoundingClientRect();
+          return {
+            x: bounds.left + bounds.width / 2,
+            y: bounds.top + bounds.height / 2,
+            width: bounds.width,
+            height: bounds.height,
+            size: Math.min(bounds.width, bounds.height)
+          };
+        }
+
+        function addRipple(x, y, start, end, color, life = 1050, scaleY = 1) {
+          ripples.push({ born: performance.now(), x, y, start, end, color, life, scaleY });
+          ripples = ripples.slice(-18);
+        }
+
+        function isFeverActive(time = performance.now()) {
+          return time < feverUntil;
+        }
+
+        function triggerFever(time = performance.now()) {
+          feverStarted = time;
+          feverUntil = time + PERFECT_FEVER_DURATION;
+          feverWasActive = true;
+          document.body.dataset.fever = "true";
+        }
+
+        function updateCombo(timing) {
+          if (timing.rank === "perfect") {
+            comboCount += 1;
+            perfectStreak += 1;
+          } else if (timing.rank === "cool") {
+            comboCount += 1;
+            perfectStreak = 0;
+          } else {
+            comboCount = 0;
+            perfectStreak = 0;
+          }
+          const shouldTriggerFever = perfectStreak > 0
+            && perfectStreak % PERFECT_FEVER_THRESHOLD === 0
+            && !isFeverActive();
+          if (shouldTriggerFever) triggerFever();
+          return shouldTriggerFever;
+        }
+
+        function feedbackSlot(geometry, type) {
+          const sideOffset = Math.min(canvasWidth * 0.34, geometry.width * 0.72);
+          const verticalOffset = Math.min(canvasHeight * 0.23, geometry.height * 0.48);
+          const slots = type === "release"
+            ? [
+                { x: geometry.x - sideOffset * 0.72, y: geometry.y - verticalOffset * 0.9 },
+                { x: geometry.x + sideOffset * 0.72, y: geometry.y - verticalOffset * 0.82 },
+                { x: geometry.x, y: geometry.y - verticalOffset * 1.28 },
+                { x: geometry.x - sideOffset * 0.86, y: geometry.y - verticalOffset * 0.28 },
+                { x: geometry.x + sideOffset * 0.86, y: geometry.y - verticalOffset * 0.22 }
+              ]
+            : [
+                { x: geometry.x - sideOffset, y: geometry.y - verticalOffset },
+                { x: geometry.x + sideOffset, y: geometry.y - verticalOffset * 0.78 },
+                { x: geometry.x - sideOffset * 0.92, y: geometry.y + verticalOffset * 0.62 },
+                { x: geometry.x + sideOffset * 0.88, y: geometry.y + verticalOffset * 0.7 },
+                { x: geometry.x, y: geometry.y - verticalOffset * 1.24 },
+                { x: geometry.x + sideOffset * 0.18, y: geometry.y + verticalOffset * 1.02 }
+              ];
+          const slot = slots[Math.floor(Math.random() * slots.length)];
+          const horizontalInset = Math.min(canvasWidth * 0.5, Math.max(112, canvasWidth * 0.13));
+          return {
+            x: Math.max(horizontalInset, Math.min(canvasWidth - horizontalInset, slot.x)),
+            y: Math.max(120, Math.min(canvasHeight - 108, slot.y))
+          };
+        }
+
+        function addBurst(timing, gain, detail, geometry, type) {
+          const slot = feedbackSlot(geometry, type);
+          bursts.push({
+            born: performance.now(),
+            grade: timing.label,
+            rank: timing.rank,
+            gain,
+            detail,
+            combo: comboCount > 1 ? `COMBO ×${comboCount}` : "",
+            x: slot.x,
+            y: slot.y,
+            type,
+            rotation: (Math.random() - 0.5) * 0.14,
+            seed: Math.random()
+          });
+          bursts = bursts.slice(-10);
+        }
+
+        function strikeMerit(fromAuto = false) {
+          if (fortuneOpen || fortunePending) return;
+          const actionTime = performance.now();
+          const timing = getTimingGrade(actionTime, fromAuto);
+          registerSessionAction(actionTime);
+          resetIdleHint();
+          triggerUiHit(timing);
+          const feverTriggered = updateCombo(timing);
+          lastTimingGrade = timing.label;
+          meritTotal += 1;
+          woodStrikeStarted = actionTime;
+          woodStrikeFromAuto = fromAuto;
+          const geometry = stageGeometry();
+          strikeEmojiParticles = makeStrikeEmojiParticles(fromAuto);
+          strikeEmojiAnchor = {
+            x: geometry.x + geometry.size * 0.17,
+            y: geometry.y + geometry.size * 0.13,
+            strikeStarted: woodStrikeStarted
+          };
+          const imprintAngle = Math.random() * Math.PI * 2;
+          const imprintRadiusX = geometry.size * (0.42 + Math.random() * 0.28);
+          const imprintRadiusY = geometry.size * (0.26 + Math.random() * 0.2);
+          meritImprints.push({
+            born: performance.now(),
+            x: geometry.x + Math.cos(imprintAngle) * imprintRadiusX,
+            y: geometry.y + Math.sin(imprintAngle) * imprintRadiusY,
+            rotation: (Math.random() - 0.5) * 0.24,
+            scale: 1.12 + Math.random() * 0.58
+          });
+          meritImprints = meritImprints.slice(-10);
+          addRipple(
+            geometry.x,
+            geometry.y + geometry.size * 0.1,
+            geometry.size * 0.19,
+            geometry.size * 0.55,
+            colors.rust
+          );
+          addBurst(timing, "功德 +1", "", geometry, "merit");
+          renderUi();
+          saveState();
+          playWoodSound(timing.rank === "perfect");
+          announce(
+            feverTriggered
+              ? "连续二十次 PERFECT，功德时刻开始，持续八秒"
+              : STRINGS.meritStatus(timing.label, formatter.format(meritTotal), comboCount)
+          );
+          if (!fromAuto && navigator.vibrate) {
+            navigator.vibrate(timing.rank === "perfect" ? [12, 18, 18] : 8);
+          }
+        }
+
+        function releaseFish(fromAuto = false) {
+          if (fortuneOpen || fortunePending) return;
+          const actionTime = performance.now();
+          const geometry = stageGeometry();
+          const item = species[Math.floor(Math.random() * species.length)];
+          const fish = createReleasedFish(item);
+          const timing = getTimingGrade(actionTime, fromAuto);
+          registerSessionAction(actionTime);
+          resetIdleHint();
+          triggerUiHit(timing);
+          const feverTriggered = updateCombo(timing);
+          lastTimingGrade = timing.label;
+          fishSchool.push(fish);
+          fishSchool = fishSchool.slice(-42);
+          releaseTotal += 1;
+          releaseDetail.textContent = `${timing.label} · 刚刚放生：${item.name}`;
+          const entry = projectSea(
+            geometry.x,
+            geometry.y,
+            geometry.width,
+            geometry.height,
+            fish.lane,
+            fish.depth
+          );
+          addRipple(
+            entry.x,
+            entry.y,
+            geometry.size * 0.025,
+            geometry.size * 0.19,
+            colors.washiLight,
+            900,
+            0.42
+          );
+          addBurst(timing, "放生 +1", item.name, geometry, "release");
+          renderUi();
+          saveState();
+          playWaterSound();
+          announce(
+            feverTriggered
+              ? "连续二十次 PERFECT，放生时刻开始，持续八秒"
+              : STRINGS.releaseStatus(timing.label, item.name, formatter.format(releaseTotal), comboCount)
+          );
+          if (!fromAuto && navigator.vibrate) {
+            navigator.vibrate(timing.rank === "perfect" ? [8, 14, 14] : 6);
+          }
+        }
+
+        function performCurrentAction(fromAuto = false) {
+          if (fortuneOpen || fortunePending) return;
+          if (fromAuto) {
+            rhythmBeatIndex = (rhythmBeatIndex + 1) % 4;
+            rhythmEpoch = performance.now();
+          }
+          if (mode === "merit") strikeMerit(fromAuto);
+          else releaseFish(fromAuto);
+        }
+
+        function stopAuto(shouldAnnounce = false) {
+          window.clearTimeout(autoTimer);
+          autoTimer = 0;
+          if (!autoActive) return;
+          autoActive = false;
+          if (sessionActionCount > 0) sessionMissAnchor = performance.now();
+          renderUi();
+          resetIdleHint();
+          if (shouldAnnounce) announce("自动操作已关闭");
+        }
+
+        function scheduleAuto() {
+          window.clearTimeout(autoTimer);
+          if (!autoActive) return;
+          autoTimer = window.setTimeout(() => {
+            performCurrentAction(true);
+            scheduleAuto();
+          }, MODES[mode].autoDelay);
+        }
+
+        function toggleAuto() {
+          if (fortuneOpen || fortunePending) return;
+          if (autoActive) {
+            stopAuto(true);
+            return;
+          }
+          autoActive = true;
+          renderUi();
+          window.clearTimeout(autoTimer);
+          resetIdleHint();
+          rhythmEpoch = performance.now();
+          performCurrentAction(true);
+          scheduleAuto();
+          announce(`${MODES[mode].autoLabel}已开启`);
+        }
+
+        function toggleSound() {
+          if (fortuneOpen || fortunePending) return;
+          resetIdleHint();
+          soundEnabled = !soundEnabled;
+          renderUi();
+          saveState();
+          setSystemMessage("");
+          announce(soundEnabled ? "声音已开启" : "声音已关闭");
+          if (soundEnabled) ensureAudio();
+        }
+
+        function setMode(nextMode, focusTab = false) {
+          if (fortuneOpen || fortunePending) return;
+          if (nextMode === mode) {
+            if (focusTab) (mode === "merit" ? meritTab : releaseTab).focus();
+            return;
+          }
+          const hadAuto = autoActive;
+          stopAuto(false);
+          resetSessionCycle();
+          mode = nextMode;
+          comboCount = 0;
+          perfectStreak = 0;
+          feverStarted = 0;
+          feverUntil = 0;
+          feverWasActive = false;
+          document.body.removeAttribute("data-fever");
+          lastTimingGrade = "READY";
+          rhythmBeatIndex = 0;
+          rhythmEpoch = performance.now();
+          resetIdleHint();
+          renderUi();
+          if (focusTab) (mode === "merit" ? meritTab : releaseTab).focus();
+          if (hadAuto) announce(STRINGS.autoStoppedOnSwitch);
+          else announce(mode === "merit" ? STRINGS.modeMerit : STRINGS.modeRelease);
+        }
+
+        function makeTexture() {
+          const random = seededRandomFactory(2905);
+          backgroundCanvas.width = Math.max(1, Math.round(canvasWidth));
+          backgroundCanvas.height = Math.max(1, Math.round(canvasHeight));
+          backgroundContext.clearRect(0, 0, canvasWidth, canvasHeight);
+          backgroundContext.fillStyle = colors.washi;
+          backgroundContext.fillRect(0, 0, canvasWidth, canvasHeight);
+
+          const minSide = Math.min(canvasWidth, canvasHeight);
+          const drawHalftoneField = (centerX, centerY, radius, spacing, color, alpha, hollow = false) => {
+            backgroundContext.save();
+            backgroundContext.beginPath();
+            backgroundContext.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            backgroundContext.clip();
+            backgroundContext.fillStyle = color;
+            backgroundContext.globalAlpha = alpha;
+            const startX = Math.floor((centerX - radius) / spacing) * spacing;
+            const startY = Math.floor((centerY - radius) / spacing) * spacing;
+            for (let dotY = startY; dotY <= centerY + radius; dotY += spacing) {
+              for (let dotX = startX; dotX <= centerX + radius; dotX += spacing) {
+                const distance = Math.hypot(dotX - centerX, dotY - centerY);
+                if (distance > radius) continue;
+                const normalized = Math.min(1, distance / radius);
+                const weight = hollow ? normalized : 1 - normalized;
+                const dotRadius = spacing * (0.055 + weight * 0.21);
+                backgroundContext.beginPath();
+                backgroundContext.arc(dotX, dotY, dotRadius, 0, Math.PI * 2);
+                backgroundContext.fill();
+              }
+            }
+            backgroundContext.restore();
+          };
+
+          drawHalftoneField(
+            -canvasWidth * 0.02,
+            canvasHeight * 0.27,
+            minSide * 0.3,
+            Math.max(10, minSide * 0.019),
+            colors.ink,
+            0.18
+          );
+          drawHalftoneField(
+            canvasWidth * 1.01,
+            canvasHeight * 0.18,
+            minSide * 0.24,
+            Math.max(11, minSide * 0.021),
+            colors.rust,
+            0.2
+          );
+          drawHalftoneField(
+            canvasWidth * 0.5,
+            canvasHeight * 0.55,
+            minSide * 0.52,
+            Math.max(14, minSide * 0.027),
+            colors.lakeDeep,
+            0.08,
+            true
+          );
+
+          backgroundContext.save();
+          backgroundContext.globalAlpha = 0.08;
+          backgroundContext.strokeStyle = colors.ink;
+          backgroundContext.lineWidth = Math.max(1, minSide * 0.002);
+          const hatchGap = Math.max(14, minSide * 0.024);
+          for (let line = -canvasHeight; line < canvasWidth; line += hatchGap) {
+            backgroundContext.beginPath();
+            backgroundContext.moveTo(line, canvasHeight);
+            backgroundContext.lineTo(line + canvasHeight * 0.36, canvasHeight * 0.64);
+            backgroundContext.stroke();
+          }
+          backgroundContext.restore();
+
+          const grainCount = Math.min(180, Math.max(80, Math.round(canvasWidth * canvasHeight / 9000)));
+          backgroundContext.fillStyle = colors.ink;
+          for (let grain = 0; grain < grainCount; grain += 1) {
+            backgroundContext.globalAlpha = 0.035 + random() * 0.07;
+            const grainSize = 0.4 + random() * 1.3;
+            backgroundContext.fillRect(
+              random() * canvasWidth,
+              random() * canvasHeight,
+              grainSize,
+              grainSize * (0.5 + random())
+            );
+          }
+          backgroundContext.globalAlpha = 1;
+        }
+
+        function resizeCanvas() {
+          if (!(window.innerWidth > 0 && window.innerHeight > 0)) return;
+          pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+          canvasWidth = window.innerWidth;
+          canvasHeight = window.innerHeight;
+          canvas.width = Math.max(1, Math.round(canvasWidth * pixelRatio));
+          canvas.height = Math.max(1, Math.round(canvasHeight * pixelRatio));
+          context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+          makeTexture();
+        }
+
+        function drawPaperTexture() {
+          context.drawImage(backgroundCanvas, 0, 0, canvasWidth, canvasHeight);
+        }
+
+        function drawEnso(x, y, size, time) {
+          const phase = reducedMotion ? 0.38 : getRhythmPhase(time);
+          const approach = phase * phase * (3 - 2 * phase);
+          const targetRadius = size * 0.43;
+          const farthestX = Math.max(x, canvasWidth - x);
+          const farthestY = Math.max(y, canvasHeight - y);
+          const outerRadius = Math.hypot(farthestX, farthestY) * 1.08;
+          const ringRadius = outerRadius + (targetRadius - outerRadius) * approach;
+          const period = MODES.merit.autoDelay;
+          const beatNumber = ((rhythmBeatIndex + Math.floor((time - rhythmEpoch) / period)) % 4 + 4) % 4;
+          const beatColors = [colors.rust, colors.lakeDeep, colors.washiDeep, colors.purple];
+          const beatColor = beatColors[beatNumber];
+          context.save();
+
+          context.translate(x - size * 0.03, y + size * 0.01);
+          context.rotate(-0.13);
+          context.fillStyle = colors.pink;
+          context.globalAlpha = 0.78;
+          context.beginPath();
+          context.moveTo(-size * 0.43, -size * 0.2);
+          context.lineTo(size * 0.33, -size * 0.42);
+          context.lineTo(size * 0.46, size * 0.15);
+          context.lineTo(-size * 0.28, size * 0.41);
+          context.closePath();
+          context.fill();
+          context.strokeStyle = colors.ink;
+          context.globalAlpha = 1;
+          context.lineWidth = Math.max(4, size * 0.014);
+          context.stroke();
+          context.restore();
+
+          context.save();
+          context.translate(x, y);
+          context.fillStyle = colors.washiLight;
+          context.globalAlpha = 0.9;
+          context.beginPath();
+          context.ellipse(0, 0, size * 0.405, size * 0.315, 0, 0, Math.PI * 2);
+          context.fill();
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(4, size * 0.017);
+          context.stroke();
+          context.restore();
+
+          context.save();
+          context.translate(x, y);
+          for (let track = 0; track < 3; track += 1) {
+            const separation = (track - 1) * Math.max(12, size * 0.045) * (1 - approach);
+            context.strokeStyle = track === 1 ? beatColor : colors.ink;
+            context.globalAlpha = track === 1 ? 0.82 : 0.28;
+            context.lineWidth = track === 1
+              ? Math.max(5, size * (0.012 + phase * 0.009))
+              : Math.max(2, size * 0.006);
+            context.setLineDash(track === 1 ? [] : [Math.max(18, size * 0.05), Math.max(12, size * 0.03)]);
+            context.beginPath();
+            context.arc(0, 0, Math.max(targetRadius * 0.9, ringRadius + separation), 0, Math.PI * 2);
+            context.stroke();
+          }
+          context.setLineDash([]);
+
+          const arrowDistance = Math.max(targetRadius * 1.08, ringRadius);
+          context.fillStyle = beatColor;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(2, size * 0.007);
+          context.globalAlpha = 0.88;
+          for (let arrow = 0; arrow < 4; arrow += 1) {
+            const angle = arrow * Math.PI * 0.5;
+            const arrowX = Math.cos(angle) * arrowDistance;
+            const arrowY = Math.sin(angle) * arrowDistance;
+            context.save();
+            context.translate(arrowX, arrowY);
+            context.rotate(angle + Math.PI * 0.5);
+            context.beginPath();
+            context.moveTo(0, Math.max(14, size * 0.04));
+            context.lineTo(-Math.max(10, size * 0.03), -Math.max(12, size * 0.035));
+            context.lineTo(Math.max(10, size * 0.03), -Math.max(12, size * 0.035));
+            context.closePath();
+            context.fill();
+            context.stroke();
+            context.restore();
+          }
+          context.restore();
+
+          context.save();
+          const numberPositions = [
+            { x: canvasWidth * 0.08, y: canvasHeight * 0.46 },
+            { x: canvasWidth * 0.34, y: Math.max(72, canvasHeight * 0.12) },
+            { x: canvasWidth * 0.92, y: canvasHeight * 0.55 },
+            { x: canvasWidth * 0.68, y: canvasHeight * 0.88 }
+          ];
+          const numberSize = Math.max(58, Math.min(112, Math.min(canvasWidth, canvasHeight) * 0.13));
+          context.font = `${cssValue("--fontWeightBold")} ${numberSize}px ${cssValue("--fontFamilyBase")}`;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          for (let beat = 0; beat < 4; beat += 1) {
+            const active = beat === beatNumber;
+            context.globalAlpha = active ? 0.92 : 0.11;
+            context.lineWidth = Math.max(4, numberSize * 0.08);
+            context.strokeStyle = colors.ink;
+            context.strokeText(String(beat + 1), numberPositions[beat].x, numberPositions[beat].y);
+            context.fillStyle = active ? beatColor : colors.ink;
+            context.fillText(String(beat + 1), numberPositions[beat].x, numberPositions[beat].y);
+          }
+          context.restore();
+        }
+
+        function bodyPath(x, y, size, offsetX = 0, offsetY = 0) {
+          const path = new Path2D();
+          path.moveTo(x - size * 0.35 + offsetX, y + offsetY);
+          path.bezierCurveTo(
+            x - size * 0.34 + offsetX,
+            y - size * 0.24 + offsetY,
+            x - size * 0.12 + offsetX,
+            y - size * 0.31 + offsetY,
+            x + size * 0.08 + offsetX,
+            y - size * 0.29 + offsetY
+          );
+          path.bezierCurveTo(
+            x + size * 0.29 + offsetX,
+            y - size * 0.27 + offsetY,
+            x + size * 0.36 + offsetX,
+            y - size * 0.11 + offsetY,
+            x + size * 0.35 + offsetX,
+            y + offsetY
+          );
+          path.bezierCurveTo(
+            x + size * 0.36 + offsetX,
+            y + size * 0.22 + offsetY,
+            x + size * 0.13 + offsetX,
+            y + size * 0.31 + offsetY,
+            x - size * 0.09 + offsetX,
+            y + size * 0.29 + offsetY
+          );
+          path.bezierCurveTo(
+            x - size * 0.3 + offsetX,
+            y + size * 0.27 + offsetY,
+            x - size * 0.36 + offsetX,
+            y + size * 0.11 + offsetY,
+            x - size * 0.35 + offsetX,
+            y + offsetY
+          );
+          path.closePath();
+          return path;
+        }
+
+        function drawCushion(x, y, size) {
+          context.save();
+          context.fillStyle = colors.ink;
+          context.beginPath();
+          context.ellipse(x + size * 0.018, y + size * 0.035, size * 0.32, size * 0.25, 0, 0, Math.PI * 2);
+          context.fill();
+
+          context.fillStyle = colors.washiLight;
+          context.beginPath();
+          context.ellipse(x, y, size * 0.305, size * 0.235, 0, 0, Math.PI * 2);
+          context.fill();
+          context.strokeStyle = colors.ink;
+          context.lineWidth = size * 0.015;
+          context.stroke();
+
+          context.strokeStyle = colors.rust;
+          context.lineWidth = size * 0.012;
+          context.setLineDash([size * 0.026, size * 0.018]);
+          context.beginPath();
+          context.ellipse(x, y, size * 0.27, size * 0.2, 0, 0, Math.PI * 2);
+          context.stroke();
+          context.restore();
+        }
+
+        function drawMeritImprints(time, size) {
+          const life = reducedMotion ? 650 : 1100;
+          meritImprints = meritImprints.filter((imprint) => time - imprint.born < life);
+          for (const imprint of meritImprints) {
+            const rawProgress = Math.min(1, (time - imprint.born) / life);
+            const enter = reducedMotion ? 1 : Math.min(1, rawProgress / 0.1);
+            const fade = Math.pow(1 - rawProgress, reducedMotion ? 1 : 1.35);
+            const fontSize = size * 0.235 * imprint.scale;
+            context.save();
+            context.translate(imprint.x, imprint.y);
+            context.rotate(imprint.rotation);
+            context.scale(0.82 + enter * 0.18, 0.82 + enter * 0.18);
+            context.font = `${cssValue("--fontWeightSemibold")} ${fontSize}px ${cssValue("--fontFamilyInk")}`;
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillStyle = colors.ink;
+            context.globalAlpha = fade * 0.12;
+            context.fillText("功德", -fontSize * 0.018, fontSize * 0.012);
+            context.fillText("功德", fontSize * 0.014, -fontSize * 0.008);
+            context.globalAlpha = fade * 0.58;
+            context.fillText("功德", 0, 0);
+            context.restore();
+          }
+        }
+
+        function drawWoodMallet(baseX, baseY, headX, headY, angle, normalX, normalY, size, positiveImpact) {
+          context.save();
+          context.lineCap = "round";
+          context.shadowColor = colors.shadow;
+          context.shadowBlur = size * 0.028;
+          const handleShade = context.createLinearGradient(
+            baseX - normalX * size * 0.022,
+            baseY - normalY * size * 0.022,
+            baseX + normalX * size * 0.022,
+            baseY + normalY * size * 0.022
+          );
+          handleShade.addColorStop(0, colors.woodDeep);
+          handleShade.addColorStop(0.34, colors.woodHighlight);
+          handleShade.addColorStop(0.64, colors.wood);
+          handleShade.addColorStop(1, colors.woodDeep);
+          context.strokeStyle = handleShade;
+          context.lineWidth = size * 0.052;
+          context.beginPath();
+          context.moveTo(baseX, baseY);
+          context.lineTo(headX, headY);
+          context.stroke();
+          context.shadowColor = "transparent";
+          context.strokeStyle = colors.woodHighlight;
+          context.globalAlpha = 0.58;
+          context.lineWidth = size * 0.008;
+          context.beginPath();
+          context.moveTo(baseX - normalX * size * 0.009, baseY - normalY * size * 0.009);
+          context.lineTo(headX - normalX * size * 0.009, headY - normalY * size * 0.009);
+          context.stroke();
+
+          context.translate(headX, headY);
+          context.rotate(angle + Math.PI / 2);
+          const headShade = context.createRadialGradient(
+            -size * 0.024,
+            -size * 0.018,
+            size * 0.004,
+            0,
+            0,
+            size * 0.098
+          );
+          headShade.addColorStop(0, colors.woodHighlight);
+          headShade.addColorStop(0.36, positiveImpact > 0.5 ? colors.rust : colors.woodLight);
+          headShade.addColorStop(0.72, colors.wood);
+          headShade.addColorStop(1, colors.woodDeep);
+          context.fillStyle = headShade;
+          context.globalAlpha = 1;
+          context.shadowColor = colors.shadow;
+          context.shadowBlur = size * 0.025;
+          context.beginPath();
+          context.ellipse(0, 0, size * 0.098, size * 0.066, 0, 0, Math.PI * 2);
+          context.fill();
+          context.shadowColor = "transparent";
+          context.strokeStyle = colors.woodDeep;
+          context.lineWidth = size * 0.008;
+          context.stroke();
+          context.strokeStyle = colors.woodHighlight;
+          context.globalAlpha = 0.62;
+          context.lineWidth = size * 0.004;
+          context.beginPath();
+          context.ellipse(
+            -size * 0.012,
+            -size * 0.009,
+            size * 0.067,
+            size * 0.041,
+            0,
+            Math.PI * 1.06,
+            Math.PI * 1.82
+          );
+          context.stroke();
+          context.restore();
+        }
+
+        function drawCyberMallet(baseX, baseY, headX, headY, angle, normalX, normalY, size, positiveImpact) {
+          context.save();
+          context.lineCap = "round";
+          context.shadowColor = colors.cyberGlow;
+          context.shadowBlur = size * (0.038 + positiveImpact * 0.022);
+          const handleShade = context.createLinearGradient(
+            baseX - normalX * size * 0.03,
+            baseY - normalY * size * 0.03,
+            baseX + normalX * size * 0.03,
+            baseY + normalY * size * 0.03
+          );
+          handleShade.addColorStop(0, colors.steelDark);
+          handleShade.addColorStop(0.18, colors.steelMid);
+          handleShade.addColorStop(0.36, colors.steelBright);
+          handleShade.addColorStop(0.52, colors.steelLight);
+          handleShade.addColorStop(0.72, colors.steelMid);
+          handleShade.addColorStop(1, colors.steelDark);
+          context.strokeStyle = handleShade;
+          context.lineWidth = size * 0.058;
+          context.beginPath();
+          context.moveTo(baseX, baseY);
+          context.lineTo(headX, headY);
+          context.stroke();
+
+          context.shadowColor = "transparent";
+          context.strokeStyle = colors.steelBright;
+          context.globalAlpha = 0.88;
+          context.lineWidth = size * 0.009;
+          context.beginPath();
+          context.moveTo(baseX - normalX * size * 0.012, baseY - normalY * size * 0.012);
+          context.lineTo(headX - normalX * size * 0.012, headY - normalY * size * 0.012);
+          context.stroke();
+          context.strokeStyle = colors.cyberCyan;
+          context.globalAlpha = 0.82;
+          context.lineWidth = size * 0.005;
+          context.beginPath();
+          context.moveTo(baseX + normalX * size * 0.018, baseY + normalY * size * 0.018);
+          context.lineTo(headX + normalX * size * 0.018, headY + normalY * size * 0.018);
+          context.stroke();
+
+          for (let band = 1; band <= 5; band += 1) {
+            const position = 0.11 + band * 0.14;
+            const bandX = baseX + (headX - baseX) * position;
+            const bandY = baseY + (headY - baseY) * position;
+            context.strokeStyle = band % 2 === 0 ? colors.pink : colors.cyberCyan;
+            context.globalAlpha = 0.82;
+            context.lineWidth = size * 0.008;
+            context.beginPath();
+            context.moveTo(
+              bandX - normalX * size * 0.036,
+              bandY - normalY * size * 0.036
+            );
+            context.lineTo(
+              bandX + normalX * size * 0.036,
+              bandY + normalY * size * 0.036
+            );
+            context.stroke();
+          }
+
+          context.translate(headX, headY);
+          context.rotate(angle + Math.PI / 2);
+          const headWidth = size * 0.25;
+          const headHeight = size * 0.14;
+          const headShade = context.createLinearGradient(0, -headHeight * 0.5, 0, headHeight * 0.5);
+          headShade.addColorStop(0, colors.steelDark);
+          headShade.addColorStop(0.16, colors.steelMid);
+          headShade.addColorStop(0.34, colors.steelBright);
+          headShade.addColorStop(0.52, colors.steelLight);
+          headShade.addColorStop(0.76, colors.steelMid);
+          headShade.addColorStop(1, colors.steelDark);
+          context.globalAlpha = 1;
+          context.shadowColor = colors.cyberGlow;
+          context.shadowBlur = size * (0.045 + positiveImpact * 0.04);
+          context.fillStyle = headShade;
+          context.strokeStyle = colors.steelDark;
+          context.lineWidth = size * 0.009;
+          context.beginPath();
+          context.moveTo(-headWidth * 0.5, -headHeight * 0.22);
+          context.lineTo(-headWidth * 0.36, -headHeight * 0.5);
+          context.lineTo(headWidth * 0.36, -headHeight * 0.5);
+          context.lineTo(headWidth * 0.5, -headHeight * 0.22);
+          context.lineTo(headWidth * 0.5, headHeight * 0.22);
+          context.lineTo(headWidth * 0.36, headHeight * 0.5);
+          context.lineTo(-headWidth * 0.36, headHeight * 0.5);
+          context.lineTo(-headWidth * 0.5, headHeight * 0.22);
+          context.closePath();
+          context.fill();
+          context.stroke();
+
+          context.shadowColor = "transparent";
+          context.fillStyle = colors.steelDark;
+          context.strokeStyle = colors.cyberCyan;
+          context.lineWidth = size * 0.005;
+          context.fillRect(-headWidth * 0.12, -headHeight * 0.48, headWidth * 0.24, headHeight * 0.96);
+          context.strokeRect(-headWidth * 0.12, -headHeight * 0.48, headWidth * 0.24, headHeight * 0.96);
+
+          context.strokeStyle = colors.steelBright;
+          context.globalAlpha = 0.84;
+          context.lineWidth = size * 0.006;
+          context.beginPath();
+          context.moveTo(-headWidth * 0.31, -headHeight * 0.26);
+          context.lineTo(headWidth * 0.3, -headHeight * 0.26);
+          context.stroke();
+
+          const rivets = [
+            [-0.32, -0.22],
+            [0.32, -0.22],
+            [-0.32, 0.22],
+            [0.32, 0.22]
+          ];
+          for (const [rivetX, rivetY] of rivets) {
+            context.fillStyle = colors.steelBright;
+            context.strokeStyle = colors.steelDark;
+            context.lineWidth = size * 0.004;
+            context.beginPath();
+            context.arc(
+              headWidth * rivetX,
+              headHeight * rivetY,
+              size * 0.009,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.stroke();
+          }
+
+          context.shadowColor = colors.cyberGlow;
+          context.shadowBlur = size * 0.035;
+          context.fillStyle = positiveImpact > 0.45 ? colors.pink : colors.cyberCyan;
+          context.strokeStyle = colors.steelBright;
+          context.lineWidth = size * 0.005;
+          context.beginPath();
+          context.arc(0, 0, size * 0.026, 0, Math.PI * 2);
+          context.fill();
+          context.stroke();
+          context.restore();
+        }
+
+        function drawWoodfish(x, y, size, time) {
+          const elapsed = (time - woodStrikeStarted) / 1000;
+          const duration = reducedMotion ? 0.001 : WOOD_STRIKE_DURATION;
+          const progress = Math.min(1, Math.max(0, elapsed / duration));
+          let impact = 0;
+          let malletSwing = 0;
+
+          if (elapsed >= 0 && elapsed <= duration) {
+            if (progress < WOOD_IMPACT_PHASE) {
+              const approach = progress / WOOD_IMPACT_PHASE;
+              malletSwing = approach ** 3;
+            } else {
+              const release = (progress - WOOD_IMPACT_PHASE) / (1 - WOOD_IMPACT_PHASE);
+              malletSwing = Math.pow(1 - release, 2.35);
+              impact = Math.exp(-release * 9) * Math.cos(release * Math.PI * 3.2);
+            }
+          }
+
+          const positiveImpact = Math.max(0, impact);
+          const beatPhase = getRhythmPhase(time);
+          const beatDistance = Math.min(beatPhase, 1 - beatPhase);
+          const beatKick = reducedMotion ? 0 : Math.max(0, 1 - beatDistance * 12);
+          const idle = reducedMotion ? 0 : Math.sin(time * 0.00052) * size * 0.002;
+          const tiltX = pointerX * size * 0.012;
+          const tiltY = pointerY * size * 0.009;
+          const bodyX = x + tiltX;
+          const bodyY = y + idle + tiltY - beatKick * size * 0.006 + positiveImpact * size * 0.008;
+          const strikePointX = bodyX + size * 0.17;
+          const strikePointY = bodyY + size * 0.13;
+
+          drawEnso(x, y, size, time);
+          drawMeritImprints(time, size);
+          drawCushion(x, bodyY, size);
+
+          context.save();
+          context.translate(bodyX, bodyY);
+          context.scale(
+            1 + positiveImpact * 0.034 + beatKick * 0.006,
+            1 - positiveImpact * 0.044 + beatKick * 0.006
+          );
+          context.translate(-bodyX, -bodyY);
+
+          for (let layer = 5; layer >= 1; layer -= 1) {
+            const depth = bodyPath(
+              bodyX,
+              bodyY,
+              size,
+              0,
+              size * layer * 0.003
+            );
+            context.fillStyle = layer < 3 ? colors.woodMid : colors.woodDeep;
+            context.globalAlpha = 0.72 + layer * 0.045;
+            context.fill(depth);
+          }
+          context.globalAlpha = 1;
+
+          const body = bodyPath(bodyX, bodyY, size);
+          context.save();
+          const woodShade = context.createRadialGradient(
+            bodyX - size * 0.08,
+            bodyY - size * 0.08,
+            size * 0.02,
+            bodyX,
+            bodyY,
+            size * 0.39
+          );
+          woodShade.addColorStop(0, colors.woodHighlight);
+          woodShade.addColorStop(0.35, colors.woodLight);
+          woodShade.addColorStop(0.74, colors.wood);
+          woodShade.addColorStop(1, colors.woodDeep);
+          context.fillStyle = woodShade;
+          context.shadowColor = colors.shadow;
+          context.shadowBlur = size * 0.055;
+          context.shadowOffsetX = size * 0.014;
+          context.shadowOffsetY = size * 0.024;
+          context.fill(body);
+          context.shadowColor = "transparent";
+
+          context.clip(body);
+          const volumeLight = context.createRadialGradient(
+            bodyX - size * 0.13,
+            bodyY - size * 0.18,
+            size * 0.025,
+            bodyX - size * 0.03,
+            bodyY - size * 0.04,
+            size * 0.43
+          );
+          volumeLight.addColorStop(0, colors.woodHighlight);
+          volumeLight.addColorStop(0.42, colors.woodLight);
+          volumeLight.addColorStop(1, colors.woodDeep);
+          context.globalAlpha = 0.24;
+          context.fillStyle = volumeLight;
+          context.fillRect(
+            bodyX - size * 0.36,
+            bodyY - size * 0.39,
+            size * 0.74,
+            size * 0.78
+          );
+
+          context.strokeStyle = colors.woodDeep;
+          context.lineCap = "round";
+          for (let line = 0; line < 11; line += 1) {
+            const offset = (line - 5) * size * 0.04;
+            context.globalAlpha = 0.1 + (line % 3) * 0.035;
+            context.lineWidth = size * (line % 3 === 0 ? 0.006 : 0.003);
+            context.beginPath();
+            context.moveTo(bodyX - size * 0.31, bodyY + offset);
+            context.bezierCurveTo(
+              bodyX - size * 0.12,
+              bodyY + offset - size * 0.05,
+              bodyX + size * 0.07,
+              bodyY + offset + size * 0.055,
+              bodyX + size * 0.32,
+              bodyY + offset - size * 0.01
+            );
+            context.stroke();
+          }
+          context.restore();
+
+          context.save();
+          context.strokeStyle = woodHovered ? colors.rust : colors.ink;
+          context.globalAlpha = 1;
+          context.lineWidth = size * 0.016;
+          context.stroke(body);
+          context.strokeStyle = colors.woodHighlight;
+          context.globalAlpha = 0.68;
+          context.lineWidth = size * 0.006;
+          context.beginPath();
+          context.moveTo(bodyX - size * 0.25, bodyY - size * 0.12);
+          context.bezierCurveTo(
+            bodyX - size * 0.18,
+            bodyY - size * 0.23,
+            bodyX - size * 0.03,
+            bodyY - size * 0.28,
+            bodyX + size * 0.15,
+            bodyY - size * 0.23
+          );
+          context.stroke();
+          context.restore();
+
+          context.save();
+          context.lineCap = "round";
+          context.shadowColor = colors.shadow;
+          context.shadowBlur = size * 0.018;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = size * 0.044;
+          context.beginPath();
+          context.moveTo(bodyX - size * 0.23, bodyY - size * 0.025);
+          context.bezierCurveTo(
+            bodyX - size * 0.08,
+            bodyY - size * 0.11,
+            bodyX + size * 0.14,
+            bodyY - size * 0.1,
+            bodyX + size * 0.24,
+            bodyY - size * 0.005
+          );
+          context.stroke();
+          context.shadowColor = "transparent";
+
+          context.strokeStyle = colors.woodDeep;
+          context.globalAlpha = 1;
+          context.lineWidth = size * 0.018;
+          context.beginPath();
+          context.moveTo(bodyX - size * 0.22, bodyY - size * 0.02);
+          context.bezierCurveTo(
+            bodyX - size * 0.07,
+            bodyY - size * 0.09,
+            bodyX + size * 0.135,
+            bodyY - size * 0.08,
+            bodyX + size * 0.232,
+            bodyY
+          );
+          context.stroke();
+
+          context.strokeStyle = colors.woodHighlight;
+          context.globalAlpha = 0.58;
+          context.lineWidth = size * 0.005;
+          context.beginPath();
+          context.moveTo(bodyX - size * 0.21, bodyY - size * 0.055);
+          context.bezierCurveTo(
+            bodyX - size * 0.06,
+            bodyY - size * 0.13,
+            bodyX + size * 0.15,
+            bodyY - size * 0.11,
+            bodyX + size * 0.25,
+            bodyY - size * 0.018
+          );
+          context.stroke();
+          context.restore();
+
+          context.save();
+          for (const side of [-1, 1]) {
+            const eyeX = bodyX + side * size * 0.225;
+            const eyeY = bodyY + size * 0.015;
+            context.fillStyle = colors.ink;
+            context.beginPath();
+            context.ellipse(
+              eyeX,
+              eyeY,
+              size * 0.038,
+              size * 0.052,
+              side * 0.2,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.fillStyle = colors.rust;
+            context.beginPath();
+            context.arc(eyeX, eyeY, size * 0.015, 0, Math.PI * 2);
+            context.fill();
+            context.fillStyle = colors.washiLight;
+            context.beginPath();
+            context.arc(
+              eyeX - side * size * 0.005,
+              eyeY - size * 0.006,
+              size * 0.004,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+          }
+          context.restore();
+
+          if (positiveImpact > 0.05) {
+            context.save();
+            context.translate(strikePointX, strikePointY);
+            context.globalAlpha = positiveImpact * 0.9;
+            context.strokeStyle = colors.rust;
+            context.lineWidth = Math.max(3, size * 0.012);
+            context.lineCap = "square";
+            for (let ray = 0; ray < 10; ray += 1) {
+              const rayAngle = (ray / 10) * Math.PI * 2;
+              const inner = size * 0.075;
+              const outer = size * (0.12 + (ray % 3) * 0.022);
+              context.beginPath();
+              context.moveTo(Math.cos(rayAngle) * inner, Math.sin(rayAngle) * inner);
+              context.lineTo(Math.cos(rayAngle) * outer, Math.sin(rayAngle) * outer);
+              context.stroke();
+            }
+            context.fillStyle = colors.washiDeep;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(2, size * 0.007);
+            context.beginPath();
+            for (let point = 0; point < 16; point += 1) {
+              const pointAngle = (point / 16) * Math.PI * 2;
+              const pointRadius = size * (point % 2 === 0 ? 0.075 : 0.038);
+              const pointX = Math.cos(pointAngle) * pointRadius;
+              const pointY = Math.sin(pointAngle) * pointRadius;
+              if (point === 0) context.moveTo(pointX, pointY);
+              else context.lineTo(pointX, pointY);
+            }
+            context.closePath();
+            context.fill();
+            context.stroke();
+            context.globalAlpha = positiveImpact * 0.5;
+            context.shadowColor = colors.rust;
+            context.shadowBlur = size * 0.055 * positiveImpact;
+            context.fillStyle = colors.washiLight;
+            context.beginPath();
+            context.ellipse(
+              0,
+              0,
+              size * 0.07,
+              size * 0.028,
+              -0.12,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.restore();
+          }
+          context.restore();
+
+          const useCyberMallet = woodStrikeFromAuto
+            && (autoActive || elapsed <= duration + 0.18);
+          const baseX = useCyberMallet ? -size * 0.12 : x + size * 0.46;
+          const baseY = useCyberMallet ? -size * 0.1 : canvasHeight + size * 0.08;
+          const contactAngle = Math.atan2(strikePointY - baseY, strikePointX - baseX);
+          const restAngle = contactAngle + (useCyberMallet ? -0.4 : 0.38);
+          const angle = restAngle + (contactAngle - restAngle) * malletSwing;
+          const handleLength = Math.hypot(strikePointX - baseX, strikePointY - baseY);
+          const headX = baseX + Math.cos(angle) * handleLength;
+          const headY = baseY + Math.sin(angle) * handleLength;
+          const normalX = -Math.sin(angle);
+          const normalY = Math.cos(angle);
+
+          if (useCyberMallet) {
+            drawCyberMallet(
+              baseX,
+              baseY,
+              headX,
+              headY,
+              angle,
+              normalX,
+              normalY,
+              size,
+              positiveImpact
+            );
+          } else {
+            drawWoodMallet(
+              baseX,
+              baseY,
+              headX,
+              headY,
+              angle,
+              normalX,
+              normalY,
+              size,
+              positiveImpact
+            );
+          }
+        }
+
+        function drawWoodStrikeEmojis(x, y, size, time) {
+          const impactTime = WOOD_STRIKE_DURATION * WOOD_IMPACT_PHASE;
+          const elapsed = (time - woodStrikeStarted) / 1000 - impactTime;
+          const effectDuration = reducedMotion ? 0.28 : 0.72;
+          if (elapsed < 0 || elapsed > effectDuration) return;
+
+          const anchorX = strikeEmojiAnchor.strikeStarted === woodStrikeStarted
+            ? strikeEmojiAnchor.x
+            : x + size * 0.17;
+          const anchorY = strikeEmojiAnchor.strikeStarted === woodStrikeStarted
+            ? strikeEmojiAnchor.y
+            : y + size * 0.13;
+
+          context.save();
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          for (let index = 0; index < strikeEmojiParticles.length; index += 1) {
+            const particle = strikeEmojiParticles[index];
+            const particleElapsed = elapsed - particle.delay;
+            if (particleElapsed < 0) continue;
+            const progress = Math.min(
+              1,
+              particleElapsed / Math.max(0.01, effectDuration - particle.delay)
+            );
+            const alpha = reducedMotion
+              ? 0.78
+              : progress < 0.58 ? 1 : (1 - progress) / 0.42;
+            const enter = reducedMotion ? 1 : Math.min(1, progress / 0.14);
+            const radialDistance = size * particle.radius * (0.72 + enter * 0.28);
+            const originX = anchorX + Math.cos(particle.angle) * radialDistance;
+            const originY = anchorY + Math.sin(particle.angle) * radialDistance * 0.72;
+            const drift = size * particle.driftX * progress;
+            const lift = size * particle.lift * (1 - Math.pow(1 - progress, 2));
+            const wobble = reducedMotion
+              ? 0
+              : Math.sin(progress * Math.PI * 2 + particle.angle) * size * 0.014;
+            const emojiSize = size
+              * (woodStrikeFromAuto ? 0.07 : 0.066)
+              * particle.scale;
+            context.save();
+            context.translate(originX + drift + wobble, originY - lift);
+            context.rotate(reducedMotion ? 0 : particle.rotation * (0.7 + progress * 0.3));
+            context.scale(enter, enter);
+            context.globalAlpha = Math.max(0, alpha);
+            context.font = `${emojiSize}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+            context.fillText(particle.icon, 0, 0);
+            context.restore();
+          }
+          context.restore();
+        }
+
+        function projectSea(x, y, width, height, lane, depth) {
+          const clampedDepth = Math.max(0, Math.min(1, depth));
+          const easedDepth = Math.pow(clampedDepth, 0.82);
+          const nearY = y + height * 0.46;
+          const horizonY = y - height * 0.43;
+          const laneWidth = width * (0.48 - easedDepth * 0.41);
+          return {
+            x: x + lane * laneWidth,
+            y: nearY + (horizonY - nearY) * easedDepth,
+            scale: 1.65 - easedDepth * 1.38
+          };
+        }
+
+        function createReleasedFish(item) {
+          return {
+            species: item,
+            lane: 0,
+            depth: 0.015,
+            targetLane: (Math.random() - 0.5) * 1.45,
+            speed: 0.065 + Math.random() * 0.035,
+            size: 0.9 + Math.random() * 0.34,
+            phase: Math.random() * Math.PI * 2,
+            turnTimer: 2.2 + Math.random() * 3.8,
+            wander: 0.08 + Math.random() * 0.12,
+            age: 0
+          };
+        }
+
+        function updateFish(delta) {
+          if (reducedMotion) return;
+          for (const fish of fishSchool) {
+            fish.age += delta;
+            fish.phase += delta * (2.8 + fish.speed * 6);
+            fish.turnTimer -= delta;
+            if (fish.turnTimer <= 0) {
+              fish.targetLane = Math.max(-0.82, Math.min(0.82, fish.targetLane + (Math.random() - 0.5) * 0.62));
+              fish.turnTimer = 2.2 + Math.random() * 4.8;
+            }
+            fish.lane += (fish.targetLane - fish.lane) * Math.min(1, delta * 0.72);
+            fish.lane += Math.sin(fish.phase * 0.58) * delta * fish.wander;
+            fish.lane = Math.max(-0.92, Math.min(0.92, fish.lane));
+            fish.depth = Math.min(0.965, fish.depth + fish.speed * delta);
+            if (fish.depth > 0.9) fish.speed *= Math.pow(0.985, delta * 60);
+          }
+          fishSchool = fishSchool.filter((fish) => fish.age < 34);
+        }
+
+        function drawFish(fish, projection, scale, angle, depthScale) {
+          const bodyLength = scale * 0.105 * fish.size * depthScale;
+          const bodyHeight = bodyLength * 0.42;
+          const wobble = reducedMotion ? 0 : Math.sin(fish.phase * 3.2) * 0.12;
+
+          context.save();
+          context.translate(projection.x, projection.y);
+          context.rotate(angle + wobble * 0.08);
+          context.scale(1, 0.76);
+          context.globalAlpha = 0.84;
+
+          context.fillStyle = colors.lakeDeep;
+          context.globalAlpha = 0.18;
+          context.beginPath();
+          context.ellipse(
+            -bodyLength * 0.02,
+            bodyHeight * 0.44,
+            bodyLength * 0.54,
+            bodyHeight * 0.26,
+            0,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+
+          context.globalAlpha = 0.86;
+          const fishShade = context.createLinearGradient(
+            -bodyLength * 0.48,
+            -bodyHeight * 0.38,
+            bodyLength * 0.48,
+            bodyHeight * 0.38
+          );
+          fishShade.addColorStop(0, fish.species.accent);
+          fishShade.addColorStop(0.42, fish.species.color);
+          fishShade.addColorStop(1, colors.inkSoft);
+          context.fillStyle = fishShade;
+          context.beginPath();
+          context.ellipse(0, 0, bodyLength * 0.5, bodyHeight * 0.5, 0, 0, Math.PI * 2);
+          context.fill();
+
+          context.beginPath();
+          context.moveTo(-bodyLength * 0.46, 0);
+          context.lineTo(-bodyLength * 0.78, -bodyHeight * (0.55 + wobble * 0.2));
+          context.lineTo(-bodyLength * 0.72, bodyHeight * (0.55 - wobble * 0.2));
+          context.closePath();
+          context.fill();
+
+          context.fillStyle = fish.species.accent;
+          context.globalAlpha = 0.7;
+          if (fish.species.pattern === "patch") {
+            context.beginPath();
+            context.ellipse(bodyLength * 0.08, -bodyHeight * 0.08, bodyLength * 0.16, bodyHeight * 0.24, 0.3, 0, Math.PI * 2);
+            context.fill();
+          } else if (fish.species.pattern === "stripe") {
+            context.fillRect(-bodyLength * 0.08, -bodyHeight * 0.46, bodyLength * 0.12, bodyHeight * 0.92);
+          } else if (fish.species.pattern === "scale") {
+            context.strokeStyle = fish.species.accent;
+            context.lineWidth = Math.max(0.7, bodyLength * 0.025);
+            for (let stripe = -1; stripe <= 1; stripe += 1) {
+              context.beginPath();
+              context.arc(stripe * bodyLength * 0.12, 0, bodyHeight * 0.22, -1.2, 1.2);
+              context.stroke();
+            }
+          } else if (fish.species.pattern === "fan") {
+            context.beginPath();
+            context.moveTo(-bodyLength * 0.54, 0);
+            context.lineTo(-bodyLength * 0.9, -bodyHeight * 0.72);
+            context.lineTo(-bodyLength * 0.82, bodyHeight * 0.72);
+            context.closePath();
+            context.fill();
+          }
+
+          context.globalAlpha = 0.92;
+          context.fillStyle = colors.ink;
+          context.beginPath();
+          context.arc(bodyLength * 0.29, -bodyHeight * 0.11, Math.max(1, bodyLength * 0.035), 0, Math.PI * 2);
+          context.fill();
+          context.restore();
+        }
+
+        function drawSea(x, y, width, height, time, delta) {
+          const scale = Math.min(width, height);
+          const phase = reducedMotion ? 0.72 : getRhythmPhase(time);
+          const left = x - width * 0.62;
+          const top = y - height * 0.58;
+          const seaWidth = width * 1.24;
+          const seaHeight = height * 1.16;
+
+          context.save();
+          context.fillStyle = colors.lake;
+          context.fillRect(left, top, seaWidth, seaHeight);
+
+          context.fillStyle = colors.lakeDeep;
+          context.globalAlpha = 0.72;
+          context.beginPath();
+          context.moveTo(left, y - height * 0.48);
+          context.lineTo(left + seaWidth, y - height * 0.53);
+          context.lineTo(left + seaWidth, y - height * 0.33);
+          context.lineTo(left, y - height * 0.29);
+          context.closePath();
+          context.fill();
+
+          context.globalAlpha = 0.22;
+          context.fillStyle = colors.ink;
+          const dotGap = Math.max(8, scale * 0.035);
+          for (let dotY = y - height * 0.48; dotY < y - height * 0.25; dotY += dotGap) {
+            for (let dotX = left; dotX < left + seaWidth; dotX += dotGap) {
+              context.beginPath();
+              context.arc(dotX, dotY, Math.max(1.2, scale * 0.006), 0, Math.PI * 2);
+              context.fill();
+            }
+          }
+
+          context.lineCap = "square";
+          context.lineJoin = "miter";
+          for (let band = 0; band < 11; band += 1) {
+            const depth = band / 10;
+            const center = projectSea(x, y, width, height, 0, depth);
+            const travel = reducedMotion ? 0 : Math.sin(time * 0.0017 + band * 0.9) * scale * 0.014;
+            const perspectiveWidth = width * (0.5 - depth * 0.4);
+            context.strokeStyle = band % 3 === 0 ? colors.ink : colors.washiLight;
+            context.globalAlpha = band % 3 === 0 ? 0.52 : 0.64;
+            context.lineWidth = Math.max(2, scale * (0.006 + (1 - depth) * 0.009));
+            context.beginPath();
+            context.moveTo(center.x - perspectiveWidth, center.y + travel);
+            context.lineTo(center.x - perspectiveWidth * 0.36, center.y - scale * 0.025 + travel);
+            context.lineTo(center.x + perspectiveWidth * 0.18, center.y + scale * 0.018 + travel);
+            context.lineTo(center.x + perspectiveWidth, center.y - scale * 0.01 + travel);
+            context.stroke();
+          }
+
+          for (let beat = 0; beat < 4; beat += 1) {
+            const travel = (phase + beat * 0.25) % 1;
+            const depth = 1 - travel;
+            const center = projectSea(x, y, width, height, 0, depth);
+            const halfWidth = width * (0.035 + travel * 0.18);
+            context.strokeStyle = beat === 0 ? colors.pink : colors.washiLight;
+            context.globalAlpha = beat === 0 ? 1 : 0.62;
+            context.lineWidth = Math.max(3, scale * (0.008 + travel * 0.01));
+            context.beginPath();
+            context.moveTo(center.x - halfWidth, center.y - scale * 0.018);
+            context.lineTo(center.x, center.y + scale * 0.025);
+            context.lineTo(center.x + halfWidth, center.y - scale * 0.018);
+            context.stroke();
+          }
+
+          const entry = projectSea(x, y, width, height, 0, 0);
+          const targetPulse = 0.7 + phase * 0.3;
+          context.globalAlpha = 0.92;
+          context.strokeStyle = colors.ink;
+          context.fillStyle = colors.pink;
+          context.lineWidth = Math.max(3, scale * 0.012);
+          context.beginPath();
+          context.moveTo(entry.x, entry.y - scale * 0.052 * targetPulse);
+          context.lineTo(entry.x + scale * 0.052 * targetPulse, entry.y);
+          context.lineTo(entry.x, entry.y + scale * 0.052 * targetPulse);
+          context.lineTo(entry.x - scale * 0.052 * targetPulse, entry.y);
+          context.closePath();
+          context.fill();
+          context.stroke();
+
+          context.globalAlpha = 1;
+          context.font = `${Math.max(26, scale * 0.075)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+          context.textAlign = "center";
+          context.textBaseline = "bottom";
+          context.fillText("🫳", entry.x, entry.y - scale * 0.062);
+
+          updateFish(delta);
+          const projectedFish = fishSchool.map((fish) => {
+            const projection = projectSea(x, y, width, height, fish.lane, fish.depth);
+            const steer = fish.targetLane - fish.lane;
+            return {
+              fish,
+              projection,
+              angle: -Math.PI / 2 + steer * 0.48,
+              depthScale: projection.scale
+            };
+          }).sort((first, second) => second.fish.depth - first.fish.depth);
+          for (const item of projectedFish) {
+            drawFish(item.fish, item.projection, scale, item.angle, item.depthScale);
+          }
+
+          context.restore();
+        }
+
+        function drawRipples(time) {
+          ripples = ripples.filter((ripple) => time - ripple.born < ripple.life);
+          for (const ripple of ripples) {
+            const rawProgress = Math.min(1, (time - ripple.born) / ripple.life);
+            const progress = reducedMotion ? 0.45 : rawProgress;
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const radius = ripple.start + (ripple.end - ripple.start) * eased;
+            context.save();
+            context.globalAlpha = reducedMotion ? 0.62 : (1 - progress) * 0.78;
+            context.strokeStyle = ripple.color;
+            context.lineWidth = reducedMotion ? 2 : Math.max(1, 2.4 * (1 - progress));
+            context.translate(ripple.x, ripple.y);
+            context.scale(1, ripple.scaleY || 1);
+            context.beginPath();
+            context.arc(0, 0, radius, 0, Math.PI * 2);
+            context.stroke();
+            context.restore();
+          }
+        }
+
+        function drawBursts(time, size) {
+          const feedbackLife = (burst) => burst.rank === "miss"
+            ? (reducedMotion ? 480 : 720)
+            : (reducedMotion ? 900 : 1350);
+          bursts = bursts.filter((burst) => time - burst.born < feedbackLife(burst));
+          for (const burst of bursts) {
+            const life = feedbackLife(burst);
+            const rawProgress = Math.min(1, (time - burst.born) / life);
+            if (burst.rank === "miss") {
+              const missSize = Math.max(18, Math.min(32, size * 0.062));
+              const rise = reducedMotion ? 0 : size * 0.025 * rawProgress;
+              const alpha = reducedMotion ? 0.56 : Math.pow(1 - rawProgress, 1.2) * 0.62;
+              context.save();
+              context.translate(burst.x, burst.y - rise);
+              context.rotate(burst.rotation * 0.25);
+              context.globalAlpha = alpha;
+              context.fillStyle = colors.inkSoft;
+              context.font = `${cssValue("--fontWeightSemibold")} ${missSize}px ${cssValue("--fontFamilyBase")}`;
+              context.textAlign = "center";
+              context.textBaseline = "middle";
+              context.fillText(`${burst.grade} · ${burst.gain}`, 0, 0);
+              context.restore();
+              continue;
+            }
+            const progress = reducedMotion ? 0.45 : rawProgress;
+            const pop = reducedMotion ? 1 : (progress < 0.18
+              ? 0.52 + (progress / 0.18) * 0.62
+              : 1.14 - ((progress - 0.18) / 0.82) * 0.14);
+            const rise = reducedMotion ? 0 : size * 0.1 * progress;
+            const alpha = reducedMotion ? 1 : (progress < 0.7 ? 1 : 1 - (progress - 0.7) / 0.3);
+            const baseGradeSize = Math.max(38, Math.min(90, size * 0.16));
+            const gradeScale = burst.rank === "perfect"
+              ? 1.18
+              : burst.rank === "cool"
+                ? 0.82
+                : 1;
+            const gradeSize = baseGradeSize * gradeScale;
+            const gainSize = Math.max(22, gradeSize * 0.46);
+            const comboSize = Math.max(19, gradeSize * 0.38);
+            const gradePalette = {
+              perfect: { primary: colors.washiDeep, accent: colors.pink },
+              cool: { primary: colors.lake, accent: colors.lime },
+              miss: { primary: colors.washiLight, accent: colors.purple },
+              good: { primary: colors.purple, accent: colors.rust }
+            };
+            const feedbackColors = gradePalette[burst.rank] || gradePalette.good;
+
+            context.save();
+            context.translate(burst.x, burst.y - rise);
+            context.rotate(burst.rotation);
+            context.scale(pop, pop);
+            context.globalAlpha = alpha;
+            context.strokeStyle = feedbackColors.accent;
+            context.lineWidth = Math.max(3, gradeSize * 0.075);
+            context.lineCap = "square";
+            for (let ray = 0; ray < 12; ray += 1) {
+              const angle = (ray / 12) * Math.PI * 2 + burst.seed;
+              const inner = gradeSize * (1.22 + (ray % 2) * 0.08);
+              const outer = gradeSize * (1.7 + ((ray + Math.floor(burst.seed * 10)) % 3) * 0.16);
+              context.beginPath();
+              context.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner * 0.55);
+              context.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer * 0.55);
+              context.stroke();
+            }
+
+            context.font = `${cssValue("--fontWeightBold")} ${gradeSize}px ${cssValue("--fontFamilyBase")}`;
+            const gradeWidth = Math.max(gradeSize * 2.9, context.measureText(burst.grade).width + gradeSize * 0.7);
+            context.fillStyle = feedbackColors.accent;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(3, gradeSize * 0.06);
+            context.beginPath();
+            context.moveTo(-gradeWidth * 0.53, -gradeSize * 0.48);
+            context.lineTo(gradeWidth * 0.49, -gradeSize * 0.65);
+            context.lineTo(gradeWidth * 0.54, gradeSize * 0.34);
+            context.lineTo(-gradeWidth * 0.47, gradeSize * 0.53);
+            context.closePath();
+            context.fill();
+            context.stroke();
+
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.lineJoin = "round";
+            context.lineWidth = Math.max(7, gradeSize * 0.17);
+            context.strokeStyle = colors.washiLight;
+            context.strokeText(burst.grade, 0, 0);
+            context.lineWidth = Math.max(4, gradeSize * 0.09);
+            context.strokeStyle = colors.ink;
+            context.strokeText(burst.grade, 0, 0);
+            context.fillStyle = feedbackColors.primary;
+            context.fillText(burst.grade, 0, 0);
+
+            context.save();
+            context.translate(gradeSize * 0.5, gradeSize * 0.72);
+            context.rotate(0.035);
+            context.font = `${cssValue("--fontWeightBold")} ${gainSize}px ${cssValue("--fontFamilyBase")}`;
+            const gainWidth = context.measureText(burst.gain).width + gainSize * 0.8;
+            context.fillStyle = colors.washiLight;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(3, gainSize * 0.11);
+            context.fillRect(-gainWidth * 0.5, -gainSize * 0.58, gainWidth, gainSize * 1.16);
+            context.strokeRect(-gainWidth * 0.5, -gainSize * 0.58, gainWidth, gainSize * 1.16);
+            context.fillStyle = colors.ink;
+            context.fillText(burst.gain, 0, 0);
+            context.restore();
+
+            if (burst.combo) {
+              context.save();
+              context.translate(-gradeSize * 0.66, -gradeSize * 0.82);
+              context.rotate(-0.045);
+              context.font = `${cssValue("--fontWeightBold")} ${comboSize}px ${cssValue("--fontFamilyBase")}`;
+              const comboWidth = context.measureText(burst.combo).width + comboSize * 0.72;
+              context.fillStyle = colors.lime;
+              context.strokeStyle = colors.ink;
+              context.lineWidth = Math.max(3, comboSize * 0.12);
+              context.beginPath();
+              context.moveTo(-comboWidth * 0.52, -comboSize * 0.58);
+              context.lineTo(comboWidth * 0.48, -comboSize * 0.48);
+              context.lineTo(comboWidth * 0.53, comboSize * 0.52);
+              context.lineTo(-comboWidth * 0.47, comboSize * 0.6);
+              context.closePath();
+              context.fill();
+              context.stroke();
+              context.fillStyle = colors.ink;
+              context.fillText(burst.combo, 0, 0);
+              context.restore();
+            }
+
+            context.font = `${cssValue("--fontWeightBold")} ${Math.max(13, comboSize * 0.68)}px ${cssValue("--fontFamilyBase")}`;
+            context.fillStyle = colors.ink;
+            context.globalAlpha = alpha * 0.78;
+            context.fillText(burst.detail, -gradeSize * 0.92, gradeSize * 0.92);
+            context.restore();
+          }
+        }
+
+        function drawFeverBackdrop(time) {
+          if (!isFeverActive(time)) return;
+          const elapsed = Math.max(0, time - feverStarted);
+          const minSide = Math.min(canvasWidth, canvasHeight);
+          const dotGap = Math.max(18, minSide * 0.036);
+          context.save();
+          context.globalAlpha = 0.94;
+          context.fillStyle = colors.ink;
+          context.fillRect(0, 0, canvasWidth, canvasHeight);
+          context.fillStyle = colors.purple;
+          context.globalAlpha = 0.16;
+          const drift = reducedMotion ? 0 : (elapsed * 0.018) % dotGap;
+          for (let dotY = -dotGap + drift; dotY < canvasHeight + dotGap; dotY += dotGap) {
+            for (let dotX = -dotGap; dotX < canvasWidth + dotGap; dotX += dotGap) {
+              const offsetX = (Math.floor(dotY / dotGap) % 2) * dotGap * 0.5;
+              context.beginPath();
+              context.arc(
+                dotX + offsetX,
+                dotY,
+                Math.max(1.8, minSide * 0.0045),
+                0,
+                Math.PI * 2
+              );
+              context.fill();
+            }
+          }
+          context.restore();
+        }
+
+        function drawFever(time, geometry) {
+          if (!isFeverActive(time)) {
+            if (feverWasActive) {
+              feverWasActive = false;
+              document.body.removeAttribute("data-fever");
+              announce(mode === "merit" ? "功德时刻结束" : "放生时刻结束");
+            }
+            return;
+          }
+
+          const elapsed = Math.max(0, time - feverStarted);
+          const remainingSeconds = Math.max(1, Math.ceil((feverUntil - time) / 1000));
+          const minSide = Math.min(canvasWidth, canvasHeight);
+          const pulse = reducedMotion ? 1 : 1 + Math.sin(elapsed * 0.018) * 0.045;
+          const spin = reducedMotion ? 0 : elapsed * 0.00018;
+          const effectColors = [colors.washiDeep, colors.pink, colors.lake, colors.purple];
+          const colorIndex = reducedMotion ? 0 : Math.floor(elapsed / 260) % effectColors.length;
+          const primary = effectColors[colorIndex];
+          const secondary = effectColors[(colorIndex + 1) % effectColors.length];
+          const edgeWidth = Math.max(8, minSide * 0.014);
+
+          context.save();
+          context.strokeStyle = primary;
+          context.globalAlpha = 0.92;
+          context.lineWidth = edgeWidth;
+          context.setLineDash([edgeWidth * 2.2, edgeWidth * 1.05]);
+          context.lineDashOffset = reducedMotion ? 0 : -elapsed * 0.055;
+          context.strokeRect(
+            edgeWidth * 0.55,
+            edgeWidth * 0.55,
+            canvasWidth - edgeWidth * 1.1,
+            canvasHeight - edgeWidth * 1.1
+          );
+          context.setLineDash([]);
+
+          const outerRadius = Math.hypot(
+            Math.max(geometry.x, canvasWidth - geometry.x),
+            Math.max(geometry.y, canvasHeight - geometry.y)
+          );
+          context.lineCap = "square";
+          for (let ray = 0; ray < 24; ray += 1) {
+            const angle = (ray / 24) * Math.PI * 2 + spin;
+            const inner = geometry.size * (0.52 + (ray % 3) * 0.025);
+            const outer = outerRadius * (0.88 + (ray % 4) * 0.035);
+            context.strokeStyle = ray % 2 === 0 ? primary : secondary;
+            context.globalAlpha = 0.12 + (ray % 3) * 0.025;
+            context.lineWidth = Math.max(2, minSide * (ray % 2 === 0 ? 0.006 : 0.003));
+            context.beginPath();
+            context.moveTo(
+              geometry.x + Math.cos(angle) * inner,
+              geometry.y + Math.sin(angle) * inner
+            );
+            context.lineTo(
+              geometry.x + Math.cos(angle) * outer,
+              geometry.y + Math.sin(angle) * outer
+            );
+            context.stroke();
+          }
+
+          const chipRadius = geometry.size * 0.58 * pulse;
+          for (let chip = 0; chip < PERFECT_FEVER_THRESHOLD; chip += 1) {
+            const angle = (chip / PERFECT_FEVER_THRESHOLD) * Math.PI * 2 - spin * 1.8;
+            const chipSize = Math.max(5, geometry.size * (chip % 2 === 0 ? 0.018 : 0.012));
+            context.save();
+            context.translate(
+              geometry.x + Math.cos(angle) * chipRadius,
+              geometry.y + Math.sin(angle) * chipRadius * 0.78
+            );
+            context.rotate(angle + Math.PI * 0.25);
+            context.globalAlpha = 0.78;
+            context.fillStyle = chip % 2 === 0 ? primary : secondary;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(1.5, chipSize * 0.22);
+            context.fillRect(-chipSize, -chipSize, chipSize * 2, chipSize * 2);
+            context.strokeRect(-chipSize, -chipSize, chipSize * 2, chipSize * 2);
+            context.restore();
+          }
+
+          context.save();
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          for (let prayer = 0; prayer < 11; prayer += 1) {
+            const prayerSize = Math.max(24, minSide * (0.045 + (prayer % 4) * 0.008));
+            const lane = ((prayer * 0.237 + 0.08) % 0.88) + 0.04;
+            const travelRange = canvasHeight + prayerSize * 3;
+            const travel = reducedMotion
+              ? (prayer * 0.091 % 1) * travelRange
+              : (elapsed * (0.028 + (prayer % 3) * 0.006) + prayer * 137) % travelRange;
+            const prayerY = canvasHeight + prayerSize - travel;
+            const prayerPulse = reducedMotion ? 1 : 0.88 + Math.sin(elapsed * 0.01 + prayer) * 0.12;
+            context.save();
+            context.translate(canvasWidth * lane, prayerY);
+            context.scale(prayerPulse, prayerPulse);
+            context.rotate((prayer % 2 === 0 ? -1 : 1) * 0.08);
+            context.globalAlpha = 0.48 + (prayer % 3) * 0.12;
+            context.font = `${prayerSize}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+            context.fillText("🙏", 0, 0);
+            context.restore();
+          }
+          context.restore();
+
+          const titleSize = Math.max(25, Math.min(52, geometry.size * 0.105));
+          const bannerWidth = Math.min(
+            canvasWidth - Math.max(24, edgeWidth * 2.2),
+            Math.max(250, titleSize * 7.2)
+          );
+          const bannerHeight = titleSize * 1.72;
+          const bannerY = Math.max(
+            92,
+            Math.min(canvasHeight - bannerHeight, geometry.y - geometry.size * 0.31)
+          );
+          context.translate(geometry.x, bannerY);
+          context.rotate(-0.025);
+          context.globalAlpha = 0.96;
+          context.fillStyle = colors.washiDeep;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(3, titleSize * 0.09);
+          context.beginPath();
+          context.moveTo(-bannerWidth * 0.52, -bannerHeight * 0.43);
+          context.lineTo(bannerWidth * 0.48, -bannerHeight * 0.54);
+          context.lineTo(bannerWidth * 0.52, bannerHeight * 0.35);
+          context.lineTo(-bannerWidth * 0.46, bannerHeight * 0.5);
+          context.closePath();
+          context.fill();
+          context.stroke();
+
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.lineJoin = "round";
+          context.font = `${cssValue("--fontWeightBold")} ${titleSize}px ${cssValue("--fontFamilyBase")}`;
+          context.lineWidth = Math.max(5, titleSize * 0.14);
+          context.strokeStyle = colors.ink;
+          context.strokeText(`PERFECT ×${PERFECT_FEVER_THRESHOLD}`, 0, -titleSize * 0.14);
+          context.fillStyle = primary;
+          context.fillText(`PERFECT ×${PERFECT_FEVER_THRESHOLD}`, 0, -titleSize * 0.14);
+
+          context.font = `${cssValue("--fontWeightBold")} ${Math.max(14, titleSize * 0.38)}px ${cssValue("--fontFamilyBase")}`;
+          context.fillStyle = colors.ink;
+          context.fillText(
+            `${mode === "merit" ? "功德时刻" : "放生时刻"} · ${remainingSeconds}s`,
+            0,
+            titleSize * 0.58
+          );
+          context.restore();
+        }
+
+        function updateSessionMissClock(time, geometry) {
+          if (
+            fortuneOpen
+            || fortunePending
+            || sessionActionCount < 1
+            || document.hidden
+          ) {
+            return;
+          }
+
+          if (autoActive || isFeverActive(time)) {
+            sessionMissAnchor = time;
+            return;
+          }
+
+          const beatDuration = MODES[mode].autoDelay;
+          if (!sessionMissAnchor) sessionMissAnchor = time;
+
+          while (time - sessionMissAnchor >= beatDuration && sessionMissCount < 2) {
+            sessionMissAnchor += beatDuration;
+            sessionMissCount += 1;
+            comboCount = 0;
+            perfectStreak = 0;
+            lastTimingGrade = "MISS";
+            addBurst(
+              { label: "MISS", rank: "miss" },
+              sessionMissCount === 1 ? "1 / 2" : "2 / 2 · 抽签",
+              "",
+              geometry,
+              mode
+            );
+            renderUi();
+
+            if (sessionMissCount === 1) {
+              announce("MISS，下一拍仍未操作将自动抽签");
+              continue;
+            }
+
+            fortunePending = true;
+            window.clearTimeout(idleHintTimer);
+            idleHint.hidden = true;
+            announce("连续 MISS 两拍，正在抽签");
+            fortuneTimer = window.setTimeout(
+              showFortuneSummary,
+              reducedMotion ? 120 : 320
+            );
+            break;
+          }
+        }
+
+        function draw(time) {
+          const delta = Math.min(0.05, Math.max(0, (time - lastFrame) / 1000));
+          lastFrame = time;
+          context.clearRect(0, 0, canvasWidth, canvasHeight);
+          drawPaperTexture(time);
+          drawFeverBackdrop(time);
+
+          const geometry = stageGeometry();
+          updateSessionMissClock(time, geometry);
+          if (mode === "merit") {
+            drawWoodfish(geometry.x, geometry.y, geometry.size, time);
+            drawWoodStrikeEmojis(geometry.x, geometry.y, geometry.size, time);
+          } else {
+            drawSea(
+              geometry.x,
+              geometry.y,
+              geometry.width,
+              geometry.height,
+              time,
+              delta
+            );
+          }
+          drawRipples(time);
+          drawFever(time, geometry);
+          drawBursts(time, geometry.size);
+        }
+
+        function frame(time) {
+          draw(time);
+          animationFrame = window.requestAnimationFrame(frame);
+        }
+
+        function startAnimation() {
+          if (animationFrame) return;
+          lastFrame = performance.now();
+          animationFrame = window.requestAnimationFrame(frame);
+        }
+
+        function stopAnimation() {
+          if (!animationFrame) return;
+          window.cancelAnimationFrame(animationFrame);
+          animationFrame = 0;
+        }
+
+        function handleTabKeydown(event) {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+          event.preventDefault();
+          if (event.key === "Home") {
+            setMode("merit", true);
+          } else if (event.key === "End") {
+            setMode("release", true);
+          } else {
+            setMode(mode === "merit" ? "release" : "merit", true);
+          }
+        }
+
+        meritTab.addEventListener("click", () => setMode("merit"));
+        releaseTab.addEventListener("click", () => setMode("release"));
+        meritTab.addEventListener("keydown", handleTabKeydown);
+        releaseTab.addEventListener("keydown", handleTabKeydown);
+        meritAction.addEventListener("click", () => strikeMerit(false));
+        releaseAction.addEventListener("click", () => releaseFish(false));
+        autoToggle.addEventListener("click", toggleAuto);
+        soundToggle.addEventListener("click", toggleSound);
+        fortuneContinue.addEventListener("click", () => closeFortuneSummary());
+
+        meritAction.addEventListener("pointerenter", () => {
+          woodHovered = true;
+        });
+        meritAction.addEventListener("pointerleave", () => {
+          woodHovered = false;
+          pointerX = 0;
+          pointerY = 0;
+        });
+        meritAction.addEventListener("pointermove", (event) => {
+          const bounds = meritAction.getBoundingClientRect();
+          pointerX = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+          pointerY = ((event.clientY - bounds.top) / bounds.height) * 2 - 1;
+        });
+        meritAction.addEventListener("focus", () => {
+          woodHovered = true;
+        });
+        meritAction.addEventListener("blur", () => {
+          woodHovered = false;
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (fortuneOpen) {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              closeFortuneSummary();
+            } else if (event.key === "Tab") {
+              event.preventDefault();
+              fortuneContinue.focus();
+            }
+            return;
+          }
+          resetIdleHint();
+          const target = event.target;
+          const isTyping = target instanceof HTMLInputElement
+            || target instanceof HTMLTextAreaElement
+            || target instanceof HTMLSelectElement
+            || target.isContentEditable;
+          const isInteractive = target instanceof Element
+            && Boolean(target.closest("button, a, input, textarea, select, [contenteditable='true']"));
+          const isUnmodifiedSpace = event.code === "Space"
+            && !event.altKey
+            && !event.ctrlKey
+            && !event.metaKey
+            && !event.shiftKey;
+          if (isUnmodifiedSpace && !isTyping && !isInteractive) {
+            event.preventDefault();
+            performCurrentAction(false);
+          }
+        });
+
+        window.addEventListener("resize", resizeCanvas, { passive: true });
+        document.addEventListener("pointerdown", resetIdleHint, { passive: true, capture: true });
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) {
+            window.clearTimeout(idleHintTimer);
+            idleHint.hidden = true;
+            stopAnimation();
+            stopAuto(false);
+            if (audioContext && audioContext.state === "running") {
+              audioContext.suspend().catch(() => {
+                setSystemMessage(STRINGS.audioBlocked);
+              });
+            }
+          } else {
+            if (sessionActionCount > 0) sessionMissAnchor = performance.now();
+            startAnimation();
+            resetIdleHint();
+          }
+        });
+
+        const handleReducedMotion = (event) => {
+          reducedMotion = event.matches;
+          ripples = [];
+          bursts = [];
+        };
+        if (reducedMotionQuery.addEventListener) {
+          reducedMotionQuery.addEventListener("change", handleReducedMotion);
+        } else {
+          reducedMotionQuery.addListener(handleReducedMotion);
+        }
+
+        window.setInterval(() => {
+          if (document.hidden) return;
+          if (demoTick % 2 === 0) demoRemoteMerit += 1;
+          if (demoTick % 3 === 0) demoRemoteRelease += 1;
+          demoTick += 1;
+          renderUi();
+        }, 5200);
+
+        loadState();
+        renderUi();
+        resizeCanvas();
+        startAnimation();
+        resetIdleHint();
+        resolveLocation();
+
+        window.__ritualPrototype = {
+          merit: () => strikeMerit(false),
+          meritPerfect: () => strikeMerit(true),
+          release: () => releaseFish(false),
+          releasePerfect: () => releaseFish(true),
+          previewMiss: () => {
+            addBurst(
+              { label: "MISS", rank: "miss" },
+              "1 / 2",
+              "",
+              stageGeometry(),
+              mode
+            );
+          },
+          showFortune: (level = "", keyword = "") => {
+            if (sessionActionCount < 1) sessionActionCount = 1;
+            showFortuneSummary(level, keyword);
+          },
+          closeFortune: closeFortuneSummary,
+          getFortuneMessages: () => FORTUNE_MESSAGES.map((message) => ({ ...message })),
+          triggerFever: () => {
+            perfectStreak = PERFECT_FEVER_THRESHOLD;
+            comboCount = Math.max(comboCount, PERFECT_FEVER_THRESHOLD);
+            triggerFever();
+          },
+          setMode,
+          toggleAuto,
+          draw: () => draw(performance.now()),
+          get state() {
+            return {
+              mode,
+              merit: meritTotal,
+              release: releaseTotal,
+              global: getDemoGlobal(),
+              sound: soundEnabled,
+              auto: autoActive,
+              fish: fishSchool.length,
+              fishDirections: fishSchool.slice(-8).map((fish) => ({
+                lane: Number(fish.lane.toFixed(3)),
+                depth: Number(fish.depth.toFixed(3)),
+                targetLane: Number(fish.targetLane.toFixed(3))
+              })),
+              rhythmPhase: Number(getRhythmPhase().toFixed(3)),
+              rhythmBeat: ((rhythmBeatIndex + Math.floor((performance.now() - rhythmEpoch) / MODES[mode].autoDelay)) % 4 + 4) % 4 + 1,
+              timingGrade: lastTimingGrade,
+              combo: comboCount,
+              perfectStreak,
+              feverActive: isFeverActive(),
+              feverRemainingMs: Math.max(0, Math.round(feverUntil - performance.now())),
+              sessionActions: sessionActionCount,
+              sessionMisses: sessionMissCount,
+              fortuneOpen,
+              fortunePending,
+              fortuneClosing,
+              fortuneTone,
+              fortuneMessage: {
+                keyword: fortuneKeyword.textContent,
+                english: fortuneEnglish.textContent,
+                description: fortuneExplanation.textContent
+              },
+              woodStrikeFromAuto,
+              woodStrikeElapsedMs: Number.isFinite(woodStrikeStarted)
+                ? Math.max(0, Math.round(performance.now() - woodStrikeStarted))
+                : null,
+              woodImpactAtMs: Math.round(WOOD_STRIKE_DURATION * WOOD_IMPACT_PHASE * 1000),
+              woodStrikeDurationMs: Math.round(WOOD_STRIKE_DURATION * 1000),
+              malletOrigin: woodStrikeFromAuto
+                && (
+                  autoActive
+                  || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
+                )
+                ? "top-left"
+                : "bottom",
+              malletMaterial: woodStrikeFromAuto
+                && (
+                  autoActive
+                  || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
+                )
+                ? "cyber-stainless"
+                : "wood",
+              strikeEmojis: strikeEmojiParticles.map((particle) => particle.icon),
+              strikeEmojiAnchor: {
+                x: Math.round(strikeEmojiAnchor.x),
+                y: Math.round(strikeEmojiAnchor.y)
+              },
+              strikeEmojiLayout: strikeEmojiParticles.map((particle) => ({
+                icon: particle.icon,
+                angle: Number(particle.angle.toFixed(3)),
+                radius: Number(particle.radius.toFixed(3)),
+                driftX: Number(particle.driftX.toFixed(3)),
+                lift: Number(particle.lift.toFixed(3))
+              })),
+              bursts: bursts.length,
+              feedback: bursts.slice(-10).map((burst) => ({
+                rank: burst.rank,
+                type: burst.type,
+                x: Math.round(burst.x),
+                y: Math.round(burst.y)
+              })),
+              idleHintVisible: !idleHint.hidden,
+              imprints: meritImprints.length,
+              ripples: ripples.length,
+              storage: storageAvailable,
+              reducedMotion
+            };
+          }
+        };
+      })();
+    </script>
+
+  </body>
+</html>
