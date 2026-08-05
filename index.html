@@ -110,6 +110,7 @@
         --durationSlower: 400ms;
         --durationFortuneMotion: 500ms;
         --durationFortuneBurn: 760ms;
+        --durationFortuneFloat: 4800ms;
         --curveEasyEase: cubic-bezier(0.33, 0, 0.67, 1);
         --curveAccelerateMax: cubic-bezier(1, 0, 1, 1);
         --curveDecelerateMax: cubic-bezier(0, 0, 0, 1);
@@ -188,6 +189,7 @@
         --rhythmPeriod: 960ms;
         --idleCueSize: 72px;
         --fortuneTitleLift: -40px;
+        --fortuneStickerWidth: 76px;
         --durationReducedMotion: 1ms;
       }
 
@@ -696,6 +698,12 @@
         border: var(--strokeThin) solid var(--colorAccentPurple);
         border-radius: var(--borderRadiusCircular);
         box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorInkFaintAlpha);
+        text-shadow:
+          var(--spacingHorizontalXXS) 0 0 var(--colorInk),
+          calc(0px - var(--spacingHorizontalXXS)) 0 0 var(--colorInk),
+          0 var(--spacingVerticalXXS) 0 var(--colorInk),
+          0 calc(0px - var(--spacingVerticalXXS)) 0 var(--colorInk),
+          var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorInk);
         transform: translate(-50%, -50%);
         transform-origin: center;
         font-family: var(--fontFamilyInk);
@@ -814,9 +822,8 @@
         width: min(78vw, 320px);
         min-height: min(62svh, 540px);
         display: grid;
-        grid-template-rows: auto 1fr auto;
-        justify-items: center;
-        align-items: center;
+        grid-template-rows: 1fr;
+        place-items: center;
         gap: var(--spacingVerticalM);
         padding: var(--spacingVerticalXXL) var(--spacingHorizontalXXL);
         color: var(--colorInk);
@@ -845,6 +852,39 @@
       .fortune-signature {
         position: relative;
         z-index: 2;
+      }
+
+      .fortune-float {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        width: min(100%, 380px);
+        transform-origin: 50% 16%;
+        transform-style: preserve-3d;
+        animation: fortune-paper-float var(--durationFortuneFloat) var(--curveEasyEase) infinite;
+      }
+
+      .fortune-heading {
+        display: grid;
+        justify-items: center;
+        gap: var(--spacingVerticalS);
+        transform: translateY(var(--fortuneTitleLift));
+      }
+
+      .fortune-lab-sticker {
+        position: absolute;
+        z-index: 5;
+        top: var(--spacingVerticalM);
+        left: var(--spacingHorizontalXXL);
+        width: var(--fortuneStickerWidth);
+        height: auto;
+        padding: var(--spacingHorizontalXXS);
+        background: var(--colorInk);
+        border: var(--strokeMedium) solid var(--colorWashiLight);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorWashiDeep);
+        clip-path: polygon(5% 1%, 96% 4%, 100% 92%, 90% 100%, 2% 96%, 0 8%);
+        transform: translateZ(16px) rotate(-6deg);
       }
 
       .fortune-signature {
@@ -911,8 +951,8 @@
       }
 
       .fortune-kicker {
-        justify-self: start;
-        align-self: start;
+        justify-self: center;
+        align-self: end;
         padding: 0;
         color: var(--colorInk);
         background: transparent;
@@ -921,6 +961,7 @@
         line-height: var(--lineHeightBase200);
         font-weight: var(--fontWeightBold);
         letter-spacing: var(--labelTracking);
+        text-align: center;
         transform: rotate(-1.5deg);
       }
 
@@ -940,7 +981,7 @@
         writing-mode: vertical-rl;
         text-orientation: upright;
         letter-spacing: var(--spacingVerticalS);
-        transform: translateY(var(--fortuneTitleLift)) rotate(1deg);
+        transform: rotate(1deg);
       }
 
       .fortune-keyword {
@@ -963,7 +1004,7 @@
         background: var(--colorWashiLight);
         border: var(--strokeMedium) solid var(--colorInk);
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPurple);
-        transform: translate(-53%, -50%) rotate(1deg);
+        transform: translate(-53%, -50%) translateZ(12px) rotate(1deg);
       }
 
       .fortune-message::before {
@@ -1000,17 +1041,44 @@
         position: absolute;
         z-index: 3;
         top: var(--spacingVerticalL);
-        right: 0;
-        max-width: 122px;
-        padding: var(--spacingVerticalXS) var(--spacingHorizontalS);
+        right: var(--spacingHorizontalM);
+        min-width: 132px;
+        max-width: 132px;
+        padding: var(--spacingVerticalS) var(--spacingHorizontalS);
         background: var(--colorAccentLime);
         border: var(--strokeMedium) solid var(--colorInk);
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk);
+        overflow: visible;
+        transform: translateZ(18px) rotate(5deg);
+      }
+
+      .fortune-count-visual {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        align-items: end;
+        justify-content: center;
+        gap: var(--spacingHorizontalXXS);
         font-size: var(--fontSizeBase100);
         line-height: var(--lineHeightBase200);
         font-weight: var(--fontWeightBold);
         text-align: center;
-        transform: rotate(5deg);
+        white-space: nowrap;
+      }
+
+      .fortune-count-value {
+        position: relative;
+        z-index: 2;
+        display: inline-block;
+        margin: calc(0px - var(--spacingVerticalS)) calc(0px - var(--spacingHorizontalXXS));
+        color: var(--colorRustDeep);
+        font-family: var(--fontFamilyInk);
+        font-size: var(--fontSizeHero900);
+        line-height: var(--lineHeightFortune);
+        font-weight: var(--fontWeightBold);
+        text-shadow:
+          var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorWashiLight),
+          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk);
+        transform: translateY(calc(0px - var(--spacingVerticalM))) rotate(-8deg) scale(1.24);
       }
 
       .fortune-continue {
@@ -1247,14 +1315,24 @@
       @keyframes idle-hint-breathe {
         0%,
         100% {
-          color: var(--colorInkSoft);
+          color: var(--colorWashiDeep);
           background-color: var(--idleCueBackgroundSoft);
           scale: 0.94;
         }
         72% {
-          color: var(--colorInk);
+          color: var(--colorWashiLight);
           background-color: var(--idleCueBackgroundStrong);
           scale: 1.05;
+        }
+      }
+
+      @keyframes fortune-paper-float {
+        0%,
+        100% {
+          transform: perspective(1200px) translateY(0) rotateX(0.35deg) rotateY(-0.55deg);
+        }
+        50% {
+          transform: perspective(1200px) translateY(calc(0px - var(--spacingVerticalXS))) rotateX(-0.45deg) rotateY(0.6deg);
         }
       }
 
@@ -1790,19 +1868,35 @@
           <span></span>
           <span></span>
         </div>
-        <div class="fortune-paper">
-          <article class="fortune-slip">
-            <p class="fortune-kicker" id="fortuneMode">今日赛博签</p>
-            <h2 class="fortune-title" id="fortuneTitle">大吉</h2>
-          </article>
-          <div class="fortune-message">
-            <p class="fortune-keyword" id="fortuneKeyword">共赢</p>
-            <p class="fortune-english" id="fortuneEnglish">Win-Win</p>
-            <p class="fortune-explanation" id="fortuneExplanation">
-              只要我不内卷，大家都有光明的未来。
+        <div class="fortune-float">
+          <div class="fortune-paper">
+            <article class="fortune-slip">
+              <div class="fortune-heading">
+                <p class="fortune-kicker" id="fortuneMode">今日赛博签</p>
+                <h2 class="fortune-title" id="fortuneTitle">大吉</h2>
+              </div>
+            </article>
+            <img
+              class="fortune-lab-sticker"
+              src="luanjiang-lab.png"
+              alt="乱讲实验室"
+            />
+            <div class="fortune-message">
+              <p class="fortune-keyword" id="fortuneKeyword">共赢</p>
+              <p class="fortune-english" id="fortuneEnglish">Win-Win</p>
+              <p class="fortune-explanation" id="fortuneExplanation">
+                只要我不内卷，大家都有光明的未来。
+              </p>
+            </div>
+            <p class="fortune-count" id="fortuneDescription">
+              <span class="visually-hidden" id="fortuneCountAccessible">积攒 0 功德</span>
+              <span class="fortune-count-visual" aria-hidden="true">
+                <span id="fortuneCountLead">积攒</span>
+                <strong class="fortune-count-value" id="fortuneCountValue">0</strong>
+                <span id="fortuneCountUnit">功德</span>
+              </span>
             </p>
           </div>
-          <p class="fortune-count" id="fortuneDescription">本次积攒 0 次</p>
         </div>
         <span class="fortune-fire" aria-hidden="true">
           <span>🔥</span><span>🔥</span><span>🔥</span><span>🔥</span>
@@ -1810,7 +1904,7 @@
           <span>🔥</span><span>🔥</span><span>🔥</span><span>🔥</span>
         </span>
         <button class="fortune-continue" id="fortuneContinue" type="button">
-          收好，继续积攒
+          安心收下
         </button>
         <p class="fortune-signature">
           <span lang="en">Love from Suzhou</span> 爱来自苏州 @乱讲实验室 @黑糖不是黑桃
@@ -1837,6 +1931,7 @@
         const PERFECT_FEVER_DURATION = 10000;
         const FEVER_RING_CHIP_COUNT = 20;
         const MISS_FORTUNE_THRESHOLD = 1;
+        const FORTUNE_AFTER_MISS_DELAY = 500;
         const WOOD_STRIKE_DURATION = 0.32;
         const WOOD_IMPACT_PHASE = 0.14;
         const FORTUNE_EXIT_DURATION = 500;
@@ -2017,7 +2112,10 @@
         const fortuneKeyword = document.getElementById("fortuneKeyword");
         const fortuneEnglish = document.getElementById("fortuneEnglish");
         const fortuneExplanation = document.getElementById("fortuneExplanation");
-        const fortuneDescription = document.getElementById("fortuneDescription");
+        const fortuneCountAccessible = document.getElementById("fortuneCountAccessible");
+        const fortuneCountLead = document.getElementById("fortuneCountLead");
+        const fortuneCountValue = document.getElementById("fortuneCountValue");
+        const fortuneCountUnit = document.getElementById("fortuneCountUnit");
         const fortuneContinue = document.getElementById("fortuneContinue");
         const fortuneAuraItems = [...document.querySelectorAll(".fortune-aura span")];
         const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -2237,15 +2335,18 @@
           fortuneKeyword.textContent = message.keyword;
           fortuneEnglish.textContent = message.english;
           fortuneExplanation.textContent = message.description;
-          fortuneDescription.textContent = isMerit
-            ? `本次积攒 ${sessionActionCount} 次`
-            : `本次放生 ${sessionActionCount} 尾`;
+          fortuneCountLead.textContent = isMerit ? "积攒" : "放生";
+          fortuneCountValue.textContent = sessionActionCount;
+          fortuneCountUnit.textContent = isMerit ? "功德" : "尾";
+          fortuneCountAccessible.textContent = isMerit
+            ? `积攒 ${sessionActionCount} 功德`
+            : `放生 ${sessionActionCount} 尾`;
           const auraIcons = fortuneTone === "auspicious" ? ["👍", "🌹"] : ["❓", "😱"];
           fortuneAuraItems.forEach((item, index) => {
             item.textContent = auraIcons[index % auraIcons.length];
           });
           fortuneContinue.textContent = fortuneTone === "auspicious"
-            ? "🫴 收好 继续积攒"
+            ? "安心收下"
             : "🔥 立刻化解";
           fortuneContinue.removeAttribute("aria-disabled");
 
@@ -2677,7 +2778,9 @@
         }
 
         function addBurst(timing, gain, detail, geometry, type) {
-          const slot = feedbackSlot(geometry, type);
+          const slot = timing.rank === "miss"
+            ? { x: canvasWidth / 2, y: canvasHeight * 0.42 }
+            : feedbackSlot(geometry, type);
           bursts.push({
             born: performance.now(),
             grade: timing.label,
@@ -3998,25 +4101,39 @@
 
         function drawBursts(time, size) {
           const feedbackLife = (burst) => burst.rank === "miss"
-            ? (reducedMotion ? 480 : 720)
+            ? (reducedMotion ? 520 : 760)
             : (reducedMotion ? 900 : 1350);
           bursts = bursts.filter((burst) => time - burst.born < feedbackLife(burst));
           for (const burst of bursts) {
             const life = feedbackLife(burst);
             const rawProgress = Math.min(1, (time - burst.born) / life);
             if (burst.rank === "miss") {
-              const missSize = Math.max(18, Math.min(32, size * 0.062));
-              const rise = reducedMotion ? 0 : size * 0.025 * rawProgress;
-              const alpha = reducedMotion ? 0.56 : Math.pow(1 - rawProgress, 1.2) * 0.62;
+              const missSize = Math.max(58, Math.min(104, size * 0.19));
+              const reveal = reducedMotion ? 1 : Math.min(1, rawProgress / 0.18);
+              const pop = reducedMotion ? 1 : 0.62 + (1 - Math.pow(1 - reveal, 3)) * 0.42;
+              const rise = reducedMotion ? 0 : size * 0.018 * rawProgress;
+              const alpha = reducedMotion
+                ? 1
+                : rawProgress < 0.68
+                  ? 1
+                  : Math.pow((1 - rawProgress) / 0.32, 1.4);
               context.save();
               context.translate(burst.x, burst.y - rise);
               context.rotate(burst.rotation * 0.25);
+              context.scale(pop, pop);
               context.globalAlpha = alpha;
-              context.fillStyle = colors.inkSoft;
-              context.font = `${cssValue("--fontWeightSemibold")} ${missSize}px ${cssValue("--fontFamilyBase")}`;
+              context.fillStyle = colors.pink;
+              context.strokeStyle = colors.ink;
+              context.lineWidth = Math.max(5, missSize * 0.1);
+              context.lineJoin = "round";
+              context.font = `${cssValue("--fontWeightBold")} ${missSize}px ${cssValue("--fontFamilyBase")}`;
               context.textAlign = "center";
               context.textBaseline = "middle";
-              context.fillText(`${burst.grade} · ${burst.gain}`, 0, 0);
+              context.strokeText(burst.grade, 0, 0);
+              context.fillText(burst.grade, 0, 0);
+              context.font = `${cssValue("--fontWeightBold")} ${Math.max(13, missSize * 0.2)}px ${cssValue("--fontFamilyBase")}`;
+              context.fillStyle = colors.ink;
+              context.fillText(burst.gain, 0, missSize * 0.7);
               context.restore();
               continue;
             }
@@ -4348,7 +4465,7 @@
             announce("MISS，正在抽签");
             fortuneTimer = window.setTimeout(
               showFortuneSummary,
-              reducedMotion ? 120 : 320
+              FORTUNE_AFTER_MISS_DELAY
             );
             break;
           }
