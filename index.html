@@ -2302,10 +2302,10 @@
             class="tool-button sound-button"
             id="soundToggle"
             type="button"
-            aria-label="声音与背景音乐"
+            aria-label="背景音乐"
             aria-pressed="true"
             aria-describedby="songProgressDescription"
-            title="声音与背景音乐 · 128 BPM"
+            title="背景音乐 · 128 BPM"
           >
             <span class="sound-glyph sound-glyph-on" aria-hidden="true">🔊</span>
             <span class="sound-glyph sound-glyph-off" aria-hidden="true">🔇</span>
@@ -2470,6 +2470,15 @@
         const BGM_QUARTER_MS = 60000 / BGM_BPM;
         const BGM_BEAT_OFFSET_SECONDS = 0.435;
         const BGM_VOLUME = 0.24;
+        const WOOD_SOUND_PEAK = Object.freeze({
+          normal: 0.54,
+          perfect: 0.62
+        });
+        const FORTUNE_SOUND_PROFILES = Object.freeze({
+          auspicious: Object.freeze([392, 523.25, 659.25]),
+          inauspicious: Object.freeze([220, 174.61, 146.83]),
+          special: Object.freeze([523.25, 659.25, 783.99, 1046.5])
+        });
         const AUTO_BEAT_LATE_WINDOW_MS = 80;
         const AUTO_TIMER_SAFETY_MS = 8;
         const START_TIMING = Object.freeze({ label: "START", rank: "start" });
@@ -2775,6 +2784,13 @@
         let reducedMotion = reducedMotionQuery.matches;
         let audioContext = null;
         let noiseBuffer = null;
+        const audioEventCounts = {
+          wood: 0,
+          water: 0,
+          fortuneAuspicious: 0,
+          fortuneInauspicious: 0,
+          fortuneSpecial: 0
+        };
         let bgmStarted = false;
         let bgmResumeOnVisible = false;
         let animationFrame = 0;
@@ -2954,6 +2970,7 @@
               : FORTUNE_MESSAGES[randomIndex(FORTUNE_MESSAGES.length)]);
           const isMerit = mode === "merit";
           fortuneTone = outcome.tone;
+          void playFortuneSound(fortuneTone);
           fortuneMode.textContent = "今日赛博签";
           fortuneTitle.textContent = level;
           fortuneKeyword.textContent = message.keyword;
@@ -3262,7 +3279,6 @@
         }
 
         async function ensureAudio() {
-          if (!soundEnabled) return null;
           const AudioEngine = window.AudioContext || window.webkitAudioContext;
           if (!AudioEngine) {
             setSystemMessage(STRINGS.audioUnavailable);
@@ -3324,11 +3340,15 @@
 
         async function playWoodSound(isPerfect = false) {
           const audio = await ensureAudio();
-          if (!audio || !soundEnabled) return;
+          if (!audio) return;
+          audioEventCounts.wood += 1;
           const now = audio.currentTime;
           const output = audio.createGain();
           output.gain.setValueAtTime(0.0001, now);
-          output.gain.exponentialRampToValueAtTime(isPerfect ? 0.46 : 0.38, now + 0.004);
+          output.gain.exponentialRampToValueAtTime(
+            isPerfect ? WOOD_SOUND_PEAK.perfect : WOOD_SOUND_PEAK.normal,
+            now + 0.004
+          );
           output.gain.exponentialRampToValueAtTime(0.0001, now + (isPerfect ? 0.34 : 0.27));
           output.connect(audio.destination);
 
@@ -3352,7 +3372,7 @@
           noiseFilter.type = "bandpass";
           noiseFilter.frequency.value = 1320;
           noiseFilter.Q.value = 1.7;
-          noiseGain.gain.setValueAtTime(isPerfect ? 0.22 : 0.16, now);
+          noiseGain.gain.setValueAtTime(isPerfect ? 0.3 : 0.24, now);
           noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075);
           noise.connect(noiseFilter);
           noiseFilter.connect(noiseGain);
@@ -3367,7 +3387,7 @@
             overtone.frequency.setValueAtTime(880, now + 0.008);
             overtone.frequency.exponentialRampToValueAtTime(640, now + 0.22);
             overtoneGain.gain.setValueAtTime(0.0001, now);
-            overtoneGain.gain.exponentialRampToValueAtTime(0.12, now + 0.018);
+            overtoneGain.gain.exponentialRampToValueAtTime(0.16, now + 0.018);
             overtoneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
             overtone.connect(overtoneGain);
             overtoneGain.connect(audio.destination);
@@ -3378,7 +3398,8 @@
 
         async function playWaterSound() {
           const audio = await ensureAudio();
-          if (!audio || !soundEnabled) return;
+          if (!audio) return;
+          audioEventCounts.water += 1;
           const now = audio.currentTime;
 
           const noise = audio.createBufferSource();
@@ -3408,6 +3429,58 @@
           bubbleGain.connect(audio.destination);
           bubble.start(now);
           bubble.stop(now + 0.22);
+        }
+
+        async function playFortuneSound(tone) {
+          const audio = await ensureAudio();
+          if (!audio) return;
+          if (tone === "inauspicious") {
+            audioEventCounts.fortuneInauspicious += 1;
+          } else if (tone === "special") {
+            audioEventCounts.fortuneSpecial += 1;
+          } else {
+            audioEventCounts.fortuneAuspicious += 1;
+          }
+          const profile = FORTUNE_SOUND_PROFILES[tone]
+            || FORTUNE_SOUND_PROFILES.auspicious;
+          const isInauspicious = tone === "inauspicious";
+          const now = audio.currentTime;
+          const output = audio.createGain();
+          output.gain.setValueAtTime(0.0001, now);
+          output.gain.exponentialRampToValueAtTime(
+            isInauspicious ? 0.24 : 0.2,
+            now + 0.018
+          );
+          output.gain.exponentialRampToValueAtTime(
+            0.0001,
+            now + (isInauspicious ? 0.74 : 0.88)
+          );
+          output.connect(audio.destination);
+
+          profile.forEach((frequency, index) => {
+            const start = now + index * (isInauspicious ? 0.065 : 0.055);
+            const oscillator = audio.createOscillator();
+            const voice = audio.createGain();
+            oscillator.type = isInauspicious ? "sine" : "triangle";
+            oscillator.frequency.setValueAtTime(frequency, start);
+            oscillator.frequency.exponentialRampToValueAtTime(
+              frequency * (isInauspicious ? 0.78 : 1.12),
+              start + (isInauspicious ? 0.48 : 0.42)
+            );
+            voice.gain.setValueAtTime(0.0001, start);
+            voice.gain.exponentialRampToValueAtTime(
+              isInauspicious ? 0.38 : 0.3,
+              start + 0.018
+            );
+            voice.gain.exponentialRampToValueAtTime(
+              0.0001,
+              start + (isInauspicious ? 0.58 : 0.66)
+            );
+            oscillator.connect(voice);
+            voice.connect(output);
+            oscillator.start(start);
+            oscillator.stop(start + (isInauspicious ? 0.62 : 0.7));
+          });
         }
 
         function activeAction() {
@@ -3871,8 +3944,8 @@
           setSystemMessage("");
           announce(
             soundEnabled
-              ? "声音与背景音乐已开启"
-              : "声音与背景音乐已关闭"
+              ? "背景音乐已开启，木槌与抽签音效始终保留"
+              : "背景音乐已静音，木槌与抽签音效仍会播放"
           );
           if (soundEnabled) {
             void ensureAudio();
@@ -5174,13 +5247,13 @@
           const cyberMalletSwing = woodStrikeFromAuto ? malletSwing : 0;
 
           if (showCyberMallet) {
-            const cyberBaseX = x - size * 0.46;
-            const cyberBaseY = canvasHeight + size * 0.08;
+            const cyberBaseX = x + size * 0.22;
+            const cyberBaseY = -size * 0.1;
             const cyberContactAngle = Math.atan2(
               strikePointY - cyberBaseY,
               cyberStrikePointX - cyberBaseX
             );
-            const cyberRestAngle = cyberContactAngle - 0.38;
+            const cyberRestAngle = cyberContactAngle + 0.22;
             const cyberAngle = cyberRestAngle
               + (cyberContactAngle - cyberRestAngle) * cyberMalletSwing;
             const cyberHandleLength = Math.hypot(
@@ -5992,14 +6065,7 @@
             Math.max(272, titleSize * 6.4)
           );
           const bannerHeight = titleSize * 2.05;
-          const topbarBottom = document.querySelector(".topbar").getBoundingClientRect().bottom;
-          const statsTop = document.querySelector(".stats").getBoundingClientRect().top;
-          const minimumY = topbarBottom + bannerHeight * 0.58 + 8;
-          const maximumY = statsTop - bannerHeight * 0.58 - 8;
-          const desiredY = geometry.y - geometry.size * 0.32;
-          const bannerY = maximumY > minimumY
-            ? Math.max(minimumY, Math.min(maximumY, desiredY))
-            : (topbarBottom + statsTop) * 0.5;
+          const bannerY = 8 + bannerHeight * 0.61;
 
           const drawBannerPath = () => {
             context.beginPath();
@@ -6498,6 +6564,16 @@
               release: releaseTotal,
               global: getDemoGlobal(),
               sound: soundEnabled,
+              bgmEnabled: soundEnabled,
+              ritualEffectsAlwaysAudible: true,
+              woodSoundPeakGain: { ...WOOD_SOUND_PEAK },
+              fortuneSoundProfiles: Object.fromEntries(
+                Object.entries(FORTUNE_SOUND_PROFILES).map(([key, value]) => [
+                  key,
+                  [...value]
+                ])
+              ),
+              audioEvents: { ...audioEventCounts },
               woodfishStyle: {
                 index: woodfishStyleIndex,
                 id: WOODFISH_STYLES[woodfishStyleIndex].id,
@@ -6596,10 +6672,10 @@
                   woodStrikeFromAuto
                   && performance.now() - woodStrikeStarted <= WOOD_STRIKE_DURATION * 1000
                 ),
-              cyberMalletOrigin: "bottom-left",
+              cyberMalletOrigin: "top-right",
               manualMalletOrigin: "bottom-right",
               malletOrigin: woodStrikeFromAuto
-                ? "bottom-left"
+                ? "top-right"
                 : "bottom-right",
               malletMaterial: woodStrikeFromAuto
                 && (
@@ -6615,7 +6691,11 @@
                 )
                 ? "left"
                 : "right",
-              malletTravelDirection: "bottom-to-top",
+              malletTravelDirection: woodStrikeFromAuto
+                ? "top-to-bottom-arc"
+                : "bottom-to-top",
+              feverBannerLayer: "topmost-foreground",
+              feverBannerPosition: "screen-top",
               strikeEmojis: strikeEmojiParticles.map((particle) => particle.icon),
               strikeEmojiAnchor: {
                 x: Math.round(strikeEmojiAnchor.x),
