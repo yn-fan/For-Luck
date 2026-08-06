@@ -589,15 +589,6 @@
         white-space: nowrap;
       }
 
-      .woodfish-picker-label > span {
-        color: var(--colorInkSoft);
-        font-family: var(--fontFamilyMonospace);
-        font-size: var(--fontSizeBase100);
-        line-height: var(--lineHeightBase100);
-        font-weight: var(--fontWeightBold);
-        letter-spacing: var(--microTracking);
-      }
-
       .woodfish-photo-upload {
         position: absolute;
         z-index: 4;
@@ -2274,7 +2265,6 @@
           </button>
           <p class="woodfish-picker-label">
             <strong id="woodfishStyleName">玄木共鸣</strong>
-            <span id="woodfishStylePosition">1 / 6 · 左右滑动</span>
           </p>
           <button
             class="woodfish-picker-button"
@@ -2555,8 +2545,8 @@
         const MAX_PHOTO_BYTES = 12 * 1024 * 1024;
         const PHOTO_OUTPUT_SIZE = 512;
         const CYBER_STRIKE_OFFSET_Y = 20;
-        const THEME_ROTATION_QUARTER_BEATS = 32;
-        const THEME_SCHEMA_VERSION = 2;
+        const THEME_ROTATION_QUARTER_BEATS = 16;
+        const THEME_SCHEMA_VERSION = 3;
         const WOOD_SOUND_PEAK = Object.freeze({
           normal: 0.54,
           perfect: 0.62
@@ -2570,6 +2560,7 @@
         const AUTO_TIMER_SAFETY_MS = 8;
         const START_TIMING = Object.freeze({ label: "START", rank: "start" });
         const CYBER_DUET_TIMING = Object.freeze({ label: "对敲", rank: "duet" });
+        const CYBER_BEAD_TIMING = Object.freeze({ label: "助盘", rank: "duet" });
         const MERIT_BEAT_PLATE_ROTATION = -0.13;
         const MERIT_BEAT_CORNERS = Object.freeze([
           { x: 0.33, y: -0.42 },
@@ -2579,16 +2570,30 @@
         ]);
         const WOODFISH_STYLES = Object.freeze([
           { id: "resonance", name: "玄木共鸣", mode: "merit" },
+          { id: "qingtuan-pounding", name: "青团捣捣", mode: "merit" },
+          { id: "prayer-beads", name: "盘珠子", mode: "merit" },
           {
             id: "ancient-door",
             name: "开门啊我知道你在家！",
             nameLines: ["开门啊", "我知道你在家！"],
             mode: "merit"
           },
-          { id: "qingtuan-pounding", name: "青团捣捣", mode: "merit" },
-          { id: "prayer-beads", name: "盘珠子", mode: "merit" },
           { id: "custom-photo", name: "敲张照片", mode: "merit" },
           { id: "release", name: "放生", mode: "release" }
+        ]);
+        const THEME_SCHEMA_V2_IDS = Object.freeze([
+          "resonance",
+          "ancient-door",
+          "qingtuan-pounding",
+          "prayer-beads",
+          "custom-photo",
+          "release"
+        ]);
+        const LEGACY_THEME_IDS = Object.freeze([
+          "resonance",
+          "ancient-door",
+          "qingtuan-pounding",
+          "custom-photo"
         ]);
         const MODES = {
           merit: {
@@ -2779,12 +2784,12 @@
         const meritPanel = document.getElementById("meritPanel");
         const releasePanel = document.getElementById("releasePanel");
         const meritAction = document.getElementById("meritAction");
+        const meritHcLabel = meritAction.querySelector(".hc-label");
         const releaseAction = document.getElementById("releaseAction");
         const woodfishPicker = document.getElementById("woodfishPicker");
         const woodfishPrevious = document.getElementById("woodfishPrevious");
         const woodfishNext = document.getElementById("woodfishNext");
         const woodfishStyleName = document.getElementById("woodfishStyleName");
-        const woodfishStylePosition = document.getElementById("woodfishStylePosition");
         const woodfishStyleHelp = document.getElementById("woodfishStyleHelp");
         const woodfishPhotoUpload = document.getElementById("woodfishPhotoUpload");
         const woodfishPhotoInput = document.getElementById("woodfishPhotoInput");
@@ -2897,6 +2902,7 @@
         let noiseBuffer = null;
         const audioEventCounts = {
           wood: 0,
+          bead: 0,
           water: 0,
           fortuneAuspicious: 0,
           fortuneInauspicious: 0,
@@ -3182,7 +3188,11 @@
             : activeAction();
           focusBeforeFortune = null;
           focusTarget.focus();
-          const nextAction = mode === "merit" ? "积攒" : "放生";
+          const nextAction = mode === "merit"
+            ? isPrayerBeadsStyle()
+              ? "转珠"
+              : "积攒"
+            : "放生";
           announce(
             completedTone === "inauspicious"
               ? `凶签已化解，音乐已停止，再次${nextAction}会从头开始`
@@ -3203,10 +3213,15 @@
             return;
           }
           const hint = mode === "merit"
-            ? {
-                visual: "轻敲",
-                announcement: "跟随收拢节拍敲击木鱼"
-              }
+            ? isPrayerBeadsStyle()
+              ? {
+                  visual: "轻转",
+                  announcement: "跟随收拢节拍，用右手依次拨动佛珠"
+                }
+              : {
+                  visual: "轻敲",
+                  announcement: "跟随收拢节拍敲击木鱼"
+                }
             : {
                 visual: "轻放",
                 announcement: "跟随浪线抵达入水点放生"
@@ -3278,6 +3293,37 @@
 
         function isReleaseStyle(index = woodfishStyleIndex) {
           return WOODFISH_STYLES[index]?.id === "release";
+        }
+
+        function isPrayerBeadsStyle(index = woodfishStyleIndex) {
+          return WOODFISH_STYLES[index]?.id === "prayer-beads";
+        }
+
+        function themeIndexById(themeId) {
+          const index = WOODFISH_STYLES.findIndex((style) => style.id === themeId);
+          return index < 0 ? 0 : index;
+        }
+
+        function getSavedThemeId(saved, savedStyleIndex) {
+          if (
+            typeof saved.woodfishStyleId === "string"
+            && WOODFISH_STYLES.some((style) => style.id === saved.woodfishStyleId)
+          ) {
+            return saved.woodfishStyleId;
+          }
+          if (saved.themeSchemaVersion === 2) {
+            return THEME_SCHEMA_V2_IDS[
+              positiveModulo(savedStyleIndex, THEME_SCHEMA_V2_IDS.length)
+            ];
+          }
+          if (saved.themeSchemaVersion === THEME_SCHEMA_VERSION) {
+            return WOODFISH_STYLES[
+              positiveModulo(savedStyleIndex, WOODFISH_STYLES.length)
+            ].id;
+          }
+          return LEGACY_THEME_IDS[
+            positiveModulo(savedStyleIndex, LEGACY_THEME_IDS.length)
+          ];
         }
 
         function setCustomPhotoDataUrl(dataUrl) {
@@ -3398,12 +3444,9 @@
               const savedStyleIndex = Number.isInteger(saved.woodfishStyle)
                 ? saved.woodfishStyle
                 : 0;
-              woodfishStyleIndex =
-                saved.themeSchemaVersion === THEME_SCHEMA_VERSION
-                  ? positiveModulo(savedStyleIndex, WOODFISH_STYLES.length)
-                  : savedStyleIndex === 3
-                    ? 4
-                    : positiveModulo(savedStyleIndex, 4);
+              woodfishStyleIndex = themeIndexById(
+                getSavedThemeId(saved, savedStyleIndex)
+              );
               mode = WOODFISH_STYLES[woodfishStyleIndex]?.mode || "merit";
               previousWoodfishStyleIndex = woodfishStyleIndex;
               pendingRitualEvents = Array.isArray(saved.pendingRitualEvents)
@@ -3440,6 +3483,7 @@
                 sound: soundEnabled,
                 themeSchemaVersion: THEME_SCHEMA_VERSION,
                 woodfishStyle: woodfishStyleIndex,
+                woodfishStyleId: WOODFISH_STYLES[woodfishStyleIndex].id,
                 customPhoto: customPhotoDataUrl,
                 pendingRitualEvents
               })
@@ -3690,7 +3734,7 @@
               themeBeatsUntilRotation - 1,
               THEME_ROTATION_QUARTER_BEATS
             ) + 1;
-          announce(`四个八拍，自动切换为${nextStyle.style.name}`);
+          announce(`两个八拍，自动切换为${nextStyle.style.name}`);
         }
 
         function renderUi() {
@@ -3716,6 +3760,7 @@
             customPhotoImage ? "更换敲击照片" : "上传一张圆形敲击照片"
           );
           const selectedWoodfishStyle = WOODFISH_STYLES[woodfishStyleIndex];
+          const prayerBeadsSelected = isPrayerBeadsStyle();
           if (selectedWoodfishStyle.nameLines) {
             woodfishStyleName.replaceChildren(
               ...selectedWoodfishStyle.nameLines.map((line) => {
@@ -3727,20 +3772,29 @@
           } else {
             woodfishStyleName.textContent = selectedWoodfishStyle.name;
           }
-          woodfishStylePosition.textContent =
-            `${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length} · 左右滑动`;
           woodfishPicker.setAttribute(
             "aria-label",
-            `开局主题，当前${WOODFISH_STYLES[woodfishStyleIndex].name}，${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length}`
+            `开局主题，当前${WOODFISH_STYLES[woodfishStyleIndex].name}`
           );
           woodfishStyleHelp.textContent =
             `当前主题：${WOODFISH_STYLES[woodfishStyleIndex].name}。游戏开始前可左右滑动屏幕，或使用主题左右按钮切换`;
 
-          autoLabel.textContent = config.autoLabel;
-          autoDescription.textContent = config.autoDescription;
-          autoToggle.title = config.autoDescription;
+          const autoLabelText = prayerBeadsSelected ? "赛博助盘" : config.autoLabel;
+          const autoDescriptionText = prayerBeadsSelected
+            ? "开启后你在正拍拨珠，赛博助力在反拍推动下一颗"
+            : config.autoDescription;
+          autoLabel.textContent = autoLabelText;
+          autoDescription.textContent = autoDescriptionText;
+          autoToggle.title = autoDescriptionText;
           autoToggle.setAttribute("aria-pressed", String(autoActive));
           soundToggle.setAttribute("aria-pressed", String(soundEnabled));
+          meritAction.setAttribute(
+            "aria-label",
+            prayerBeadsSelected
+              ? "用右手转动佛珠，积攒一份功德"
+              : "敲击木鱼，积攒一份功德"
+          );
+          meritHcLabel.textContent = prayerBeadsSelected ? "转动佛珠" : "敲击木鱼";
 
           globalLabel.textContent = config.globalLabel;
           const globalTotal = getGlobalTotal();
@@ -3885,6 +3939,47 @@
             overtone.start(now + 0.008);
             overtone.stop(now + 0.28);
           }
+        }
+
+        async function playBeadSound(isPerfect = false) {
+          const audio = await ensureAudio();
+          if (!audio) return;
+          audioEventCounts.bead += 1;
+          const now = audio.currentTime;
+          const output = audio.createGain();
+          output.gain.setValueAtTime(0.0001, now);
+          output.gain.exponentialRampToValueAtTime(isPerfect ? 0.34 : 0.26, now + 0.003);
+          output.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+          output.connect(audio.destination);
+
+          for (const [index, frequency] of (isPerfect ? [740, 990] : [620, 820]).entries()) {
+            const tone = audio.createOscillator();
+            const toneGain = audio.createGain();
+            tone.type = index === 0 ? "sine" : "triangle";
+            tone.frequency.setValueAtTime(frequency + Math.random() * 16, now);
+            tone.frequency.exponentialRampToValueAtTime(frequency * 0.72, now + 0.13);
+            toneGain.gain.setValueAtTime(index === 0 ? 0.52 : 0.28, now);
+            toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+            tone.connect(toneGain);
+            toneGain.connect(output);
+            tone.start(now + index * 0.014);
+            tone.stop(now + 0.18);
+          }
+
+          const click = audio.createBufferSource();
+          const clickFilter = audio.createBiquadFilter();
+          const clickGain = audio.createGain();
+          click.buffer = noiseBuffer;
+          clickFilter.type = "bandpass";
+          clickFilter.frequency.value = isPerfect ? 2100 : 1750;
+          clickFilter.Q.value = 3.6;
+          clickGain.gain.setValueAtTime(isPerfect ? 0.22 : 0.16, now);
+          clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+          click.connect(clickFilter);
+          clickFilter.connect(clickGain);
+          clickGain.connect(output);
+          click.start(now);
+          click.stop(now + 0.05);
         }
 
         async function playWaterSound() {
@@ -4216,6 +4311,27 @@
           );
         }
 
+        function addPrayerBeadTurnVisual(actionTime, fromCyber, geometry) {
+          woodStrikeStarted = actionTime;
+          woodStrikeFromAuto = fromCyber;
+          strikeEmojiParticles = [];
+          const turnX = geometry.x - geometry.size * 0.12;
+          const turnY = geometry.y - geometry.size * 0.02;
+          strikeEmojiAnchor = {
+            x: turnX,
+            y: turnY,
+            strikeStarted: actionTime,
+            fromCyber
+          };
+          addRipple(
+            turnX,
+            turnY,
+            geometry.size * 0.045,
+            geometry.size * 0.24,
+            fromCyber ? colors.cyberCyan : colors.rust
+          );
+        }
+
         function strikeMerit(fromAuto = false, countIn = false) {
           if (fortuneOpen || fortunePending) return;
           const actionTime = performance.now();
@@ -4226,23 +4342,37 @@
           const feverTriggered = countIn ? false : updateCombo(timing);
           lastTimingGrade = timing.label;
           lastActionWasCountIn = countIn;
-          if (WOODFISH_STYLES[woodfishStyleIndex].id === "prayer-beads") {
-            prayerBeadTurns += fromAuto ? 0.34 : 0.62;
-          }
+          const prayerBeadsSelected = isPrayerBeadsStyle();
+          if (prayerBeadsSelected) prayerBeadTurns += fromAuto ? 0.44 : 0.72;
           meritTotal += 1;
           sessionMeritCount += 1;
           enqueueRitualAction("merit");
           const geometry = stageGeometry();
-          addMeritHitVisual(actionTime, fromAuto, geometry);
-          addBurst(timing, "功德 +1", "", geometry, "merit");
+          if (prayerBeadsSelected) {
+            addPrayerBeadTurnVisual(actionTime, fromAuto, geometry);
+          } else {
+            addMeritHitVisual(actionTime, fromAuto, geometry);
+          }
+          addBurst(
+            timing,
+            "功德 +1",
+            prayerBeadsSelected ? "转珠" : "",
+            geometry,
+            "merit"
+          );
           renderUi();
           saveState();
-          playWoodSound(timing.rank === "perfect");
+          if (prayerBeadsSelected) playBeadSound(timing.rank === "perfect");
+          else playWoodSound(timing.rank === "perfect");
           announce(
             countIn
-              ? STRINGS.meritStart(formatter.format(meritTotal))
+              ? prayerBeadsSelected
+                ? `START，功德加一，跟随佛珠周围的拍点继续拨珠，我已积攒的功德 ${formatter.format(meritTotal)}`
+                : STRINGS.meritStart(formatter.format(meritTotal))
               : feverTriggered
-              ? "连续 3 次 PERFECT，功德时刻开始，赛博鼓槌已加入反拍对敲，持续 10 秒"
+              ? prayerBeadsSelected
+                ? "连续 3 次 PERFECT，功德时刻开始，赛博助盘已加入反拍拨珠，持续 10 秒"
+                : "连续 3 次 PERFECT，功德时刻开始，赛博鼓槌已加入反拍对敲，持续 10 秒"
               : STRINGS.meritStatus(timing.label, formatter.format(meritTotal), comboCount)
           );
           if (!fromAuto && navigator.vibrate) {
@@ -4262,17 +4392,29 @@
           meritTotal += 1;
           sessionMeritCount += 1;
           enqueueRitualAction("merit");
-          addMeritHitVisual(actionTime, true, geometry);
+          const prayerBeadsSelected = isPrayerBeadsStyle();
+          const timing = prayerBeadsSelected ? CYBER_BEAD_TIMING : CYBER_DUET_TIMING;
+          if (prayerBeadsSelected) {
+            prayerBeadTurns += 0.44;
+            addPrayerBeadTurnVisual(actionTime, true, geometry);
+          } else {
+            addMeritHitVisual(actionTime, true, geometry);
+          }
           addBurst(
-            CYBER_DUET_TIMING,
+            timing,
             "功德 +1",
-            isFeverActive(actionTime) ? "功德时刻助力" : "反拍",
+            isFeverActive(actionTime)
+              ? "功德时刻助力"
+              : prayerBeadsSelected
+                ? "反拍拨珠"
+                : "反拍",
             geometry,
             "merit"
           );
           renderUi();
           saveState();
-          playWoodSound(true);
+          if (prayerBeadsSelected) playBeadSound(true);
+          else playWoodSound(true);
         }
 
         function releaseFish(fromAuto = false, countIn = false) {
@@ -4376,7 +4518,13 @@
           resetIdleHint();
           if (mode === "merit" && isFeverActive()) scheduleAuto();
           if (shouldAnnounce) {
-            announce(mode === "merit" ? "赛博对敲已关闭" : "赛博代放已关闭");
+            announce(
+              mode === "merit"
+                ? isPrayerBeadsStyle()
+                  ? "赛博助盘已关闭"
+                  : "赛博对敲已关闭"
+                : "赛博代放已关闭"
+            );
           }
         }
 
@@ -4428,7 +4576,11 @@
           resetIdleHint();
           if (mode === "merit") {
             if (sessionManualActionCount > 0 || isBgmPlaying()) scheduleAuto();
-            announce("赛博对敲已就位：你敲正拍，赛博鼓槌敲反拍");
+            announce(
+              isPrayerBeadsStyle()
+                ? "赛博助盘已就位：你在正拍拨珠，赛博助力推动反拍"
+                : "赛博对敲已就位：你敲正拍，赛博鼓槌敲反拍"
+            );
             return;
           }
           rhythmEpoch = performance.now();
@@ -4835,7 +4987,11 @@
               context.font = `${cssValue("--fontWeightBold")} ${Math.max(14, cueSize * (isActiveAction ? 0.48 : 0.4))}px ${cssValue("--fontFamilyBase")}`;
               context.lineWidth = Math.max(3, cueSize * 0.09);
               context.strokeStyle = colors.ink;
-              const label = mode === "merit" ? "敲" : "放";
+              const label = mode === "merit"
+                ? isPrayerBeadsStyle()
+                  ? "转"
+                  : "敲"
+                : "放";
               if (mode !== "merit") context.strokeText(label, 0, 0);
               context.fillStyle = isActiveAction && !integratedWithPlate
                 ? colors.washiLight
@@ -4845,9 +5001,10 @@
               context.font = `${cssValue("--fontWeightBold")} ${Math.max(13, cueSize * (isActiveCyber ? 0.46 : 0.38))}px ${cssValue("--fontFamilyBase")}`;
               context.lineWidth = Math.max(3, cueSize * 0.085);
               context.strokeStyle = colors.ink;
-              context.strokeText("对", 0, 0);
+              const cyberLabel = isPrayerBeadsStyle() ? "助" : "对";
+              context.strokeText(cyberLabel, 0, 0);
               context.fillStyle = isActiveCyber ? colors.washiLight : colors.cyberCyan;
-              context.fillText("对", 0, 0);
+              context.fillText(cyberLabel, 0, 0);
             } else {
               context.fillStyle = colors.ink;
               context.strokeStyle = active ? colors.washiLight : colors.ink;
@@ -5342,7 +5499,7 @@
           context.font = `800 ${Math.max(9, size * 0.038)}px ui-sans-serif, system-ui, sans-serif`;
           context.textAlign = "center";
           context.textBaseline = "middle";
-          context.fillText("情深深雨蒙蒙", 0, 0, size * 0.39);
+          context.fillText("陆振华府", 0, 0, size * 0.39);
           context.fillStyle = colors.washiDeep;
           context.globalAlpha = 0.78;
           context.fillRect(-size * 0.205, -size * 0.052, size * 0.055, size * 0.022);
@@ -5675,102 +5832,336 @@
         }
 
         function drawPrayerBeadsWoodfish(x, y, size, time, beatKick, positiveImpact) {
-          const activeBeat = positiveModulo(getQuarterBeatIndex(time), 4);
+          const turnElapsed = (time - woodStrikeStarted) / 1000;
+          const turnProgress = Math.min(1, Math.max(0, turnElapsed / 0.42));
+          const turnPulse = turnElapsed >= 0 && turnElapsed <= 0.42
+            ? Math.sin(turnProgress * Math.PI)
+            : 0;
+          const handPulse = reducedMotion ? positiveImpact * 0.35 : turnPulse;
+          const beadCount = 11;
+          const loopCenterX = -size * 0.08;
+          const loopCenterY = -size * 0.015;
+          const radiusX = size * (0.285 + handPulse * 0.012);
+          const radiusY = size * (0.315 - handPulse * 0.01);
           const spin = prayerBeadTurns
-            + positiveImpact * 0.48
-            + (reducedMotion ? 0 : Math.sin(time * 0.0012) * 0.018);
-          const radiusX = size * (0.285 + positiveImpact * 0.018);
-          const radiusY = size * (0.205 - positiveImpact * 0.012);
-          context.save();
-          context.translate(x, y);
-          context.rotate(-0.08);
-
-          context.fillStyle = colors.shadow;
-          context.globalAlpha = 0.34;
-          context.beginPath();
-          context.ellipse(size * 0.015, size * 0.035, size * 0.34, size * 0.255, 0, 0, Math.PI * 2);
-          context.fill();
-          context.globalAlpha = 1;
-
-          context.strokeStyle = colors.sandDeep;
-          context.lineWidth = size * 0.018;
-          context.beginPath();
-          context.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
-          context.stroke();
-          context.strokeStyle = colors.ink;
-          context.lineWidth = size * 0.005;
-          context.stroke();
-
-          const beadCount = 18;
-          for (let bead = 0; bead < beadCount; bead += 1) {
-            const angle = (bead / beadCount) * Math.PI * 2 + spin;
-            const beadX = Math.cos(angle) * radiusX;
-            const beadY = Math.sin(angle) * radiusY;
+            + handPulse * (woodStrikeFromAuto ? 0.12 : 0.2)
+            + (reducedMotion ? 0 : Math.sin(time * 0.001) * 0.012);
+          const pinchPoint = { x: -size * 0.21, y: -size * 0.015 };
+          const beads = Array.from({ length: beadCount }, (_, index) => {
+            const angle = index / beadCount * Math.PI * 2 + spin;
             const depth = (Math.sin(angle) + 1) * 0.5;
-            const beadRadius = size * (0.034 + depth * 0.015 + beatKick * 0.002);
-            const isBeatBead = bead % 4 === activeBeat;
-            context.fillStyle = isBeatBead
-              ? colors.pink
-              : bead % 3 === 0
-                ? colors.woodLight
-                : colors.wood;
-            context.strokeStyle = colors.ink;
+            return {
+              index,
+              angle,
+              depth,
+              x: loopCenterX + Math.cos(angle) * radiusX,
+              y: loopCenterY + Math.sin(angle) * radiusY,
+              radius: size * (0.052 + depth * 0.02 + beatKick * 0.002)
+            };
+          });
+          const activeBead = beads.reduce((nearest, bead) => {
+            const distance = Math.hypot(bead.x - pinchPoint.x, bead.y - pinchPoint.y);
+            return !nearest || distance < nearest.distance
+              ? { index: bead.index, distance }
+              : nearest;
+          }, null)?.index;
+
+          const drawBead = (bead) => {
+            const isActive = bead.index === activeBead;
+            const beadShade = context.createRadialGradient(
+              bead.x - bead.radius * 0.34,
+              bead.y - bead.radius * 0.38,
+              bead.radius * 0.08,
+              bead.x,
+              bead.y,
+              bead.radius
+            );
+            beadShade.addColorStop(0, colors.woodHighlight);
+            beadShade.addColorStop(0.38, isActive ? colors.woodLight : colors.wood);
+            beadShade.addColorStop(0.78, colors.woodDeep);
+            beadShade.addColorStop(1, colors.ink);
+            context.shadowColor = colors.shadow;
+            context.shadowBlur = bead.radius * 0.42;
+            context.shadowOffsetX = bead.radius * 0.12;
+            context.shadowOffsetY = bead.radius * 0.2;
+            context.fillStyle = beadShade;
+            context.strokeStyle = isActive ? colors.pink : colors.ink;
+            context.lineWidth = size * (isActive ? 0.012 : 0.008);
+            context.beginPath();
+            context.arc(bead.x, bead.y, bead.radius, 0, Math.PI * 2);
+            context.fill();
+            context.shadowColor = "transparent";
+            context.stroke();
+
+            context.strokeStyle = colors.woodHighlight;
+            context.globalAlpha = 0.56;
             context.lineWidth = size * 0.006;
             context.beginPath();
-            context.arc(beadX, beadY, beadRadius, 0, Math.PI * 2);
-            context.fill();
-            context.stroke();
-            context.fillStyle = colors.woodHighlight;
-            context.globalAlpha = 0.68;
-            context.beginPath();
             context.arc(
-              beadX - beadRadius * 0.28,
-              beadY - beadRadius * 0.32,
-              beadRadius * 0.2,
+              bead.x - bead.radius * 0.14,
+              bead.y - bead.radius * 0.12,
+              bead.radius * 0.55,
+              Math.PI * 1.03,
+              Math.PI * 1.58
+            );
+            context.stroke();
+            context.globalAlpha = 1;
+            context.fillStyle = colors.ink;
+            context.beginPath();
+            context.ellipse(
+              bead.x,
+              bead.y,
+              bead.radius * 0.16,
+              bead.radius * 0.1,
+              bead.angle + Math.PI / 2,
               0,
               Math.PI * 2
             );
             context.fill();
-            context.globalAlpha = 1;
-            context.fillStyle = colors.ink;
+          };
+
+          context.save();
+          context.translate(x, y + size * 0.01);
+          context.rotate(-0.08);
+
+          context.fillStyle = colors.shadow;
+          context.globalAlpha = 0.28;
+          context.beginPath();
+          context.ellipse(
+            size * 0.025,
+            size * 0.13,
+            size * 0.42,
+            size * 0.34,
+            -0.08,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+          context.globalAlpha = 1;
+
+          context.strokeStyle = colors.sandDeep;
+          context.lineWidth = size * 0.02;
+          context.lineJoin = "round";
+          context.beginPath();
+          beads.forEach((bead, index) => {
+            if (index === 0) context.moveTo(bead.x, bead.y);
+            else context.lineTo(bead.x, bead.y);
+          });
+          context.closePath();
+          context.stroke();
+          context.strokeStyle = colors.ink;
+          context.globalAlpha = 0.5;
+          context.lineWidth = size * 0.005;
+          context.stroke();
+          context.globalAlpha = 1;
+
+          beads
+            .filter((bead) => bead.depth < 0.5)
+            .sort((first, second) => first.depth - second.depth)
+            .forEach(drawBead);
+
+          context.save();
+          context.translate(
+            handPulse * size * (woodStrikeFromAuto ? 0.008 : -0.022),
+            handPulse * size * 0.018
+          );
+          context.rotate(handPulse * (woodStrikeFromAuto ? 0.012 : -0.035));
+
+          context.strokeStyle = colors.ink;
+          context.lineCap = "round";
+          context.lineJoin = "round";
+          for (const finger of [
+            {
+              start: [size * 0.19, size * 0.03],
+              control: [size * 0.06, size * 0.03],
+              end: [-size * 0.09, size * 0.15]
+            },
+            {
+              start: [size * 0.22, size * 0.09],
+              control: [size * 0.08, size * 0.1],
+              end: [-size * 0.045, size * 0.23]
+            }
+          ]) {
+            context.lineWidth = size * 0.095;
             context.beginPath();
-            context.arc(beadX, beadY, beadRadius * 0.15, 0, Math.PI * 2);
-            context.fill();
+            context.moveTo(...finger.start);
+            context.quadraticCurveTo(...finger.control, ...finger.end);
+            context.stroke();
+            context.strokeStyle = colors.sand;
+            context.lineWidth = size * 0.07;
+            context.stroke();
+            context.strokeStyle = colors.ink;
           }
 
-          context.fillStyle = colors.washiDeep;
+          const skinShade = context.createLinearGradient(
+            size * 0.46,
+            size * 0.55,
+            -size * 0.18,
+            -size * 0.2
+          );
+          skinShade.addColorStop(0, colors.sandDeep);
+          skinShade.addColorStop(0.42, colors.sand);
+          skinShade.addColorStop(1, colors.washiDeep);
+
+          context.fillStyle = skinShade;
           context.strokeStyle = colors.ink;
           context.lineWidth = size * 0.012;
           context.beginPath();
-          context.arc(0, size * 0.015, size * 0.105, 0, Math.PI * 2);
-          context.fill();
-          context.stroke();
-          context.fillStyle = colors.rustDeep;
-          context.beginPath();
-          context.arc(0, size * 0.015, size * 0.076, 0, Math.PI * 2);
-          context.fill();
-          context.fillStyle = colors.washiLight;
-          context.font = `800 ${Math.round(size * 0.075)}px ${cssValue("--fontFamilyInk")}`;
-          context.textAlign = "center";
-          context.textBaseline = "middle";
-          context.fillText("佛", 0, size * 0.02);
-
-          context.strokeStyle = colors.rustDeep;
-          context.lineWidth = size * 0.014;
-          context.beginPath();
-          context.moveTo(0, size * 0.11);
-          context.lineTo(0, size * 0.25);
-          context.stroke();
-          context.fillStyle = colors.rust;
-          context.beginPath();
-          context.moveTo(-size * 0.06, size * 0.24);
-          context.lineTo(size * 0.06, size * 0.24);
-          context.lineTo(size * 0.035, size * 0.37);
-          context.lineTo(0, size * 0.325);
-          context.lineTo(-size * 0.035, size * 0.37);
+          context.moveTo(size * 0.58, size * 0.68);
+          context.lineTo(size * 0.25, size * 0.68);
+          context.bezierCurveTo(
+            size * 0.18,
+            size * 0.52,
+            size * 0.08,
+            size * 0.35,
+            size * 0.035,
+            size * 0.23
+          );
+          context.bezierCurveTo(
+            -size * 0.015,
+            size * 0.1,
+            size * 0.035,
+            -size * 0.08,
+            size * 0.16,
+            -size * 0.15
+          );
+          context.bezierCurveTo(
+            size * 0.29,
+            -size * 0.21,
+            size * 0.38,
+            -size * 0.08,
+            size * 0.38,
+            size * 0.1
+          );
+          context.bezierCurveTo(
+            size * 0.4,
+            size * 0.3,
+            size * 0.5,
+            size * 0.48,
+            size * 0.58,
+            size * 0.68
+          );
           context.closePath();
           context.fill();
           context.stroke();
+
+          context.fillStyle = skinShade;
+          context.beginPath();
+          context.moveTo(size * 0.17, -size * 0.11);
+          context.bezierCurveTo(
+            size * 0.04,
+            -size * 0.23,
+            -size * 0.13,
+            -size * 0.31,
+            -size * 0.22,
+            -size * 0.26
+          );
+          context.bezierCurveTo(
+            -size * 0.28,
+            -size * 0.22,
+            -size * 0.27,
+            -size * 0.15,
+            -size * 0.2,
+            -size * 0.12
+          );
+          context.bezierCurveTo(
+            -size * 0.09,
+            -size * 0.08,
+            size * 0.04,
+            -size * 0.015,
+            size * 0.14,
+            size * 0.045
+          );
+          context.closePath();
+          context.fill();
+          context.stroke();
+
+          context.beginPath();
+          context.moveTo(size * 0.075, size * 0.015);
+          context.bezierCurveTo(
+            -size * 0.03,
+            -size * 0.035,
+            -size * 0.16,
+            -size * 0.07,
+            -size * 0.225,
+            -size * 0.035
+          );
+          context.bezierCurveTo(
+            -size * 0.285,
+            0,
+            -size * 0.26,
+            size * 0.085,
+            -size * 0.175,
+            size * 0.105
+          );
+          context.bezierCurveTo(
+            -size * 0.075,
+            size * 0.13,
+            size * 0.025,
+            size * 0.16,
+            size * 0.125,
+            size * 0.205
+          );
+          context.closePath();
+          context.fill();
+          context.stroke();
+
+          context.fillStyle = colors.washiLight;
+          context.globalAlpha = 0.68;
+          context.beginPath();
+          context.ellipse(
+            -size * 0.205,
+            -size * 0.215,
+            size * 0.036,
+            size * 0.02,
+            0.18,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+          context.beginPath();
+          context.ellipse(
+            -size * 0.22,
+            size * 0.012,
+            size * 0.032,
+            size * 0.018,
+            -0.12,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+          context.globalAlpha = 1;
+          context.strokeStyle = colors.sandDeep;
+          context.lineWidth = size * 0.006;
+          context.beginPath();
+          context.moveTo(size * 0.12, size * 0.2);
+          context.quadraticCurveTo(size * 0.23, size * 0.17, size * 0.3, size * 0.23);
+          context.stroke();
+          context.restore();
+
+          beads
+            .filter((bead) => bead.depth >= 0.5)
+            .sort((first, second) => first.depth - second.depth)
+            .forEach(drawBead);
+
+          if (handPulse > 0.04) {
+            context.strokeStyle = woodStrikeFromAuto ? colors.cyberCyan : colors.pink;
+            context.globalAlpha = 0.28 + handPulse * 0.58;
+            context.lineWidth = size * 0.01;
+            context.lineCap = "round";
+            for (let arc = 0; arc < 3; arc += 1) {
+              context.beginPath();
+              context.arc(
+                loopCenterX,
+                loopCenterY,
+                size * (0.36 + arc * 0.035),
+                -Math.PI * (0.82 - arc * 0.03),
+                -Math.PI * (0.4 - arc * 0.02)
+              );
+              context.stroke();
+            }
+            context.globalAlpha = 1;
+          }
           context.restore();
         }
 
@@ -5852,6 +6243,8 @@
           forcedStyleIndex = woodfishStyleIndex,
           styleOnly = false
         ) {
+          const forcedStyleId = WOODFISH_STYLES[forcedStyleIndex]?.id || "resonance";
+          const prayerBeadsStyle = forcedStyleId === "prayer-beads";
           const elapsed = (time - woodStrikeStarted) / 1000;
           const duration = reducedMotion ? 0.001 : WOOD_STRIKE_DURATION;
           const progress = Math.min(1, Math.max(0, elapsed / duration));
@@ -5878,8 +6271,10 @@
           const tiltY = pointerY * size * 0.009;
           const bodyX = x + tiltX;
           const bodyY = y + idle + tiltY - beatKick * size * 0.006 + positiveImpact * size * 0.008;
-          const showCyberMallet = isMeritDuetActive(time)
-            || (woodStrikeFromAuto && elapsed <= duration + 0.18);
+          const showCyberMallet = !prayerBeadsStyle && (
+            isMeritDuetActive(time)
+            || (woodStrikeFromAuto && elapsed <= duration + 0.18)
+          );
           const strikePointX = bodyX + size * (woodStrikeFromAuto ? -0.17 : 0.17);
           const woodStrikePointY = bodyY + size * 0.13;
           const cyberStrikePointY = woodStrikePointY - CYBER_STRIKE_OFFSET_Y;
@@ -5888,7 +6283,7 @@
           if (!styleOnly) {
             drawEnso(x, y, size, time);
             drawMeritImprints(time, size);
-            drawCushion(x, bodyY, size);
+            if (!prayerBeadsStyle) drawCushion(x, bodyY, size);
           }
 
           const transitionProgress = Math.min(
@@ -5943,7 +6338,7 @@
           context.rotate(
             reducedMotion
               ? 0
-              : (1 - styleProgress) * (forcedStyleIndex === 1 ? -0.055 : 0.055)
+              : (1 - styleProgress) * (forcedStyleId === "ancient-door" ? -0.055 : 0.055)
           );
           context.scale(
             styleScale * (1 + positiveImpact * 0.034 + beatKick * 0.006),
@@ -5951,7 +6346,7 @@
           );
           context.translate(-bodyX, -bodyY);
 
-          if (forcedStyleIndex === 0) {
+          if (forcedStyleId === "resonance") {
             for (let layer = 5; layer >= 1; layer -= 1) {
             const depth = bodyPath(
               bodyX,
@@ -6100,17 +6495,17 @@
           context.stroke();
           context.restore();
 
-          } else if (forcedStyleIndex === 1) {
+          } else if (forcedStyleId === "ancient-door") {
             drawAncientDoorWoodfish(bodyX, bodyY, size, time, beatKick);
-          } else if (forcedStyleIndex === 2) {
+          } else if (forcedStyleId === "qingtuan-pounding") {
             drawQingtuanPoundingWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
-          } else if (forcedStyleIndex === 3) {
+          } else if (forcedStyleId === "prayer-beads") {
             drawPrayerBeadsWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
-          } else if (forcedStyleIndex === 4) {
+          } else if (forcedStyleId === "custom-photo") {
             drawPhotoWoodfish(bodyX, bodyY, size, time, beatKick);
           }
 
-          if (positiveImpact > 0.05) {
+          if (!prayerBeadsStyle && positiveImpact > 0.05) {
             context.save();
             context.translate(strikePointX, strikePointY);
             context.globalAlpha = positiveImpact * 0.9;
@@ -6161,7 +6556,7 @@
           context.restore();
           }
 
-          if (styleOnly) return;
+          if (styleOnly || prayerBeadsStyle) return;
 
           const woodStrikePointX = bodyX + size * 0.17;
           const cyberStrikePointX = bodyX - size * 0.17;
@@ -7079,7 +7474,11 @@
           context.font = `${cssValue("--fontWeightBold")} ${Math.max(13, titleSize * 0.36)}px ${cssValue("--fontFamilyBase")}`;
           context.fillStyle = mode === "merit" ? colors.cyberCyan : colors.washiDeep;
           context.fillText(
-            mode === "merit" ? "赛博对敲 · 反拍助力 +1" : "连击加速中",
+            mode === "merit"
+              ? isPrayerBeadsStyle()
+                ? "赛博助盘 · 反拍拨珠 +1"
+                : "赛博对敲 · 反拍助力 +1"
+              : "连击加速中",
             0,
             titleSize * 0.78
           );
@@ -7140,6 +7539,68 @@
           }
         }
 
+        function drawThemeScene(styleIndex, geometry, time, delta) {
+          if (isReleaseStyle(styleIndex)) {
+            drawSea(
+              geometry.x,
+              geometry.y,
+              geometry.width,
+              geometry.height,
+              time,
+              delta
+            );
+            return;
+          }
+          drawWoodfish(
+            geometry.x,
+            geometry.y,
+            geometry.size,
+            time,
+            styleIndex
+          );
+        }
+
+        function drawReleaseThemeTransition(geometry, time, delta) {
+          if (
+            reducedMotion
+            || previousWoodfishStyleIndex === woodfishStyleIndex
+            || (
+              !isReleaseStyle(previousWoodfishStyleIndex)
+              && !isReleaseStyle(woodfishStyleIndex)
+            )
+          ) {
+            return false;
+          }
+          const progress = Math.min(
+            1,
+            Math.max(0, (time - woodfishStyleChangedAt) / 480)
+          );
+          if (progress >= 1) return false;
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const travel = geometry.width * 1.18;
+          const previousGeometry = {
+            ...geometry,
+            x: geometry.x - woodfishTransitionDirection * travel * eased
+          };
+          const currentGeometry = {
+            ...geometry,
+            x: geometry.x + woodfishTransitionDirection * travel * (1 - eased)
+          };
+          context.save();
+          context.beginPath();
+          context.rect(
+            geometry.x - geometry.width * 0.66,
+            geometry.y - geometry.height * 0.59,
+            geometry.width * 1.32,
+            geometry.height * 1.18
+          );
+          context.clip();
+          drawThemeScene(previousWoodfishStyleIndex, previousGeometry, time, delta);
+          drawThemeScene(woodfishStyleIndex, currentGeometry, time, delta);
+          context.restore();
+          return true;
+        }
+
         function draw(time) {
           const delta = Math.min(0.05, Math.max(0, (time - lastFrame) / 1000));
           lastFrame = time;
@@ -7153,18 +7614,16 @@
           drawSongHourglass(time, geometry);
           updateSessionMissClock(time, geometry);
           maybeRotateWoodfishStyle(time);
-          if (mode === "merit") {
-            drawWoodfish(geometry.x, geometry.y, geometry.size, time);
+          const releaseTransitionActive = drawReleaseThemeTransition(
+            geometry,
+            time,
+            delta
+          );
+          if (!releaseTransitionActive) {
+            drawThemeScene(woodfishStyleIndex, geometry, time, delta);
+          }
+          if (mode === "merit" && !isPrayerBeadsStyle()) {
             drawWoodStrikeEmojis(geometry.x, geometry.y, geometry.size, time);
-          } else {
-            drawSea(
-              geometry.x,
-              geometry.y,
-              geometry.width,
-              geometry.height,
-              time,
-              delta
-            );
           }
           drawQuarterBeatCues(time, geometry);
           drawRipples(time);
@@ -7548,7 +8007,11 @@
                 modePeriodMs: MODES[mode].autoDelay
               },
               auto: autoActive,
-              autoBehavior: mode === "merit" ? "cyber-offbeat-duet" : "hands-free",
+              autoBehavior: mode === "merit"
+                ? isPrayerBeadsStyle()
+                  ? "cyber-offbeat-bead-assist"
+                  : "cyber-offbeat-duet"
+                : "hands-free",
               cyberDuetActive: isMeritDuetActive(),
               cyberOffbeatPhaseMs: mode === "merit"
                 ? Math.round(getCyberOffbeatPhaseMs())
@@ -7573,9 +8036,17 @@
               lastActionWasCountIn,
               beatCueLabels: Array.from({ length: 4 }, (_, beat) =>
                 positiveModulo(beat, MODES[mode].beatStep) === 0
-                  ? (mode === "merit" ? "敲" : "放")
+                  ? (
+                    mode === "merit"
+                      ? isPrayerBeadsStyle()
+                        ? "转"
+                        : "敲"
+                      : "放"
+                  )
                   : mode === "merit" && isMeritDuetActive()
-                    ? "对"
+                    ? isPrayerBeadsStyle()
+                      ? "助"
+                      : "对"
                     : "dot"
               ),
               beatCueLayout: cueLayout.positions.map((position) => ({
@@ -7611,12 +8082,14 @@
                 : null,
               woodImpactAtMs: Math.round(WOOD_STRIKE_DURATION * WOOD_IMPACT_PHASE * 1000),
               woodStrikeDurationMs: Math.round(WOOD_STRIKE_DURATION * 1000),
-              cyberMalletVisible: isMeritDuetActive()
+              cyberMalletVisible: !isPrayerBeadsStyle() && (
+                isMeritDuetActive()
                 || (
                   woodStrikeFromAuto
                   && performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
-                ),
-              cyberMalletResting: isMeritDuetActive()
+                )
+              ),
+              cyberMalletResting: !isPrayerBeadsStyle() && isMeritDuetActive()
                 && !(
                   woodStrikeFromAuto
                   && performance.now() - woodStrikeStarted <= WOOD_STRIKE_DURATION * 1000
@@ -7624,29 +8097,44 @@
               cyberMalletOrigin: "top-right",
               cyberStrikeOffsetY: CYBER_STRIKE_OFFSET_Y,
               manualMalletOrigin: "bottom-right",
-              malletOrigin: woodStrikeFromAuto
-                ? "top-right"
-                : "bottom-right",
-              malletMaterial: woodStrikeFromAuto
-                && (
-                  isMeritDuetActive()
-                  || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
-                )
-                ? "cyber-stainless"
-                : "wood",
+              malletOrigin: isPrayerBeadsStyle()
+                ? "none"
+                : woodStrikeFromAuto
+                  ? "top-right"
+                  : "bottom-right",
+              malletMaterial: isPrayerBeadsStyle()
+                ? "none"
+                : woodStrikeFromAuto
+                  && (
+                    isMeritDuetActive()
+                    || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
+                  )
+                  ? "cyber-stainless"
+                  : "wood",
+              prayerBeads: {
+                active: isPrayerBeadsStyle(),
+                perspective: "first-person",
+                hand: "right",
+                beadCount: 11,
+                turns: Number(prayerBeadTurns.toFixed(3))
+              },
               automaticThemeSwitchCount,
               themeBeatsUntilRotation,
               autoThemeQuarterBeats: THEME_ROTATION_QUARTER_BEATS,
-              malletImpactSide: woodStrikeFromAuto
-                && (
-                  isMeritDuetActive()
-                  || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
-                )
-                ? "left"
-                : "right",
-              malletTravelDirection: woodStrikeFromAuto
-                ? "top-to-bottom-arc"
-                : "bottom-to-top",
+              malletImpactSide: isPrayerBeadsStyle()
+                ? "none"
+                : woodStrikeFromAuto
+                  && (
+                    isMeritDuetActive()
+                    || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
+                  )
+                  ? "left"
+                  : "right",
+              malletTravelDirection: isPrayerBeadsStyle()
+                ? "none"
+                : woodStrikeFromAuto
+                  ? "top-to-bottom-arc"
+                  : "bottom-to-top",
               feverBannerLayer: "topmost-foreground",
               feverBannerPosition: "screen-top",
               strikeEmojis: strikeEmojiParticles.map((particle) => particle.icon),
