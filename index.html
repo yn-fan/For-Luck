@@ -189,8 +189,8 @@
         --rhythmPeriod: 960ms;
         --idleCueSize: 72px;
         --fortuneTitleLift: -40px;
-        --fortuneStickerWidth: 76px;
-        --fortuneMetaLift: -16px;
+        --fortuneStickerWidth: 46px;
+        --fortuneMetaLift: -26px;
         --fortuneButtonLift: -8px;
         --fortuneButtonDepth: 24px;
         --durationReducedMotion: 1ms;
@@ -988,11 +988,19 @@
       }
 
       .fortune-keyword {
+        justify-self: start;
+        padding-inline: var(--spacingHorizontalXXS);
         font-family: var(--fontFamilyInk);
         font-size: var(--fontSizeFortuneKeyword);
         line-height: var(--lineHeightFortune);
         font-weight: var(--fontWeightSemibold);
         letter-spacing: var(--spacingHorizontalXS);
+        background: linear-gradient(
+          to top,
+          var(--colorWashiDeep) 0 38%,
+          transparent 38%
+        );
+        transform: rotate(-1deg);
       }
 
       .fortune-message {
@@ -1004,23 +1012,21 @@
         display: grid;
         gap: var(--spacingVerticalXS);
         padding: var(--spacingVerticalM) var(--spacingHorizontalL);
-        background: var(--colorWashiLight);
+        background-color: var(--colorWashi);
+        background-image: radial-gradient(
+          circle,
+          var(--colorInkFaintAlpha) 0 1px,
+          transparent 1.2px
+        );
+        background-size: var(--spacingHorizontalS) var(--spacingVerticalS);
         border: var(--strokeMedium) solid var(--colorInk);
-        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPurple);
+        box-shadow:
+          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPurple),
+          calc(0px - var(--spacingHorizontalXS))
+          calc(0px - var(--spacingVerticalXS))
+          0
+          var(--colorWashiDeep);
         transform: translate(-53%, -50%) translateZ(12px) rotate(1deg);
-      }
-
-      .fortune-message::before {
-        content: "";
-        position: absolute;
-        top: calc(0px - var(--spacingVerticalMNudge));
-        left: 38%;
-        width: 34%;
-        height: var(--spacingVerticalL);
-        background: var(--colorAccentPink);
-        border: var(--strokeThin) solid var(--colorInk);
-        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorInk);
-        transform: rotate(-3deg);
       }
 
       .fortune-english {
@@ -1704,7 +1710,6 @@
 
         .fortune-aura,
         .fortune-fire,
-        .fortune-message::before,
         .stats-title::before,
         .stats-title::after,
         .tape {
