@@ -9,6 +9,7 @@
       content="佛了 for luck：在原创复古漫画网点风格的木鱼与无边海之间切换，跟随节拍积攒功德，或放生一尾鱼。"
     />
     <title>佛了 for luck · 苏州</title>
+    <link rel="icon" href="data:," />
 
     <style>
       /*
@@ -524,7 +525,7 @@
         height: var(--spacingVerticalL);
         opacity: 0;
         background: var(--colorAccentLime);
-        border: var(--strokeThin) solid var(--colorAccentPurple);
+        border: var(--strokeMedium) solid var(--colorInk);
         clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
         transform: translateX(-50%) scale(0.7);
         pointer-events: none;
@@ -1555,7 +1556,7 @@
       @keyframes stage-focus-beacon {
         0%,
         100% {
-          opacity: 0.45;
+          opacity: 1;
           transform: translateX(-50%) scale(0.72) rotate(0);
         }
         72% {
@@ -2286,6 +2287,7 @@
         const BGM_VOLUME = 0.24;
         const AUTO_BEAT_LATE_WINDOW_MS = 80;
         const AUTO_TIMER_SAFETY_MS = 8;
+        const START_TIMING = Object.freeze({ label: "START", rank: "start" });
         const MODES = {
           merit: {
             autoLabel: "赛博代敲",
@@ -2316,7 +2318,11 @@
           meritStatus: (grade, personal, combo) =>
             `${grade}，功德加一${combo > 1 ? `，连续 ${combo} 次` : ""}，我已积攒的功德 ${personal}`,
           releaseStatus: (grade, species, personal, combo) =>
-            `${grade}，已放生${species}一尾${combo > 1 ? `，连续 ${combo} 次` : ""}，我的放生 ${personal}`
+            `${grade}，已放生${species}一尾${combo > 1 ? `，连续 ${combo} 次` : ""}，我的放生 ${personal}`,
+          meritStart: (personal) =>
+            `START，功德加一，跟随木鱼四周的拍点继续，我已积攒的功德 ${personal}`,
+          releaseStart: (species, personal) =>
+            `START，已放生${species}一尾，跟随入水点四周的拍点继续，我的放生 ${personal}`
         };
         const MANUAL_STRIKE_EMOJIS = Object.freeze([
           "🙏",
@@ -2598,6 +2604,7 @@
         let rhythmEpoch = performance.now();
         let rhythmBeatIndex = 0;
         let lastTimingGrade = "READY";
+        let lastActionWasCountIn = false;
         let woodHovered = false;
         let pointerX = 0;
         let pointerY = 0;
@@ -2692,6 +2699,7 @@
           sessionActionCount = 0;
           sessionMissCount = 0;
           sessionMissAnchor = 0;
+          lastActionWasCountIn = false;
         }
 
         function registerSessionAction(time = performance.now()) {
@@ -3156,6 +3164,18 @@
           return period - remainder;
         }
 
+        function alignMissAnchorToBgm(expectedSessionActions) {
+          if (!isBgmPlaying() || sessionActionCount !== expectedSessionActions) return false;
+          const now = performance.now();
+          const mediaTimeMs = bgmAudio.currentTime * 1000;
+          const beatOffsetMs = BGM_BEAT_OFFSET_SECONDS * 1000;
+          const period = MODES[mode].autoDelay;
+          sessionMissAnchor = mediaTimeMs < beatOffsetMs
+            ? now + beatOffsetMs - mediaTimeMs
+            : now - positiveModulo(mediaTimeMs - beatOffsetMs, period);
+          return true;
+        }
+
         function getTimingGrade(time = performance.now(), fromAuto = false) {
           if (fromAuto) return { label: "PERFECT", rank: "perfect" };
           const phase = getRhythmPhase(time);
@@ -3260,15 +3280,16 @@
           bursts = bursts.slice(-10);
         }
 
-        function strikeMerit(fromAuto = false) {
+        function strikeMerit(fromAuto = false, countIn = false) {
           if (fortuneOpen || fortunePending) return;
           const actionTime = performance.now();
-          const timing = getTimingGrade(actionTime, fromAuto);
+          const timing = countIn ? START_TIMING : getTimingGrade(actionTime, fromAuto);
           registerSessionAction(actionTime);
           resetIdleHint();
           triggerUiHit(timing);
-          const feverTriggered = updateCombo(timing);
+          const feverTriggered = countIn ? false : updateCombo(timing);
           lastTimingGrade = timing.label;
+          lastActionWasCountIn = countIn;
           meritTotal += 1;
           woodStrikeStarted = actionTime;
           woodStrikeFromAuto = fromAuto;
@@ -3302,7 +3323,9 @@
           saveState();
           playWoodSound(timing.rank === "perfect");
           announce(
-            feverTriggered
+            countIn
+              ? STRINGS.meritStart(formatter.format(meritTotal))
+              : feverTriggered
               ? "连续 3 次 PERFECT，功德时刻开始，持续 10 秒"
               : STRINGS.meritStatus(timing.label, formatter.format(meritTotal), comboCount)
           );
@@ -3311,18 +3334,19 @@
           }
         }
 
-        function releaseFish(fromAuto = false) {
+        function releaseFish(fromAuto = false, countIn = false) {
           if (fortuneOpen || fortunePending) return;
           const actionTime = performance.now();
           const geometry = stageGeometry();
           const item = species[Math.floor(Math.random() * species.length)];
           const fish = createReleasedFish(item);
-          const timing = getTimingGrade(actionTime, fromAuto);
+          const timing = countIn ? START_TIMING : getTimingGrade(actionTime, fromAuto);
           registerSessionAction(actionTime);
           resetIdleHint();
           triggerUiHit(timing);
-          const feverTriggered = updateCombo(timing);
+          const feverTriggered = countIn ? false : updateCombo(timing);
           lastTimingGrade = timing.label;
+          lastActionWasCountIn = countIn;
           fishSchool.push(fish);
           fishSchool = fishSchool.slice(-42);
           releaseTotal += 1;
@@ -3349,7 +3373,9 @@
           saveState();
           playWaterSound();
           announce(
-            feverTriggered
+            countIn
+              ? STRINGS.releaseStart(item.name, formatter.format(releaseTotal))
+              : feverTriggered
               ? "连续 3 次 PERFECT，放生时刻开始，持续 10 秒"
               : STRINGS.releaseStatus(timing.label, item.name, formatter.format(releaseTotal), comboCount)
           );
@@ -3358,19 +3384,34 @@
           }
         }
 
-        function performCurrentAction(fromAuto = false) {
+        function performCurrentAction(fromAuto = false, countIn = false) {
           if (fortuneOpen || fortunePending) return;
           if (fromAuto && !isBgmPlaying()) {
             rhythmBeatIndex = (rhythmBeatIndex + 1) % 4;
             rhythmEpoch = performance.now();
           }
-          if (mode === "merit") strikeMerit(fromAuto);
-          else releaseFish(fromAuto);
+          if (mode === "merit") strikeMerit(fromAuto, countIn);
+          else releaseFish(fromAuto, countIn);
         }
 
         function performUserAction() {
-          void startBgm();
-          performCurrentAction(false);
+          const actionTime = performance.now();
+          const countIn = sessionActionCount === 0 && !isBgmPlaying();
+          const expectedSessionActions = sessionActionCount + 1;
+          if (countIn) {
+            rhythmBeatIndex = 0;
+            rhythmEpoch = actionTime;
+          }
+          const bgmReady = startBgm();
+          performCurrentAction(false, countIn);
+          if (!countIn) return;
+          void bgmReady.then((started) => {
+            if (sessionActionCount !== expectedSessionActions) return;
+            if (!started || !alignMissAnchorToBgm(expectedSessionActions)) {
+              rhythmEpoch = actionTime;
+              sessionMissAnchor = actionTime;
+            }
+          });
         }
 
         function stopAuto(shouldAnnounce = false) {
@@ -3440,7 +3481,10 @@
           );
           if (soundEnabled) {
             void ensureAudio();
-            void startBgm().then(() => {
+            void startBgm().then((started) => {
+              if (started && sessionActionCount > 0 && !autoActive) {
+                alignMissAnchorToBgm(sessionActionCount);
+              }
               if (autoActive) scheduleAuto();
             });
           }
@@ -3577,35 +3621,75 @@
           context.drawImage(backgroundCanvas, 0, 0, canvasWidth, canvasHeight);
         }
 
-        function drawQuarterBeatCues(time) {
+        function getQuarterBeatCueLayout(geometry) {
+          const cueSize = Math.max(24, Math.min(38, geometry.size * 0.105));
+          const releaseEntry = mode === "release"
+            ? projectSea(
+                geometry.x,
+                geometry.y,
+                geometry.width,
+                geometry.height,
+                0,
+                0
+              )
+            : null;
+          const center = mode === "merit"
+            ? { x: geometry.x, y: geometry.y }
+            : {
+                x: releaseEntry.x,
+                y: releaseEntry.y - geometry.size * 0.08
+              };
+          const radiusX = mode === "merit"
+            ? geometry.size * 0.48
+            : Math.min(geometry.width * 0.3, geometry.size * 0.31);
+          const radiusY = mode === "merit"
+            ? geometry.size * 0.45
+            : geometry.size * 0.18;
+          const safeInset = cueSize * 0.9;
+          const clampX = (value) => Math.max(safeInset, Math.min(canvasWidth - safeInset, value));
+          const clampY = (value) => Math.max(safeInset, Math.min(canvasHeight - safeInset, value));
+          return {
+            center,
+            radiusX,
+            radiusY,
+            cueSize,
+            positions: [
+              { x: clampX(center.x), y: clampY(center.y - radiusY), angle: -0.05 },
+              { x: clampX(center.x + radiusX), y: clampY(center.y), angle: 0.04 },
+              { x: clampX(center.x), y: clampY(center.y + radiusY), angle: -0.035 },
+              { x: clampX(center.x - radiusX), y: clampY(center.y), angle: 0.055 }
+            ]
+          };
+        }
+
+        function drawQuarterBeatCues(time, geometry) {
           const quarterIndex = getQuarterBeatIndex(time);
           const currentBeat = positiveModulo(quarterIndex, 4);
           const nextBeat = (currentBeat + 1) % 4;
           const phase = reducedMotion ? 0 : getQuarterBeatPhase(time);
           const impact = reducedMotion ? 0.35 : Math.max(0, 1 - phase * 4.2);
           const anticipation = reducedMotion ? 0 : Math.max(0, (phase - 0.52) / 0.48);
-          const edgeInset = Math.max(18, Math.min(28, Math.min(canvasWidth, canvasHeight) * 0.045));
-          const cueSize = Math.max(30, Math.min(48, Math.min(canvasWidth, canvasHeight) * 0.09));
-          const cuePositions = [
-            { x: canvasWidth * 0.54, y: edgeInset, angle: 0 },
-            { x: canvasWidth - edgeInset, y: canvasHeight * 0.43, angle: Math.PI / 2 },
-            { x: canvasWidth * 0.46, y: canvasHeight - edgeInset, angle: Math.PI },
-            { x: edgeInset, y: canvasHeight * 0.57, angle: -Math.PI / 2 }
-          ];
+          const cueLayout = getQuarterBeatCueLayout(geometry);
+          const { center, radiusX, radiusY, cueSize, positions: cuePositions } = cueLayout;
           const beatColors = [colors.rust, colors.lakeDeep, colors.sand, colors.purple];
           const currentActionBeat = isActionQuarterBeat(quarterIndex);
 
           context.save();
           if (currentActionBeat && impact > 0) {
-            context.globalAlpha = 0.08 + impact * 0.2;
+            context.globalAlpha = 0.1 + impact * 0.24;
             context.strokeStyle = beatColors[currentBeat];
             context.lineWidth = Math.max(3, cueSize * (0.08 + impact * 0.08));
-            context.strokeRect(
-              edgeInset * 0.55,
-              edgeInset * 0.55,
-              canvasWidth - edgeInset * 1.1,
-              canvasHeight - edgeInset * 1.1
+            context.beginPath();
+            context.ellipse(
+              center.x,
+              center.y,
+              radiusX + cueSize * (0.46 + impact * 0.24),
+              radiusY + cueSize * (0.46 + impact * 0.24),
+              0,
+              0,
+              Math.PI * 2
             );
+            context.stroke();
           }
 
           for (let beat = 0; beat < 4; beat += 1) {
@@ -3613,11 +3697,11 @@
             const active = beat === currentBeat;
             const upcoming = beat === nextBeat;
             const actionSlot = positiveModulo(beat, MODES[mode].beatStep) === 0;
-            const activeAction = active && actionSlot;
+            const isActiveAction = active && actionSlot;
             const scale = 1
-              + (active ? impact * (activeAction ? 0.34 : 0.18) : 0)
+              + (active ? impact * (isActiveAction ? 0.34 : 0.18) : 0)
               + (upcoming ? anticipation * 0.12 : 0);
-            const cueWidth = cueSize * (activeAction ? 1.42 : actionSlot ? 1.26 : 1.08) * scale;
+            const cueWidth = cueSize * (isActiveAction ? 1.42 : actionSlot ? 1.26 : 1.08) * scale;
             const cueHeight = cueSize * 0.62 * scale;
 
             context.save();
@@ -3663,13 +3747,23 @@
             context.textAlign = "center";
             context.textBaseline = "middle";
             context.lineJoin = "round";
-            context.font = `${cssValue("--fontWeightBold")} ${Math.max(14, cueSize * (activeAction ? 0.48 : 0.4))}px ${cssValue("--fontFamilyBase")}`;
-            context.lineWidth = Math.max(3, cueSize * 0.09);
-            context.strokeStyle = colors.ink;
-            const label = actionSlot ? (mode === "merit" ? "敲" : "放") : String(beat + 1);
-            context.strokeText(label, 0, 0);
-            context.fillStyle = activeAction ? colors.washiLight : colors.ink;
-            context.fillText(label, 0, 0);
+            if (actionSlot) {
+              context.font = `${cssValue("--fontWeightBold")} ${Math.max(14, cueSize * (isActiveAction ? 0.48 : 0.4))}px ${cssValue("--fontFamilyBase")}`;
+              context.lineWidth = Math.max(3, cueSize * 0.09);
+              context.strokeStyle = colors.ink;
+              const label = mode === "merit" ? "敲" : "放";
+              context.strokeText(label, 0, 0);
+              context.fillStyle = isActiveAction ? colors.washiLight : colors.ink;
+              context.fillText(label, 0, 0);
+            } else {
+              context.fillStyle = colors.ink;
+              context.strokeStyle = active ? colors.washiLight : colors.ink;
+              context.lineWidth = Math.max(2, cueSize * 0.06);
+              context.beginPath();
+              context.arc(0, 0, cueSize * (active ? 0.12 : 0.09), 0, Math.PI * 2);
+              context.fill();
+              if (active) context.stroke();
+            }
             context.restore();
           }
           context.restore();
@@ -3757,27 +3851,6 @@
           }
           context.restore();
 
-          context.save();
-          const numberPositions = [
-            { x: canvasWidth * 0.08, y: canvasHeight * 0.46 },
-            { x: canvasWidth * 0.34, y: Math.max(72, canvasHeight * 0.12) },
-            { x: canvasWidth * 0.92, y: canvasHeight * 0.55 },
-            { x: canvasWidth * 0.68, y: canvasHeight * 0.88 }
-          ];
-          const numberSize = Math.max(58, Math.min(112, Math.min(canvasWidth, canvasHeight) * 0.13));
-          context.font = `${cssValue("--fontWeightBold")} ${numberSize}px ${cssValue("--fontFamilyBase")}`;
-          context.textAlign = "center";
-          context.textBaseline = "middle";
-          for (let beat = 0; beat < 4; beat += 1) {
-            const active = beat === beatNumber;
-            context.globalAlpha = active ? 0.92 : 0.11;
-            context.lineWidth = Math.max(4, numberSize * 0.08);
-            context.strokeStyle = colors.ink;
-            context.strokeText(String(beat + 1), numberPositions[beat].x, numberPositions[beat].y);
-            context.fillStyle = active ? beatColor : colors.ink;
-            context.fillText(String(beat + 1), numberPositions[beat].x, numberPositions[beat].y);
-          }
-          context.restore();
         }
 
         function bodyPath(x, y, size, offsetX = 0, offsetY = 0) {
@@ -4801,6 +4874,7 @@
             const gradePalette = {
               perfect: { primary: colors.washiDeep, accent: colors.pink },
               cool: { primary: colors.lake, accent: colors.lime },
+              start: { primary: colors.lime, accent: colors.lakeDeep },
               miss: { primary: colors.washiLight, accent: colors.purple },
               good: { primary: colors.purple, accent: colors.rust }
             };
@@ -5140,7 +5214,7 @@
               delta
             );
           }
-          drawQuarterBeatCues(time);
+          drawQuarterBeatCues(time, geometry);
           drawRipples(time);
           drawFever(time, geometry);
           drawBursts(time, geometry.size);
@@ -5315,7 +5389,11 @@
             resetIdleHint();
             if (soundEnabled && bgmResumeOnVisible) {
               bgmResumeOnVisible = false;
-              void startBgm();
+              void startBgm().then((started) => {
+                if (started && sessionActionCount > 0) {
+                  alignMissAnchorToBgm(sessionActionCount);
+                }
+              });
             }
           }
         });
@@ -5389,6 +5467,9 @@
           startBgm,
           draw: () => draw(performance.now()),
           get state() {
+            const debugGeometry = stageGeometry();
+            const cueLayout = getQuarterBeatCueLayout(debugGeometry);
+            const missWindowMs = MODES[mode].autoDelay * MISS_GRACE_RATIO;
             return {
               mode,
               merit: meritTotal,
@@ -5419,6 +5500,20 @@
               quarterBeat: getQuarterBeatNumber(),
               quarterBeatIsAction: isActionQuarterBeat(getQuarterBeatIndex()),
               missGraceRatio: MISS_GRACE_RATIO,
+              missWindowMs: Math.round(missWindowMs),
+              nextMissInMs: sessionMissAnchor
+                ? Math.round(sessionMissAnchor + missWindowMs - performance.now())
+                : null,
+              lastActionWasCountIn,
+              beatCueLabels: Array.from({ length: 4 }, (_, beat) =>
+                positiveModulo(beat, MODES[mode].beatStep) === 0
+                  ? (mode === "merit" ? "敲" : "放")
+                  : "dot"
+              ),
+              beatCueLayout: cueLayout.positions.map((position) => ({
+                x: Math.round(position.x),
+                y: Math.round(position.y)
+              })),
               viewport: {
                 width: canvasWidth,
                 height: canvasHeight
