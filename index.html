@@ -4499,9 +4499,9 @@
           const tiltY = pointerY * size * 0.009;
           const bodyX = x + tiltX;
           const bodyY = y + idle + tiltY - beatKick * size * 0.006 + positiveImpact * size * 0.008;
-          const useCyberMallet = woodStrikeFromAuto
-            && (isMeritDuetActive(time) || elapsed <= duration + 0.18);
-          const strikePointX = bodyX + size * (useCyberMallet ? -0.17 : 0.17);
+          const showCyberMallet = isMeritDuetActive(time)
+            || (woodStrikeFromAuto && elapsed <= duration + 0.18);
+          const strikePointX = bodyX + size * (woodStrikeFromAuto ? -0.17 : 0.17);
           const strikePointY = bodyY + size * 0.13;
 
           drawEnso(x, y, size, time);
@@ -4747,57 +4747,66 @@
           }
           context.restore();
 
-          let baseX;
-          let baseY;
-          let headX;
-          let headY;
-          let angle;
-          if (useCyberMallet) {
-            baseX = strikePointX - size * 0.16;
-            baseY = -size * 0.22;
-            const retractedX = baseX + size * 0.04;
-            const retractedY = -size * 0.035;
-            headX = retractedX + (strikePointX - retractedX) * malletSwing;
-            headY = retractedY + (strikePointY - retractedY) * malletSwing;
-            angle = Math.atan2(headY - baseY, headX - baseX);
-          } else {
-            baseX = x + size * 0.46;
-            baseY = canvasHeight + size * 0.08;
-            const contactAngle = Math.atan2(strikePointY - baseY, strikePointX - baseX);
-            const restAngle = contactAngle + 0.38;
-            angle = restAngle + (contactAngle - restAngle) * malletSwing;
-            const handleLength = Math.hypot(strikePointX - baseX, strikePointY - baseY);
-            headX = baseX + Math.cos(angle) * handleLength;
-            headY = baseY + Math.sin(angle) * handleLength;
-          }
-          const normalX = -Math.sin(angle);
-          const normalY = Math.cos(angle);
+          const woodStrikePointX = bodyX + size * 0.17;
+          const cyberStrikePointX = bodyX - size * 0.17;
+          const woodMalletSwing = woodStrikeFromAuto ? 0 : malletSwing;
+          const cyberMalletSwing = woodStrikeFromAuto ? malletSwing : 0;
 
-          if (useCyberMallet) {
-            drawCyberMallet(
-              baseX,
-              baseY,
-              headX,
-              headY,
-              angle,
-              normalX,
-              normalY,
-              size,
-              positiveImpact
+          if (showCyberMallet) {
+            const cyberBaseX = x - size * 0.46;
+            const cyberBaseY = canvasHeight + size * 0.08;
+            const cyberContactAngle = Math.atan2(
+              strikePointY - cyberBaseY,
+              cyberStrikePointX - cyberBaseX
             );
-          } else {
-            drawWoodMallet(
-              baseX,
-              baseY,
-              headX,
-              headY,
-              angle,
-              normalX,
-              normalY,
+            const cyberRestAngle = cyberContactAngle - 0.38;
+            const cyberAngle = cyberRestAngle
+              + (cyberContactAngle - cyberRestAngle) * cyberMalletSwing;
+            const cyberHandleLength = Math.hypot(
+              cyberStrikePointX - cyberBaseX,
+              strikePointY - cyberBaseY
+            );
+            const cyberHeadX = cyberBaseX + Math.cos(cyberAngle) * cyberHandleLength;
+            const cyberHeadY = cyberBaseY + Math.sin(cyberAngle) * cyberHandleLength;
+            drawCyberMallet(
+              cyberBaseX,
+              cyberBaseY,
+              cyberHeadX,
+              cyberHeadY,
+              cyberAngle,
+              -Math.sin(cyberAngle),
+              Math.cos(cyberAngle),
               size,
-              positiveImpact
+              woodStrikeFromAuto ? positiveImpact : 0
             );
           }
+
+          const woodBaseX = x + size * 0.46;
+          const woodBaseY = canvasHeight + size * 0.08;
+          const woodContactAngle = Math.atan2(
+            strikePointY - woodBaseY,
+            woodStrikePointX - woodBaseX
+          );
+          const woodRestAngle = woodContactAngle + 0.38;
+          const woodAngle = woodRestAngle
+            + (woodContactAngle - woodRestAngle) * woodMalletSwing;
+          const woodHandleLength = Math.hypot(
+            woodStrikePointX - woodBaseX,
+            strikePointY - woodBaseY
+          );
+          const woodHeadX = woodBaseX + Math.cos(woodAngle) * woodHandleLength;
+          const woodHeadY = woodBaseY + Math.sin(woodAngle) * woodHandleLength;
+          drawWoodMallet(
+            woodBaseX,
+            woodBaseY,
+            woodHeadX,
+            woodHeadY,
+            woodAngle,
+            -Math.sin(woodAngle),
+            Math.cos(woodAngle),
+            size,
+            woodStrikeFromAuto ? 0 : positiveImpact
+          );
         }
 
         function drawWoodStrikeEmojis(x, y, size, time) {
@@ -6103,13 +6112,21 @@
                 : null,
               woodImpactAtMs: Math.round(WOOD_STRIKE_DURATION * WOOD_IMPACT_PHASE * 1000),
               woodStrikeDurationMs: Math.round(WOOD_STRIKE_DURATION * 1000),
+              cyberMalletVisible: isMeritDuetActive()
+                || (
+                  woodStrikeFromAuto
+                  && performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
+                ),
+              cyberMalletResting: isMeritDuetActive()
+                && !(
+                  woodStrikeFromAuto
+                  && performance.now() - woodStrikeStarted <= WOOD_STRIKE_DURATION * 1000
+                ),
+              cyberMalletOrigin: "bottom-left",
+              manualMalletOrigin: "bottom-right",
               malletOrigin: woodStrikeFromAuto
-                && (
-                  isMeritDuetActive()
-                  || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
-                )
-                ? "top-edge"
-                : "bottom",
+                ? "bottom-left"
+                : "bottom-right",
               malletMaterial: woodStrikeFromAuto
                 && (
                   isMeritDuetActive()
@@ -6124,13 +6141,7 @@
                 )
                 ? "left"
                 : "right",
-              malletTravelDirection: woodStrikeFromAuto
-                && (
-                  isMeritDuetActive()
-                  || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
-                )
-                ? "top-to-bottom"
-                : "bottom-to-top",
+              malletTravelDirection: "bottom-to-top",
               strikeEmojis: strikeEmojiParticles.map((particle) => particle.icon),
               strikeEmojiAnchor: {
                 x: Math.round(strikeEmojiAnchor.x),
