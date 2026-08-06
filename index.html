@@ -486,6 +486,89 @@
         aspect-ratio: 1;
       }
 
+      body[data-woodfish-selectable="true"],
+      body[data-woodfish-selectable="true"] .screen {
+        overscroll-behavior-x: none;
+      }
+
+      body[data-woodfish-selectable="true"] .screen {
+        touch-action: pan-y;
+      }
+
+      .woodfish-picker {
+        position: absolute;
+        z-index: 4;
+        top: var(--spacingVerticalXS);
+        left: 50%;
+        display: grid;
+        grid-template-columns: var(--controlMinSize) minmax(128px, auto) var(--controlMinSize);
+        align-items: stretch;
+        gap: var(--spacingHorizontalXS);
+        transform: translateX(-50%) rotate(-0.6deg);
+      }
+
+      .woodfish-picker[hidden] {
+        display: none;
+      }
+
+      .woodfish-picker-button {
+        min-width: var(--controlMinSize);
+        min-height: var(--controlMinSize);
+        padding: 0;
+        color: var(--colorInk);
+        background: var(--colorWashiDeep);
+        border: var(--strokeMedium) solid var(--colorInk);
+        border-radius: var(--borderRadiusNone);
+        box-shadow: var(--spacingHorizontalXXS) var(--spacingVerticalXXS) 0 var(--colorAccentPurple);
+        cursor: pointer;
+        font-family: var(--fontFamilyMonospace);
+        font-size: var(--fontSizeBase500);
+        line-height: var(--lineHeightBase500);
+        font-weight: var(--fontWeightBold);
+        transition:
+          transform var(--durationFast) var(--curveEasyEase),
+          background var(--durationFast) var(--curveEasyEase);
+      }
+
+      .woodfish-picker-button:hover {
+        background: var(--colorAccentLime);
+        transform: translateY(var(--hoverOffset));
+      }
+
+      .woodfish-picker-button:active {
+        transform: scale(var(--pressScale));
+      }
+
+      .woodfish-picker-label {
+        display: grid;
+        place-items: center;
+        align-content: center;
+        min-height: var(--controlMinSize);
+        margin: 0;
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
+        color: var(--colorWashiLight);
+        background: var(--colorInk);
+        border: var(--strokeMedium) solid var(--colorInk);
+        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorAccentPink);
+        text-align: center;
+        pointer-events: none;
+      }
+
+      .woodfish-picker-label strong {
+        font-size: var(--fontSizeBase300);
+        line-height: var(--lineHeightBase300);
+        letter-spacing: var(--labelTracking);
+      }
+
+      .woodfish-picker-label span {
+        color: var(--colorWashiDeep);
+        font-family: var(--fontFamilyMonospace);
+        font-size: var(--fontSizeBase100);
+        line-height: var(--lineHeightBase100);
+        font-weight: var(--fontWeightBold);
+        letter-spacing: var(--microTracking);
+      }
+
       body[data-mode="release"] .stage {
         width: min(calc(100vw - var(--spacingHorizontalXXL)), 1280px);
         height: clamp(430px, 58vh, 720px);
@@ -520,7 +603,7 @@
         border: 0;
         border-radius: var(--borderRadiusNone);
         cursor: pointer;
-        touch-action: manipulation;
+        touch-action: pan-y;
         -webkit-tap-highlight-color: transparent;
         transition: transform var(--durationFast) var(--curveEasyEase);
       }
@@ -1722,6 +1805,20 @@
           gap: var(--spacingVerticalXS);
         }
 
+        .woodfish-picker {
+          top: 0;
+          grid-template-columns: var(--controlMinSize) minmax(116px, auto) var(--controlMinSize);
+        }
+
+        .woodfish-picker-label {
+          padding-inline: var(--spacingHorizontalS);
+        }
+
+        .woodfish-picker-label strong {
+          font-size: var(--fontSizeBase200);
+          line-height: var(--lineHeightBase200);
+        }
+
         .topbar {
           grid-template-columns: minmax(0, 1fr) minmax(156px, 164px);
           gap: var(--spacingVerticalS) var(--spacingHorizontalS);
@@ -1972,6 +2069,8 @@
         .tool-button,
         .mode-copy p,
         .idle-hint,
+        .woodfish-picker-button,
+        .woodfish-picker-label,
         .fortune-slip,
         .fortune-kicker,
         .fortune-title,
@@ -1999,6 +2098,8 @@
         .stat,
         .mode-copy p,
         .idle-hint,
+        .woodfish-picker-button,
+        .woodfish-picker-label,
         .fortune-slip,
         .fortune-kicker,
         .fortune-keyword,
@@ -2014,6 +2115,13 @@
           color: ButtonText;
           background: ButtonFace;
           border-width: var(--strokeMedium);
+        }
+
+        .woodfish-picker-button,
+        .woodfish-picker-label {
+          color: ButtonText;
+          background: ButtonFace;
+          box-shadow: none;
         }
 
         .fortune-overlay,
@@ -2122,7 +2230,7 @@
             class="stage-action"
             id="meritAction"
             type="button"
-            aria-describedby="storagePolicy"
+            aria-describedby="woodfishStyleHelp storagePolicy"
           >
             <span class="visually-hidden">敲击木鱼，积攒一份功德</span>
             <span class="hc-label" aria-hidden="true">敲击木鱼</span>
@@ -2149,6 +2257,33 @@
             <p class="mode-detail" id="releaseDetail">鱼儿会从近岸游向远海</p>
           </div>
         </section>
+        <div
+          class="woodfish-picker"
+          id="woodfishPicker"
+          role="group"
+          aria-label="开局木鱼样式"
+        >
+          <button
+            class="woodfish-picker-button"
+            id="woodfishPrevious"
+            type="button"
+            aria-label="上一个木鱼样式"
+          >
+            <span aria-hidden="true">←</span>
+          </button>
+          <p class="woodfish-picker-label">
+            <strong id="woodfishStyleName">玄木共鸣</strong>
+            <span id="woodfishStylePosition">1 / 3 · 左右滑动</span>
+          </p>
+          <button
+            class="woodfish-picker-button"
+            id="woodfishNext"
+            type="button"
+            aria-label="下一个木鱼样式"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
       </div>
 
       <aside class="stats" aria-labelledby="statsTitle">
@@ -2181,6 +2316,9 @@
         </span>
         <span class="visually-hidden" id="songProgressDescription">
           歌曲播放时，背景颜色会像沙漏一样向下退场，表示剩余进度
+        </span>
+        <span class="visually-hidden" id="woodfishStyleHelp">
+          游戏开始前可左右滑动屏幕，或使用木鱼样式左右按钮切换造型
         </span>
         <dl class="stats-grid">
           <div class="stat">
@@ -2342,6 +2480,11 @@
           { x: 0.46, y: 0.15 },
           { x: -0.28, y: 0.41 },
           { x: -0.43, y: -0.2 }
+        ]);
+        const WOODFISH_STYLES = Object.freeze([
+          { id: "resonance", name: "玄木共鸣" },
+          { id: "lacquer-gate", name: "漆印拍门" },
+          { id: "merit-reactor", name: "功德反应堆" }
         ]);
         const MODES = {
           merit: {
@@ -2529,6 +2672,12 @@
         const releasePanel = document.getElementById("releasePanel");
         const meritAction = document.getElementById("meritAction");
         const releaseAction = document.getElementById("releaseAction");
+        const woodfishPicker = document.getElementById("woodfishPicker");
+        const woodfishPrevious = document.getElementById("woodfishPrevious");
+        const woodfishNext = document.getElementById("woodfishNext");
+        const woodfishStyleName = document.getElementById("woodfishStyleName");
+        const woodfishStylePosition = document.getElementById("woodfishStylePosition");
+        const woodfishStyleHelp = document.getElementById("woodfishStyleHelp");
         const autoToggle = document.getElementById("autoToggle");
         const autoLabel = document.getElementById("autoLabel");
         const autoDescription = document.getElementById("autoDescription");
@@ -2616,6 +2765,8 @@
         let releaseTotal = 0;
         let soundEnabled = true;
         let storageAvailable = true;
+        let woodfishStyleIndex = 0;
+        let woodfishStyleChangedAt = performance.now();
         let autoActive = false;
         let autoTimer = 0;
         let demoRemoteMerit = 0;
@@ -2984,6 +3135,9 @@
               meritTotal = Number.isFinite(saved.merit) ? Math.max(0, saved.merit) : 0;
               releaseTotal = Number.isFinite(saved.release) ? Math.max(0, saved.release) : 0;
               soundEnabled = saved.sound !== false;
+              woodfishStyleIndex = Number.isInteger(saved.woodfishStyle)
+                ? positiveModulo(saved.woodfishStyle, WOODFISH_STYLES.length)
+                : 0;
               return;
             }
 
@@ -3006,7 +3160,8 @@
               JSON.stringify({
                 merit: meritTotal,
                 release: releaseTotal,
-                sound: soundEnabled
+                sound: soundEnabled,
+                woodfishStyle: woodfishStyleIndex
               })
             );
           } catch (error) {
@@ -3023,9 +3178,45 @@
           return MODES[mode].globalBase + getPersonalTotal() + remote;
         }
 
+        function canChooseWoodfishStyle() {
+          return mode === "merit"
+            && sessionActionCount === 0
+            && !isBgmPlaying()
+            && !fortuneOpen
+            && !fortunePending;
+        }
+
+        function setWoodfishStyle(nextIndex, shouldAnnounce = true) {
+          if (!canChooseWoodfishStyle()) return false;
+          const normalizedIndex = positiveModulo(
+            Math.round(nextIndex),
+            WOODFISH_STYLES.length
+          );
+          if (normalizedIndex === woodfishStyleIndex) return false;
+          woodfishStyleIndex = normalizedIndex;
+          woodfishStyleChangedAt = performance.now();
+          renderUi();
+          saveState();
+          if (shouldAnnounce) {
+            announce(
+              `已选择木鱼样式：${WOODFISH_STYLES[woodfishStyleIndex].name}，轻敲开始`
+            );
+          }
+          return true;
+        }
+
+        function cycleWoodfishStyle(direction, shouldAnnounce = true) {
+          return setWoodfishStyle(
+            woodfishStyleIndex + (direction < 0 ? -1 : 1),
+            shouldAnnounce
+          );
+        }
+
         function renderUi() {
           const config = MODES[mode];
+          const styleSelectable = canChooseWoodfishStyle();
           document.body.dataset.mode = mode;
+          document.body.dataset.woodfishSelectable = String(styleSelectable);
           document.body.style.setProperty("--rhythmPeriod", `${config.autoDelay}ms`);
           meritTab.setAttribute("aria-selected", String(mode === "merit"));
           meritTab.tabIndex = mode === "merit" ? 0 : -1;
@@ -3035,6 +3226,16 @@
           releasePanel.hidden = mode !== "release";
           meritAction.tabIndex = mode === "merit" ? 0 : -1;
           releaseAction.tabIndex = mode === "release" ? 0 : -1;
+          woodfishPicker.hidden = !styleSelectable;
+          woodfishStyleName.textContent = WOODFISH_STYLES[woodfishStyleIndex].name;
+          woodfishStylePosition.textContent =
+            `${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length} · 左右滑动`;
+          woodfishPicker.setAttribute(
+            "aria-label",
+            `开局木鱼样式，当前${WOODFISH_STYLES[woodfishStyleIndex].name}，${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length}`
+          );
+          woodfishStyleHelp.textContent =
+            `当前木鱼样式：${WOODFISH_STYLES[woodfishStyleIndex].name}。游戏开始前可左右滑动屏幕，或使用木鱼样式左右按钮切换造型`;
 
           autoLabel.textContent = config.autoLabel;
           autoDescription.textContent = config.autoDescription;
@@ -4214,13 +4415,15 @@
         }
 
         function drawCushion(x, y, size) {
+          const cushionColors = [colors.moss, colors.sand, colors.purple];
+          const stitchColors = [colors.lime, colors.rust, colors.pink];
           context.save();
           context.fillStyle = colors.ink;
           context.beginPath();
           context.ellipse(x + size * 0.018, y + size * 0.035, size * 0.32, size * 0.25, 0, 0, Math.PI * 2);
           context.fill();
 
-          context.fillStyle = colors.washiLight;
+          context.fillStyle = cushionColors[woodfishStyleIndex];
           context.beginPath();
           context.ellipse(x, y, size * 0.305, size * 0.235, 0, 0, Math.PI * 2);
           context.fill();
@@ -4228,7 +4431,7 @@
           context.lineWidth = size * 0.015;
           context.stroke();
 
-          context.strokeStyle = colors.rust;
+          context.strokeStyle = stitchColors[woodfishStyleIndex];
           context.lineWidth = size * 0.012;
           context.setLineDash([size * 0.026, size * 0.018]);
           context.beginPath();
@@ -4472,6 +4675,242 @@
           context.restore();
         }
 
+        function drawLacquerGateWoodfish(x, y, size, time, beatKick) {
+          const gatePath = (offsetY = 0) => {
+            const path = new Path2D();
+            path.moveTo(x - size * 0.31, y - size * 0.1 + offsetY);
+            path.lineTo(x - size * 0.18, y - size * 0.3 + offsetY);
+            path.lineTo(x + size * 0.13, y - size * 0.32 + offsetY);
+            path.lineTo(x + size * 0.31, y - size * 0.15 + offsetY);
+            path.lineTo(x + size * 0.34, y + size * 0.15 + offsetY);
+            path.lineTo(x + size * 0.2, y + size * 0.3 + offsetY);
+            path.lineTo(x - size * 0.2, y + size * 0.3 + offsetY);
+            path.lineTo(x - size * 0.34, y + size * 0.13 + offsetY);
+            path.closePath();
+            return path;
+          };
+
+          for (let layer = 5; layer >= 1; layer -= 1) {
+            context.fillStyle = layer < 3 ? colors.steelMid : colors.ink;
+            context.globalAlpha = 0.66 + layer * 0.055;
+            context.fill(gatePath(size * layer * 0.004));
+          }
+          context.globalAlpha = 1;
+
+          const body = gatePath();
+          const lacquer = context.createLinearGradient(
+            x - size * 0.28,
+            y - size * 0.28,
+            x + size * 0.3,
+            y + size * 0.3
+          );
+          lacquer.addColorStop(0, colors.steelLight);
+          lacquer.addColorStop(0.18, colors.steelMid);
+          lacquer.addColorStop(0.52, colors.ink);
+          lacquer.addColorStop(0.78, colors.steelDark);
+          lacquer.addColorStop(1, colors.ink);
+          context.save();
+          context.fillStyle = lacquer;
+          context.shadowColor = colors.shadow;
+          context.shadowBlur = size * 0.06;
+          context.shadowOffsetY = size * 0.025;
+          context.fill(body);
+          context.shadowColor = "transparent";
+          context.strokeStyle = colors.ink;
+          context.lineWidth = size * 0.017;
+          context.stroke(body);
+          context.restore();
+
+          for (const side of [-1, 1]) {
+            context.save();
+            context.translate(x + side * size * 0.135, y + size * 0.01);
+            context.rotate(side * -0.045);
+            context.fillStyle = side < 0 ? colors.rust : colors.pink;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = size * 0.011;
+            context.beginPath();
+            context.moveTo(-size * 0.105, -size * 0.205);
+            context.lineTo(size * 0.09, -size * 0.19);
+            context.lineTo(size * 0.105, size * 0.19);
+            context.lineTo(-size * 0.09, size * 0.205);
+            context.closePath();
+            context.fill();
+            context.stroke();
+
+            context.strokeStyle = colors.washiDeep;
+            context.lineWidth = size * 0.008;
+            context.globalAlpha = 0.72;
+            context.strokeRect(-size * 0.062, -size * 0.15, size * 0.124, size * 0.3);
+            context.restore();
+          }
+
+          const chamberPulse = reducedMotion
+            ? 1
+            : 1 + beatKick * 0.08 + Math.sin(time * 0.005) * 0.012;
+          context.save();
+          context.translate(x, y + size * 0.018);
+          context.scale(chamberPulse, chamberPulse);
+          context.shadowColor = colors.pink;
+          context.shadowBlur = size * (0.025 + beatKick * 0.055);
+          context.fillStyle = colors.ink;
+          context.strokeStyle = colors.washiDeep;
+          context.lineWidth = size * 0.012;
+          context.beginPath();
+          for (let point = 0; point < 12; point += 1) {
+            const angle = (point / 12) * Math.PI * 2 - Math.PI / 2;
+            const radius = size * (point % 2 === 0 ? 0.125 : 0.105);
+            const pointX = Math.cos(angle) * radius;
+            const pointY = Math.sin(angle) * radius;
+            if (point === 0) context.moveTo(pointX, pointY);
+            else context.lineTo(pointX, pointY);
+          }
+          context.closePath();
+          context.fill();
+          context.stroke();
+          context.shadowColor = "transparent";
+          context.fillStyle = colors.rust;
+          context.beginPath();
+          context.arc(0, 0, size * 0.055, 0, Math.PI * 2);
+          context.fill();
+          context.fillStyle = colors.washiDeep;
+          context.beginPath();
+          context.arc(-size * 0.015, -size * 0.017, size * 0.014, 0, Math.PI * 2);
+          context.fill();
+          context.restore();
+
+          context.strokeStyle = colors.washiLight;
+          context.globalAlpha = 0.48;
+          context.lineWidth = size * 0.008;
+          context.beginPath();
+          context.moveTo(x - size * 0.22, y - size * 0.2);
+          context.lineTo(x + size * 0.12, y - size * 0.23);
+          context.stroke();
+          context.globalAlpha = 1;
+        }
+
+        function drawMeritReactorWoodfish(x, y, size, time, beatKick, positiveImpact) {
+          const petalColors = [colors.cyberCyan, colors.sand, colors.rust, colors.purple];
+          const activePetal = getQuarterBeatIndex(time);
+          context.save();
+          context.translate(x, y);
+
+          context.fillStyle = colors.ink;
+          context.beginPath();
+          context.arc(0, 0, size * 0.275, 0, Math.PI * 2);
+          context.fill();
+          context.strokeStyle = colors.steelBright;
+          context.lineWidth = size * 0.009;
+          context.globalAlpha = 0.6;
+          context.stroke();
+
+          for (let petal = 0; petal < 4; petal += 1) {
+            const isActive = petal === activePetal;
+            const pulse = reducedMotion
+              ? 1
+              : 1 + (isActive ? beatKick * 0.12 : 0) + positiveImpact * 0.025;
+            context.save();
+            context.rotate(-Math.PI / 2 + petal * Math.PI / 2);
+            context.scale(pulse, pulse);
+            context.fillStyle = petalColors[petal];
+            context.strokeStyle = colors.ink;
+            context.lineWidth = size * 0.012;
+            context.shadowColor = isActive ? petalColors[petal] : "transparent";
+            context.shadowBlur = isActive ? size * 0.06 * beatKick : 0;
+            context.beginPath();
+            context.moveTo(-size * 0.095, -size * 0.055);
+            context.bezierCurveTo(
+              -size * 0.175,
+              -size * 0.17,
+              -size * 0.13,
+              -size * 0.34,
+              0,
+              -size * 0.365
+            );
+            context.bezierCurveTo(
+              size * 0.13,
+              -size * 0.34,
+              size * 0.175,
+              -size * 0.17,
+              size * 0.095,
+              -size * 0.055
+            );
+            context.closePath();
+            context.fill();
+            context.stroke();
+
+            context.shadowColor = "transparent";
+            context.strokeStyle = colors.washiLight;
+            context.globalAlpha = 0.52;
+            context.lineWidth = size * 0.006;
+            context.beginPath();
+            context.moveTo(0, -size * 0.11);
+            context.lineTo(0, -size * 0.292);
+            context.stroke();
+            context.restore();
+          }
+          context.globalAlpha = 1;
+
+          context.fillStyle = colors.steelDark;
+          context.strokeStyle = colors.steelBright;
+          context.lineWidth = size * 0.012;
+          context.beginPath();
+          context.arc(0, 0, size * 0.205, 0, Math.PI * 2);
+          context.fill();
+          context.stroke();
+
+          const core = context.createRadialGradient(
+            -size * 0.055,
+            -size * 0.065,
+            size * 0.012,
+            0,
+            0,
+            size * 0.18
+          );
+          core.addColorStop(0, colors.woodHighlight);
+          core.addColorStop(0.38, colors.woodLight);
+          core.addColorStop(0.8, colors.wood);
+          core.addColorStop(1, colors.woodDeep);
+          context.fillStyle = core;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = size * 0.014;
+          context.beginPath();
+          context.arc(0, 0, size * 0.16, 0, Math.PI * 2);
+          context.fill();
+          context.stroke();
+
+          context.strokeStyle = colors.ink;
+          context.lineCap = "round";
+          context.lineWidth = size * 0.038;
+          context.beginPath();
+          context.arc(0, -size * 0.008, size * 0.105, Math.PI * 0.08, Math.PI * 0.92);
+          context.stroke();
+          context.strokeStyle = colors.woodHighlight;
+          context.globalAlpha = 0.65;
+          context.lineWidth = size * 0.008;
+          context.beginPath();
+          context.arc(0, -size * 0.018, size * 0.103, Math.PI * 0.1, Math.PI * 0.9);
+          context.stroke();
+
+          for (let bolt = 0; bolt < 4; bolt += 1) {
+            const angle = bolt * Math.PI / 2 + Math.PI / 4;
+            context.globalAlpha = 1;
+            context.fillStyle = colors.steelBright;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = size * 0.004;
+            context.beginPath();
+            context.arc(
+              Math.cos(angle) * size * 0.185,
+              Math.sin(angle) * size * 0.185,
+              size * 0.014,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.stroke();
+          }
+          context.restore();
+        }
+
         function drawWoodfish(x, y, size, time) {
           const elapsed = (time - woodStrikeStarted) / 1000;
           const duration = reducedMotion ? 0.001 : WOOD_STRIKE_DURATION;
@@ -4509,14 +4948,23 @@
           drawCushion(x, bodyY, size);
 
           context.save();
+          const styleProgress = Math.min(1, Math.max(0, (time - woodfishStyleChangedAt) / 420));
+          const styleEnter = reducedMotion ? 1 : 1 - Math.pow(1 - styleProgress, 3);
+          const styleScale = 0.84 + styleEnter * 0.16;
           context.translate(bodyX, bodyY);
+          context.rotate(
+            reducedMotion
+              ? 0
+              : (1 - styleProgress) * (woodfishStyleIndex === 1 ? -0.055 : 0.055)
+          );
           context.scale(
-            1 + positiveImpact * 0.034 + beatKick * 0.006,
-            1 - positiveImpact * 0.044 + beatKick * 0.006
+            styleScale * (1 + positiveImpact * 0.034 + beatKick * 0.006),
+            styleScale * (1 - positiveImpact * 0.044 + beatKick * 0.006)
           );
           context.translate(-bodyX, -bodyY);
 
-          for (let layer = 5; layer >= 1; layer -= 1) {
+          if (woodfishStyleIndex === 0) {
+            for (let layer = 5; layer >= 1; layer -= 1) {
             const depth = bodyPath(
               bodyX,
               bodyY,
@@ -4664,38 +5112,11 @@
           context.stroke();
           context.restore();
 
-          context.save();
-          for (const side of [-1, 1]) {
-            const eyeX = bodyX + side * size * 0.225;
-            const eyeY = bodyY + size * 0.015;
-            context.fillStyle = colors.ink;
-            context.beginPath();
-            context.ellipse(
-              eyeX,
-              eyeY,
-              size * 0.038,
-              size * 0.052,
-              side * 0.2,
-              0,
-              Math.PI * 2
-            );
-            context.fill();
-            context.fillStyle = colors.rust;
-            context.beginPath();
-            context.arc(eyeX, eyeY, size * 0.015, 0, Math.PI * 2);
-            context.fill();
-            context.fillStyle = colors.washiLight;
-            context.beginPath();
-            context.arc(
-              eyeX - side * size * 0.005,
-              eyeY - size * 0.006,
-              size * 0.004,
-              0,
-              Math.PI * 2
-            );
-            context.fill();
+          } else if (woodfishStyleIndex === 1) {
+            drawLacquerGateWoodfish(bodyX, bodyY, size, time, beatKick);
+          } else {
+            drawMeritReactorWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
           }
-          context.restore();
 
           if (positiveImpact > 0.05) {
             context.save();
@@ -5797,12 +6218,24 @@
           }
         }
 
+        let suppressActionUntil = 0;
+
+        function handleStageActionClick(event) {
+          if (performance.now() < suppressActionUntil) {
+            event.preventDefault();
+            return;
+          }
+          performUserAction();
+        }
+
         meritTab.addEventListener("click", () => setMode("merit"));
         releaseTab.addEventListener("click", () => setMode("release"));
         meritTab.addEventListener("keydown", handleTabKeydown);
         releaseTab.addEventListener("keydown", handleTabKeydown);
-        meritAction.addEventListener("click", performUserAction);
-        releaseAction.addEventListener("click", performUserAction);
+        meritAction.addEventListener("click", handleStageActionClick);
+        releaseAction.addEventListener("click", handleStageActionClick);
+        woodfishPrevious.addEventListener("click", () => cycleWoodfishStyle(-1));
+        woodfishNext.addEventListener("click", () => cycleWoodfishStyle(1));
         autoToggle.addEventListener("click", toggleAuto);
         soundToggle.addEventListener("click", toggleSound);
         fortuneContinue.addEventListener("click", () => closeFortuneSummary());
@@ -5844,6 +6277,18 @@
             || target instanceof HTMLTextAreaElement
             || target instanceof HTMLSelectElement
             || target.isContentEditable;
+          const isStyleShortcutTarget = target === meritAction
+            || target === document.body
+            || target === document.documentElement;
+          if (
+            canChooseWoodfishStyle()
+            && isStyleShortcutTarget
+            && (event.key === "ArrowLeft" || event.key === "ArrowRight")
+          ) {
+            event.preventDefault();
+            cycleWoodfishStyle(event.key === "ArrowLeft" ? -1 : 1);
+            return;
+          }
           const isInteractive = target instanceof Element
             && Boolean(target.closest("button, a, input, textarea, select, [contenteditable='true']"));
           const isUnmodifiedSpace = event.code === "Space"
@@ -5872,10 +6317,18 @@
         function handleDocumentPointerDown(event) {
           resetIdleHint();
           if (!event.isPrimary) return;
+          const target = event.target;
+          const startedOnControl = target instanceof Element
+            && Boolean(
+              target.closest(
+                "button:not(.stage-action), a[href], input, textarea, select, [contenteditable='true'], [role='dialog']"
+              )
+            );
           screenPointerStart = {
             id: event.pointerId,
             x: event.clientX,
-            y: event.clientY
+            y: event.clientY,
+            startedOnControl
           };
         }
 
@@ -5891,11 +6344,21 @@
             return;
           }
 
-          const distance = Math.hypot(
-            event.clientX - screenPointerStart.x,
-            event.clientY - screenPointerStart.y
-          );
+          const deltaX = event.clientX - screenPointerStart.x;
+          const deltaY = event.clientY - screenPointerStart.y;
+          const startedOnControl = screenPointerStart.startedOnControl;
+          const distance = Math.hypot(deltaX, deltaY);
           screenPointerStart = null;
+          const isHorizontalStyleSwipe = canChooseWoodfishStyle()
+            && !startedOnControl
+            && Math.abs(deltaX) >= 48
+            && Math.abs(deltaX) > Math.abs(deltaY) * 1.25;
+          if (isHorizontalStyleSwipe) {
+            event.preventDefault();
+            suppressActionUntil = performance.now() + 450;
+            cycleWoodfishStyle(deltaX < 0 ? 1 : -1);
+            return;
+          }
           if (distance > 18 || (event.pointerType === "mouse" && event.button !== 0)) return;
 
           const target = event.target;
@@ -5914,7 +6377,7 @@
           window.visualViewport.addEventListener("resize", syncViewportMetrics, { passive: true });
         }
         document.addEventListener("pointerdown", handleDocumentPointerDown, { passive: true, capture: true });
-        document.addEventListener("pointerup", handleDocumentPointerUp, { passive: true });
+        document.addEventListener("pointerup", handleDocumentPointerUp, { passive: false });
         document.addEventListener("pointercancel", () => {
           screenPointerStart = null;
         }, { passive: true });
@@ -6019,6 +6482,9 @@
             triggerFever();
           },
           setMode,
+          setWoodfishStyle: (index) => setWoodfishStyle(index, false),
+          previousWoodfishStyle: () => cycleWoodfishStyle(-1, false),
+          nextWoodfishStyle: () => cycleWoodfishStyle(1, false),
           toggleAuto,
           startBgm,
           draw: () => draw(performance.now()),
@@ -6032,6 +6498,14 @@
               release: releaseTotal,
               global: getDemoGlobal(),
               sound: soundEnabled,
+              woodfishStyle: {
+                index: woodfishStyleIndex,
+                id: WOODFISH_STYLES[woodfishStyleIndex].id,
+                name: WOODFISH_STYLES[woodfishStyleIndex].name,
+                selectable: canChooseWoodfishStyle(),
+                count: WOODFISH_STYLES.length,
+                swipeThresholdPx: 48
+              },
               bgm: {
                 bpm: BGM_BPM,
                 beatOffsetSeconds: BGM_BEAT_OFFSET_SECONDS,
