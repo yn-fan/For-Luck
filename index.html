@@ -1,5 +1,10 @@
 <!doctype html>
-<html lang="zh-CN" data-product="other" data-location-endpoint="">
+<html
+  lang="zh-CN"
+  data-product="other"
+  data-location-endpoint=""
+  data-ritual-api="/api/ritual"
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -567,6 +572,40 @@
         line-height: var(--lineHeightBase100);
         font-weight: var(--fontWeightBold);
         letter-spacing: var(--microTracking);
+      }
+
+      .woodfish-photo-upload {
+        position: absolute;
+        z-index: 4;
+        left: 50%;
+        bottom: calc(0px - var(--spacingVerticalS));
+        min-width: var(--controlMinSize);
+        min-height: var(--controlMinSize);
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
+        color: var(--colorInk);
+        background: var(--colorAccentLime);
+        border: var(--strokeMedium) solid var(--colorInk);
+        border-radius: var(--borderRadiusNone);
+        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorAccentPurple);
+        cursor: pointer;
+        font-weight: var(--fontWeightBold);
+        transform: translateX(-50%) rotate(0.7deg);
+        transition:
+          transform var(--durationFast) var(--curveEasyEase),
+          background var(--durationFast) var(--curveEasyEase);
+      }
+
+      .woodfish-photo-upload[hidden] {
+        display: none;
+      }
+
+      .woodfish-photo-upload:hover {
+        background: var(--colorAccentYellow);
+        transform: translateX(-50%) translateY(var(--hoverOffset)) rotate(-0.7deg);
+      }
+
+      .woodfish-photo-upload:active {
+        transform: translateX(-50%) scale(var(--pressScale));
       }
 
       body[data-mode="release"] .stage {
@@ -2071,6 +2110,7 @@
         .idle-hint,
         .woodfish-picker-button,
         .woodfish-picker-label,
+        .woodfish-photo-upload,
         .fortune-slip,
         .fortune-kicker,
         .fortune-title,
@@ -2100,6 +2140,7 @@
         .idle-hint,
         .woodfish-picker-button,
         .woodfish-picker-label,
+        .woodfish-photo-upload,
         .fortune-slip,
         .fortune-kicker,
         .fortune-keyword,
@@ -2118,7 +2159,8 @@
         }
 
         .woodfish-picker-button,
-        .woodfish-picker-label {
+        .woodfish-picker-label,
+        .woodfish-photo-upload {
           color: ButtonText;
           background: ButtonFace;
           box-shadow: none;
@@ -2273,7 +2315,7 @@
           </button>
           <p class="woodfish-picker-label">
             <strong id="woodfishStyleName">玄木共鸣</strong>
-            <span id="woodfishStylePosition">1 / 3 · 左右滑动</span>
+            <span id="woodfishStylePosition">1 / 4 · 左右滑动</span>
           </p>
           <button
             class="woodfish-picker-button"
@@ -2284,6 +2326,16 @@
             <span aria-hidden="true">→</span>
           </button>
         </div>
+        <button
+          class="woodfish-photo-upload"
+          id="woodfishPhotoUpload"
+          type="button"
+          aria-describedby="woodfishPhotoHelp"
+          hidden
+        >
+          上传照片
+        </button>
+        <input id="woodfishPhotoInput" type="file" accept="image/*" hidden />
       </div>
 
       <aside class="stats" aria-labelledby="statsTitle">
@@ -2320,6 +2372,9 @@
         <span class="visually-hidden" id="woodfishStyleHelp">
           游戏开始前可左右滑动屏幕，或使用木鱼样式左右按钮切换造型
         </span>
+        <span class="visually-hidden" id="woodfishPhotoHelp">
+          照片只在当前设备中裁切并保存，不会上传到服务器
+        </span>
         <dl class="stats-grid">
           <div class="stat">
             <dt id="globalLabel">全球功德</dt>
@@ -2334,7 +2389,7 @@
 
       <footer class="footer-note">
         <p class="visually-hidden" id="storagePolicy">
-          个人功德与放生记录只存于此设备；全球数字为交互演示
+          联网后，个人功德与放生记录按不可逆 IP 哈希延续，全球数字来自真实数据库；原始 IP 与照片都不会上传或保存
         </p>
         <p class="signature-line">
           <span lang="en">Love from Suzhou</span> 爱来自苏州 @乱讲实验室 @黑糖不是黑桃
@@ -2470,6 +2525,10 @@
         const BGM_QUARTER_MS = 60000 / BGM_BPM;
         const BGM_BEAT_OFFSET_SECONDS = 0.435;
         const BGM_VOLUME = 0.24;
+        const RITUAL_API_ENDPOINT =
+          document.documentElement.dataset.ritualApi?.trim() || "";
+        const MAX_PHOTO_BYTES = 12 * 1024 * 1024;
+        const PHOTO_OUTPUT_SIZE = 512;
         const WOOD_SOUND_PEAK = Object.freeze({
           normal: 0.54,
           perfect: 0.62
@@ -2492,8 +2551,9 @@
         ]);
         const WOODFISH_STYLES = Object.freeze([
           { id: "resonance", name: "玄木共鸣" },
-          { id: "lacquer-gate", name: "漆印拍门" },
-          { id: "merit-reactor", name: "功德反应堆" }
+          { id: "ancient-door", name: "开门啊 我知道你在家！" },
+          { id: "mochi-pounding", name: "年糕捣捣" },
+          { id: "custom-photo", name: "敲张照片" }
         ]);
         const MODES = {
           merit: {
@@ -2501,7 +2561,6 @@
             autoDescription: "开启后你敲正拍，赛博鼓槌敲反拍；功德时刻会自动加入",
             globalLabel: "全球功德",
             personalLabel: "我已积攒的功德",
-            globalBase: 1286420,
             beatStep: 2,
             autoDelay: BGM_QUARTER_MS * 2
           },
@@ -2510,7 +2569,6 @@
             autoDescription: "开启后按背景音乐节拍自动放生",
             globalLabel: "全球放生",
             personalLabel: "我的放生",
-            globalBase: 48216,
             beatStep: 4,
             autoDelay: BGM_QUARTER_MS * 4
           }
@@ -2521,6 +2579,12 @@
           audioBlocked: "浏览器暂时阻止了声音，请再次操作",
           bgmUnavailable: "背景音乐加载失败，音效与计数仍可正常使用",
           locationUnavailable: "暂时无法获取 IP 所在地，已显示“苏州”",
+          ritualConnecting: "正在连接真实功德网络",
+          ritualUnavailable: "真实功德网络暂不可用，本轮记录会保存在此设备并在恢复后重试",
+          ritualSynced: "真实功德已同步",
+          photoTypeUnavailable: "请选择浏览器支持的图片格式",
+          photoTooLarge: "照片不能超过 12 MB",
+          photoReadFailed: "照片读取失败，请换一张再试",
           autoStoppedOnSwitch: "已切换模式，协作或自动操作已关闭",
           modeMerit: "已切换到木鱼模式",
           modeRelease: "已切换到放生模式",
@@ -2687,6 +2751,8 @@
         const woodfishStyleName = document.getElementById("woodfishStyleName");
         const woodfishStylePosition = document.getElementById("woodfishStylePosition");
         const woodfishStyleHelp = document.getElementById("woodfishStyleHelp");
+        const woodfishPhotoUpload = document.getElementById("woodfishPhotoUpload");
+        const woodfishPhotoInput = document.getElementById("woodfishPhotoInput");
         const autoToggle = document.getElementById("autoToggle");
         const autoLabel = document.getElementById("autoLabel");
         const autoDescription = document.getElementById("autoDescription");
@@ -2697,7 +2763,7 @@
         const personalLabel = document.getElementById("personalLabel");
         const personalCount = document.getElementById("personalCount");
         const releaseDetail = document.getElementById("releaseDetail");
-        const storageNote = document.getElementById("storageNote");
+        const storageNote = document.getElementById("storagePolicy");
         const systemNote = document.getElementById("systemNote");
         const liveStatus = document.getElementById("liveStatus");
         const fortuneOverlay = document.getElementById("fortuneOverlay");
@@ -2775,12 +2841,18 @@
         let soundEnabled = true;
         let storageAvailable = true;
         let woodfishStyleIndex = 0;
+        let previousWoodfishStyleIndex = 0;
+        let woodfishTransitionDirection = 1;
         let woodfishStyleChangedAt = performance.now();
+        let customPhotoDataUrl = "";
+        let customPhotoImage = null;
         let autoActive = false;
         let autoTimer = 0;
-        let demoRemoteMerit = 0;
-        let demoRemoteRelease = 0;
-        let demoTick = 0;
+        let ritualNetworkState = RITUAL_API_ENDPOINT ? "connecting" : "unavailable";
+        let ritualGlobal = { merit: null, release: null };
+        let pendingRitualEvents = [];
+        let ritualConnectBusy = false;
+        let ritualSyncBusy = false;
         let reducedMotion = reducedMotionQuery.matches;
         let audioContext = null;
         let noiseBuffer = null;
@@ -3144,6 +3216,117 @@
           setSystemMessage(STRINGS.storageUnavailable);
         }
 
+        function isCustomPhotoStyle(index = woodfishStyleIndex) {
+          return WOODFISH_STYLES[index]?.id === "custom-photo";
+        }
+
+        function setCustomPhotoDataUrl(dataUrl) {
+          customPhotoDataUrl = typeof dataUrl === "string" ? dataUrl : "";
+          customPhotoImage = null;
+          if (!customPhotoDataUrl) {
+            renderUi();
+            return;
+          }
+          const image = new Image();
+          image.decoding = "async";
+          image.onload = () => {
+            if (image.src !== customPhotoDataUrl) return;
+            customPhotoImage = image;
+            renderUi();
+          };
+          image.onerror = () => {
+            if (image.src !== customPhotoDataUrl) return;
+            customPhotoDataUrl = "";
+            customPhotoImage = null;
+            saveState();
+            renderUi();
+            setSystemMessage(STRINGS.photoReadFailed);
+            announce(STRINGS.photoReadFailed);
+          };
+          image.src = customPhotoDataUrl;
+        }
+
+        async function decodePhoto(file) {
+          if (typeof window.createImageBitmap === "function") {
+            try {
+              return await window.createImageBitmap(file, {
+                imageOrientation: "from-image"
+              });
+            } catch (error) {
+              // Fall through to the broadly supported object URL path.
+            }
+          }
+          return await new Promise((resolve, reject) => {
+            const objectUrl = URL.createObjectURL(file);
+            const image = new Image();
+            image.onload = () => {
+              URL.revokeObjectURL(objectUrl);
+              resolve(image);
+            };
+            image.onerror = () => {
+              URL.revokeObjectURL(objectUrl);
+              reject(new Error("Photo decode failed"));
+            };
+            image.src = objectUrl;
+          });
+        }
+
+        async function handlePhotoUpload(event) {
+          const [file] = event.target.files || [];
+          event.target.value = "";
+          if (!file) return;
+          if (!file.type.startsWith("image/")) {
+            setSystemMessage(STRINGS.photoTypeUnavailable);
+            announce(STRINGS.photoTypeUnavailable);
+            return;
+          }
+          if (file.size > MAX_PHOTO_BYTES) {
+            setSystemMessage(STRINGS.photoTooLarge);
+            announce(STRINGS.photoTooLarge);
+            return;
+          }
+
+          try {
+            const source = await decodePhoto(file);
+            const sourceWidth = source.naturalWidth || source.width;
+            const sourceHeight = source.naturalHeight || source.height;
+            if (!sourceWidth || !sourceHeight) throw new Error("Photo has no dimensions");
+            const cropSize = Math.min(sourceWidth, sourceHeight);
+            const sourceX = (sourceWidth - cropSize) / 2;
+            const sourceY = (sourceHeight - cropSize) / 2;
+            const photoCanvas = document.createElement("canvas");
+            photoCanvas.width = PHOTO_OUTPUT_SIZE;
+            photoCanvas.height = PHOTO_OUTPUT_SIZE;
+            const photoContext = photoCanvas.getContext("2d", { alpha: false });
+            photoContext.fillStyle = colors.washi;
+            photoContext.fillRect(0, 0, PHOTO_OUTPUT_SIZE, PHOTO_OUTPUT_SIZE);
+            photoContext.drawImage(
+              source,
+              sourceX,
+              sourceY,
+              cropSize,
+              cropSize,
+              0,
+              0,
+              PHOTO_OUTPUT_SIZE,
+              PHOTO_OUTPUT_SIZE
+            );
+            if (typeof source.close === "function") source.close();
+            setCustomPhotoDataUrl(photoCanvas.toDataURL("image/jpeg", 0.86));
+            previousWoodfishStyleIndex = woodfishStyleIndex;
+            woodfishStyleChangedAt = performance.now();
+            saveState();
+            renderUi();
+            setSystemMessage(
+              ritualNetworkState === "unavailable" ? STRINGS.ritualUnavailable : ""
+            );
+            announce("照片已裁成圆形敲击主题，只保存在当前设备");
+          } catch (error) {
+            setSystemMessage(STRINGS.photoReadFailed);
+            announce(STRINGS.photoReadFailed);
+          }
+        }
+
         function loadState() {
           try {
             const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -3155,6 +3338,16 @@
               woodfishStyleIndex = Number.isInteger(saved.woodfishStyle)
                 ? positiveModulo(saved.woodfishStyle, WOODFISH_STYLES.length)
                 : 0;
+              previousWoodfishStyleIndex = woodfishStyleIndex;
+              pendingRitualEvents = Array.isArray(saved.pendingRitualEvents)
+                ? saved.pendingRitualEvents.filter(
+                    (event) =>
+                      event
+                      && typeof event.id === "string"
+                      && (event.action === "merit" || event.action === "release")
+                  ).slice(-5000)
+                : [];
+              setCustomPhotoDataUrl(saved.customPhoto);
               return;
             }
 
@@ -3178,7 +3371,9 @@
                 merit: meritTotal,
                 release: releaseTotal,
                 sound: soundEnabled,
-                woodfishStyle: woodfishStyleIndex
+                woodfishStyle: woodfishStyleIndex,
+                customPhoto: customPhotoDataUrl,
+                pendingRitualEvents
               })
             );
           } catch (error) {
@@ -3190,9 +3385,144 @@
           return mode === "merit" ? meritTotal : releaseTotal;
         }
 
-        function getDemoGlobal() {
-          const remote = mode === "merit" ? demoRemoteMerit : demoRemoteRelease;
-          return MODES[mode].globalBase + getPersonalTotal() + remote;
+        function pendingEventCount(action) {
+          return pendingRitualEvents.reduce(
+            (total, event) => total + (event.action === action ? 1 : 0),
+            0
+          );
+        }
+
+        function getGlobalTotal() {
+          const value = ritualGlobal[mode];
+          return Number.isFinite(value) ? Math.max(0, value) : null;
+        }
+
+        function makeRitualEventId() {
+          if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+          const random = Math.floor(randomUnit() * Number.MAX_SAFE_INTEGER).toString(36);
+          return `${Date.now().toString(36)}-${random}`;
+        }
+
+        function getRitualApiUrl() {
+          if (!RITUAL_API_ENDPOINT) return null;
+          const endpoint = new URL(RITUAL_API_ENDPOINT, window.location.origin);
+          if (endpoint.origin !== window.location.origin) {
+            throw new Error("Ritual API must be same-origin");
+          }
+          return endpoint;
+        }
+
+        function normalizeRitualPayload(payload) {
+          const personalMerit = Number(payload?.personal?.merit);
+          const personalRelease = Number(payload?.personal?.release);
+          const globalMerit = Number(payload?.global?.merit);
+          const globalRelease = Number(payload?.global?.release);
+          const values = [personalMerit, personalRelease, globalMerit, globalRelease];
+          if (!values.every((value) => Number.isSafeInteger(value) && value >= 0)) {
+            throw new Error("Ritual API returned invalid counters");
+          }
+          return {
+            personal: { merit: personalMerit, release: personalRelease },
+            global: { merit: globalMerit, release: globalRelease }
+          };
+        }
+
+        function applyRitualPayload(payload) {
+          const normalized = normalizeRitualPayload(payload);
+          meritTotal = normalized.personal.merit + pendingEventCount("merit");
+          releaseTotal = normalized.personal.release + pendingEventCount("release");
+          ritualGlobal = {
+            merit: normalized.global.merit + pendingEventCount("merit"),
+            release: normalized.global.release + pendingEventCount("release")
+          };
+          storageNote.textContent =
+            "个人记录按不可逆 IP 哈希延续；同一公网 IP 共用记录，更换网络或 VPN 后会变化。照片只保存在当前设备。";
+        }
+
+        async function flushPendingRitualEvents() {
+          if (
+            ritualSyncBusy
+            || ritualNetworkState !== "online"
+            || pendingRitualEvents.length === 0
+          ) {
+            return;
+          }
+          ritualSyncBusy = true;
+          try {
+            const endpoint = getRitualApiUrl();
+            while (pendingRitualEvents.length > 0 && ritualNetworkState === "online") {
+              const event = pendingRitualEvents[0];
+              const response = await window.fetch(endpoint, {
+                method: "POST",
+                cache: "no-store",
+                credentials: "same-origin",
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ action: event.action, eventId: event.id })
+              });
+              if (!response.ok) {
+                throw new Error(`Ritual update failed: ${response.status}`);
+              }
+              const payload = await response.json();
+              pendingRitualEvents.shift();
+              applyRitualPayload(payload);
+              saveState();
+              renderUi();
+            }
+          } catch (error) {
+            ritualNetworkState = "unavailable";
+            setSystemMessage(STRINGS.ritualUnavailable);
+            announce(STRINGS.ritualUnavailable);
+          } finally {
+            ritualSyncBusy = false;
+          }
+        }
+
+        async function connectRitualStats(shouldAnnounce = false) {
+          if (!RITUAL_API_ENDPOINT || ritualConnectBusy || ritualSyncBusy) return;
+          const previousNetworkState = ritualNetworkState;
+          ritualConnectBusy = true;
+          ritualNetworkState = "connecting";
+          renderUi();
+          try {
+            const endpoint = getRitualApiUrl();
+            const response = await window.fetch(endpoint, {
+              cache: "no-store",
+              credentials: "same-origin",
+              headers: { Accept: "application/json" }
+            });
+            if (!response.ok) {
+              throw new Error(`Ritual request failed: ${response.status}`);
+            }
+            applyRitualPayload(await response.json());
+            ritualNetworkState = "online";
+            saveState();
+            renderUi();
+            setSystemMessage("");
+            if (shouldAnnounce) announce(STRINGS.ritualSynced);
+            void flushPendingRitualEvents();
+          } catch (error) {
+            ritualNetworkState = "unavailable";
+            storageNote.textContent =
+              "真实功德网络暂不可用；个人记录暂存在此设备，恢复连接后会自动重试。照片不会上传。";
+            renderUi();
+            setSystemMessage(STRINGS.ritualUnavailable);
+            if (previousNetworkState !== "unavailable" || shouldAnnounce) {
+              announce(STRINGS.ritualUnavailable);
+            }
+          } finally {
+            ritualConnectBusy = false;
+          }
+        }
+
+        function enqueueRitualAction(action) {
+          if (!RITUAL_API_ENDPOINT) return;
+          pendingRitualEvents.push({ id: makeRitualEventId(), action });
+          pendingRitualEvents = pendingRitualEvents.slice(-5000);
+          saveState();
+          if (ritualNetworkState === "online") void flushPendingRitualEvents();
         }
 
         function canChooseWoodfishStyle() {
@@ -3210,6 +3540,15 @@
             WOODFISH_STYLES.length
           );
           if (normalizedIndex === woodfishStyleIndex) return false;
+          previousWoodfishStyleIndex = woodfishStyleIndex;
+          const forwardDistance = positiveModulo(
+            normalizedIndex - woodfishStyleIndex,
+            WOODFISH_STYLES.length
+          );
+          woodfishTransitionDirection =
+            forwardDistance > 0 && forwardDistance <= WOODFISH_STYLES.length / 2
+              ? 1
+              : -1;
           woodfishStyleIndex = normalizedIndex;
           woodfishStyleChangedAt = performance.now();
           renderUi();
@@ -3244,6 +3583,13 @@
           meritAction.tabIndex = mode === "merit" ? 0 : -1;
           releaseAction.tabIndex = mode === "release" ? 0 : -1;
           woodfishPicker.hidden = !styleSelectable;
+          const photoStyleSelected = isCustomPhotoStyle();
+          woodfishPhotoUpload.hidden = !styleSelectable || !photoStyleSelected;
+          woodfishPhotoUpload.textContent = customPhotoImage ? "换一张照片" : "上传照片";
+          woodfishPhotoUpload.setAttribute(
+            "aria-label",
+            customPhotoImage ? "更换敲击照片" : "上传一张圆形敲击照片"
+          );
           woodfishStyleName.textContent = WOODFISH_STYLES[woodfishStyleIndex].name;
           woodfishStylePosition.textContent =
             `${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length} · 左右滑动`;
@@ -3261,7 +3607,16 @@
           soundToggle.setAttribute("aria-pressed", String(soundEnabled));
 
           globalLabel.textContent = config.globalLabel;
-          globalCount.textContent = formatter.format(getDemoGlobal());
+          const globalTotal = getGlobalTotal();
+          globalCount.textContent = globalTotal === null
+            ? ritualNetworkState === "connecting"
+              ? "连接中"
+              : "暂不可用"
+            : formatter.format(globalTotal);
+          globalCount.setAttribute(
+            "aria-busy",
+            String(ritualNetworkState === "connecting")
+          );
           personalLabel.textContent = config.personalLabel;
           personalCount.textContent = formatter.format(getPersonalTotal());
         }
@@ -3733,6 +4088,7 @@
           lastTimingGrade = timing.label;
           lastActionWasCountIn = countIn;
           meritTotal += 1;
+          enqueueRitualAction("merit");
           const geometry = stageGeometry();
           addMeritHitVisual(actionTime, fromAuto, geometry);
           addBurst(timing, "功德 +1", "", geometry, "merit");
@@ -3761,6 +4117,7 @@
           sessionActionCount += 1;
           sessionCyberCount += 1;
           meritTotal += 1;
+          enqueueRitualAction("merit");
           addMeritHitVisual(actionTime, true, geometry);
           addBurst(
             CYBER_DUET_TIMING,
@@ -3790,6 +4147,7 @@
           fishSchool.push(fish);
           fishSchool = fishSchool.slice(-42);
           releaseTotal += 1;
+          enqueueRitualAction("release");
           releaseDetail.textContent = `${timing.label} · 刚刚放生：${item.name}`;
           const entry = projectSea(
             geometry.x,
@@ -3835,6 +4193,11 @@
         }
 
         function performUserAction() {
+          if (mode === "merit" && isCustomPhotoStyle() && !customPhotoImage) {
+            woodfishPhotoInput.click();
+            announce("请先上传一张照片，再开始敲击");
+            return;
+          }
           const actionTime = performance.now();
           const countIn = sessionManualActionCount === 0 && !isBgmPlaying();
           const expectedManualActions = sessionManualActionCount + 1;
@@ -3941,7 +4304,9 @@
           }
           renderUi();
           saveState();
-          setSystemMessage("");
+          setSystemMessage(
+            ritualNetworkState === "unavailable" ? STRINGS.ritualUnavailable : ""
+          );
           announce(
             soundEnabled
               ? "背景音乐已开启，木槌与抽签音效始终保留"
@@ -4748,243 +5113,317 @@
           context.restore();
         }
 
-        function drawLacquerGateWoodfish(x, y, size, time, beatKick) {
-          const gatePath = (offsetY = 0) => {
-            const path = new Path2D();
-            path.moveTo(x - size * 0.31, y - size * 0.1 + offsetY);
-            path.lineTo(x - size * 0.18, y - size * 0.3 + offsetY);
-            path.lineTo(x + size * 0.13, y - size * 0.32 + offsetY);
-            path.lineTo(x + size * 0.31, y - size * 0.15 + offsetY);
-            path.lineTo(x + size * 0.34, y + size * 0.15 + offsetY);
-            path.lineTo(x + size * 0.2, y + size * 0.3 + offsetY);
-            path.lineTo(x - size * 0.2, y + size * 0.3 + offsetY);
-            path.lineTo(x - size * 0.34, y + size * 0.13 + offsetY);
-            path.closePath();
-            return path;
-          };
+        function drawAncientDoorWoodfish(x, y, size, time, beatKick) {
+          const doorPulse = reducedMotion
+            ? 1
+            : 1 + beatKick * 0.018 + Math.sin(time * 0.0024) * 0.004;
+          context.save();
+          context.translate(x, y);
+          context.scale(doorPulse, doorPulse);
 
-          for (let layer = 5; layer >= 1; layer -= 1) {
-            context.fillStyle = layer < 3 ? colors.steelMid : colors.ink;
-            context.globalAlpha = 0.66 + layer * 0.055;
-            context.fill(gatePath(size * layer * 0.004));
-          }
+          context.fillStyle = colors.shadow;
+          context.globalAlpha = 0.42;
+          context.fillRect(-size * 0.3, -size * 0.2, size * 0.62, size * 0.55);
           context.globalAlpha = 1;
 
-          const body = gatePath();
-          const lacquer = context.createLinearGradient(
-            x - size * 0.28,
-            y - size * 0.28,
-            x + size * 0.3,
-            y + size * 0.3
-          );
-          lacquer.addColorStop(0, colors.steelLight);
-          lacquer.addColorStop(0.18, colors.steelMid);
-          lacquer.addColorStop(0.52, colors.ink);
-          lacquer.addColorStop(0.78, colors.steelDark);
-          lacquer.addColorStop(1, colors.ink);
-          context.save();
-          context.fillStyle = lacquer;
-          context.shadowColor = colors.shadow;
-          context.shadowBlur = size * 0.06;
-          context.shadowOffsetY = size * 0.025;
-          context.fill(body);
-          context.shadowColor = "transparent";
-          context.strokeStyle = colors.ink;
-          context.lineWidth = size * 0.017;
-          context.stroke(body);
-          context.restore();
-
-          for (const side of [-1, 1]) {
-            context.save();
-            context.translate(x + side * size * 0.135, y + size * 0.01);
-            context.rotate(side * -0.045);
-            context.fillStyle = side < 0 ? colors.rust : colors.pink;
-            context.strokeStyle = colors.ink;
-            context.lineWidth = size * 0.011;
-            context.beginPath();
-            context.moveTo(-size * 0.105, -size * 0.205);
-            context.lineTo(size * 0.09, -size * 0.19);
-            context.lineTo(size * 0.105, size * 0.19);
-            context.lineTo(-size * 0.09, size * 0.205);
-            context.closePath();
-            context.fill();
-            context.stroke();
-
-            context.strokeStyle = colors.washiDeep;
-            context.lineWidth = size * 0.008;
-            context.globalAlpha = 0.72;
-            context.strokeRect(-size * 0.062, -size * 0.15, size * 0.124, size * 0.3);
-            context.restore();
-          }
-
-          const chamberPulse = reducedMotion
-            ? 1
-            : 1 + beatKick * 0.08 + Math.sin(time * 0.005) * 0.012;
-          context.save();
-          context.translate(x, y + size * 0.018);
-          context.scale(chamberPulse, chamberPulse);
-          context.shadowColor = colors.pink;
-          context.shadowBlur = size * (0.025 + beatKick * 0.055);
           context.fillStyle = colors.ink;
           context.strokeStyle = colors.washiDeep;
           context.lineWidth = size * 0.012;
           context.beginPath();
-          for (let point = 0; point < 12; point += 1) {
-            const angle = (point / 12) * Math.PI * 2 - Math.PI / 2;
-            const radius = size * (point % 2 === 0 ? 0.125 : 0.105);
-            const pointX = Math.cos(angle) * radius;
-            const pointY = Math.sin(angle) * radius;
-            if (point === 0) context.moveTo(pointX, pointY);
-            else context.lineTo(pointX, pointY);
-          }
+          context.moveTo(-size * 0.38, -size * 0.25);
+          context.lineTo(-size * 0.26, -size * 0.36);
+          context.lineTo(size * 0.26, -size * 0.36);
+          context.lineTo(size * 0.38, -size * 0.25);
+          context.lineTo(size * 0.29, -size * 0.27);
+          context.lineTo(size * 0.23, -size * 0.22);
+          context.lineTo(-size * 0.23, -size * 0.22);
+          context.lineTo(-size * 0.29, -size * 0.27);
           context.closePath();
           context.fill();
           context.stroke();
-          context.shadowColor = "transparent";
-          context.fillStyle = colors.rust;
-          context.beginPath();
-          context.arc(0, 0, size * 0.055, 0, Math.PI * 2);
-          context.fill();
-          context.fillStyle = colors.washiDeep;
-          context.beginPath();
-          context.arc(-size * 0.015, -size * 0.017, size * 0.014, 0, Math.PI * 2);
-          context.fill();
-          context.restore();
 
-          context.strokeStyle = colors.washiLight;
-          context.globalAlpha = 0.48;
-          context.lineWidth = size * 0.008;
-          context.beginPath();
-          context.moveTo(x - size * 0.22, y - size * 0.2);
-          context.lineTo(x + size * 0.12, y - size * 0.23);
-          context.stroke();
-          context.globalAlpha = 1;
+          context.strokeStyle = colors.steelMid;
+          context.lineWidth = size * 0.018;
+          context.lineCap = "square";
+          for (let tile = -4; tile <= 4; tile += 1) {
+            context.beginPath();
+            context.moveTo(tile * size * 0.066, -size * 0.34);
+            context.lineTo(tile * size * 0.075, -size * 0.245);
+            context.stroke();
+          }
+
+          context.fillStyle = colors.rustDeep;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = size * 0.012;
+          context.fillRect(-size * 0.31, -size * 0.23, size * 0.08, size * 0.55);
+          context.strokeRect(-size * 0.31, -size * 0.23, size * 0.08, size * 0.55);
+          context.fillRect(size * 0.23, -size * 0.23, size * 0.08, size * 0.55);
+          context.strokeRect(size * 0.23, -size * 0.23, size * 0.08, size * 0.55);
+
+          for (const side of [-1, 1]) {
+            const panelX = side * size * 0.115;
+            const knock = reducedMotion ? 0 : side * beatKick * 0.012;
+            const panelShade = context.createLinearGradient(
+              panelX - size * 0.12,
+              -size * 0.2,
+              panelX + size * 0.12,
+              size * 0.3
+            );
+            panelShade.addColorStop(0, colors.rust);
+            panelShade.addColorStop(0.52, colors.rustDeep);
+            panelShade.addColorStop(1, colors.woodDeep);
+            context.save();
+            context.translate(panelX, size * 0.035);
+            context.rotate(knock);
+            context.fillStyle = panelShade;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = size * 0.012;
+            context.fillRect(-size * 0.115, -size * 0.255, size * 0.23, size * 0.52);
+            context.strokeRect(-size * 0.115, -size * 0.255, size * 0.23, size * 0.52);
+            context.strokeStyle = colors.woodHighlight;
+            context.globalAlpha = 0.48;
+            context.lineWidth = size * 0.006;
+            context.strokeRect(-size * 0.08, -size * 0.21, size * 0.16, size * 0.42);
+            context.globalAlpha = 1;
+
+            for (let row = -1; row <= 1; row += 1) {
+              for (let column = -1; column <= 1; column += 1) {
+                context.fillStyle = colors.sand;
+                context.strokeStyle = colors.ink;
+                context.lineWidth = size * 0.004;
+                context.beginPath();
+                context.arc(
+                  column * size * 0.052,
+                  row * size * 0.095 - size * 0.015,
+                  size * 0.012,
+                  0,
+                  Math.PI * 2
+                );
+                context.fill();
+                context.stroke();
+              }
+            }
+
+            context.strokeStyle = colors.sand;
+            context.lineWidth = size * 0.012;
+            context.beginPath();
+            context.arc(-side * size * 0.045, size * 0.13, size * 0.035, 0, Math.PI * 2);
+            context.stroke();
+            context.fillStyle = colors.ink;
+            context.beginPath();
+            context.arc(-side * size * 0.045, size * 0.095, size * 0.018, 0, Math.PI * 2);
+            context.fill();
+            context.restore();
+          }
+
+          context.fillStyle = colors.sand;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = size * 0.01;
+          context.fillRect(-size * 0.35, size * 0.29, size * 0.7, size * 0.07);
+          context.strokeRect(-size * 0.35, size * 0.29, size * 0.7, size * 0.07);
+          context.restore();
         }
 
-        function drawMeritReactorWoodfish(x, y, size, time, beatKick, positiveImpact) {
-          const petalColors = [colors.cyberCyan, colors.sand, colors.rust, colors.purple];
-          const activePetal = getQuarterBeatIndex(time);
+        function drawMochiPoundingWoodfish(x, y, size, time, beatKick, positiveImpact) {
+          const activeBeat = getQuarterBeatIndex(time);
           context.save();
           context.translate(x, y);
 
-          context.fillStyle = colors.ink;
+          context.fillStyle = colors.shadow;
+          context.globalAlpha = 0.38;
           context.beginPath();
-          context.arc(0, 0, size * 0.275, 0, Math.PI * 2);
+          context.ellipse(0, size * 0.12, size * 0.34, size * 0.23, 0, 0, Math.PI * 2);
           context.fill();
-          context.strokeStyle = colors.steelBright;
-          context.lineWidth = size * 0.009;
-          context.globalAlpha = 0.6;
-          context.stroke();
-
-          for (let petal = 0; petal < 4; petal += 1) {
-            const isActive = petal === activePetal;
-            const pulse = reducedMotion
-              ? 1
-              : 1 + (isActive ? beatKick * 0.12 : 0) + positiveImpact * 0.025;
-            context.save();
-            context.rotate(-Math.PI / 2 + petal * Math.PI / 2);
-            context.scale(pulse, pulse);
-            context.fillStyle = petalColors[petal];
-            context.strokeStyle = colors.ink;
-            context.lineWidth = size * 0.012;
-            context.shadowColor = isActive ? petalColors[petal] : "transparent";
-            context.shadowBlur = isActive ? size * 0.06 * beatKick : 0;
-            context.beginPath();
-            context.moveTo(-size * 0.095, -size * 0.055);
-            context.bezierCurveTo(
-              -size * 0.175,
-              -size * 0.17,
-              -size * 0.13,
-              -size * 0.34,
-              0,
-              -size * 0.365
-            );
-            context.bezierCurveTo(
-              size * 0.13,
-              -size * 0.34,
-              size * 0.175,
-              -size * 0.17,
-              size * 0.095,
-              -size * 0.055
-            );
-            context.closePath();
-            context.fill();
-            context.stroke();
-
-            context.shadowColor = "transparent";
-            context.strokeStyle = colors.washiLight;
-            context.globalAlpha = 0.52;
-            context.lineWidth = size * 0.006;
-            context.beginPath();
-            context.moveTo(0, -size * 0.11);
-            context.lineTo(0, -size * 0.292);
-            context.stroke();
-            context.restore();
-          }
           context.globalAlpha = 1;
 
-          context.fillStyle = colors.steelDark;
-          context.strokeStyle = colors.steelBright;
-          context.lineWidth = size * 0.012;
-          context.beginPath();
-          context.arc(0, 0, size * 0.205, 0, Math.PI * 2);
-          context.fill();
-          context.stroke();
-
-          const core = context.createRadialGradient(
-            -size * 0.055,
-            -size * 0.065,
-            size * 0.012,
+          const mortar = context.createRadialGradient(
+            -size * 0.1,
+            -size * 0.12,
+            size * 0.03,
             0,
             0,
-            size * 0.18
+            size * 0.34
           );
-          core.addColorStop(0, colors.woodHighlight);
-          core.addColorStop(0.38, colors.woodLight);
-          core.addColorStop(0.8, colors.wood);
-          core.addColorStop(1, colors.woodDeep);
-          context.fillStyle = core;
+          mortar.addColorStop(0, colors.woodHighlight);
+          mortar.addColorStop(0.4, colors.woodLight);
+          mortar.addColorStop(0.78, colors.wood);
+          mortar.addColorStop(1, colors.woodDeep);
+          context.fillStyle = mortar;
           context.strokeStyle = colors.ink;
-          context.lineWidth = size * 0.014;
+          context.lineWidth = size * 0.016;
           context.beginPath();
-          context.arc(0, 0, size * 0.16, 0, Math.PI * 2);
+          context.ellipse(0, size * 0.035, size * 0.32, size * 0.285, 0, 0, Math.PI * 2);
           context.fill();
           context.stroke();
 
-          context.strokeStyle = colors.ink;
-          context.lineCap = "round";
-          context.lineWidth = size * 0.038;
+          context.fillStyle = colors.ink;
           context.beginPath();
-          context.arc(0, -size * 0.008, size * 0.105, Math.PI * 0.08, Math.PI * 0.92);
-          context.stroke();
+          context.ellipse(0, -size * 0.015, size * 0.245, size * 0.205, 0, 0, Math.PI * 2);
+          context.fill();
           context.strokeStyle = colors.woodHighlight;
-          context.globalAlpha = 0.65;
-          context.lineWidth = size * 0.008;
-          context.beginPath();
-          context.arc(0, -size * 0.018, size * 0.103, Math.PI * 0.1, Math.PI * 0.9);
+          context.globalAlpha = 0.62;
+          context.lineWidth = size * 0.009;
           context.stroke();
+          context.globalAlpha = 1;
 
-          for (let bolt = 0; bolt < 4; bolt += 1) {
-            const angle = bolt * Math.PI / 2 + Math.PI / 4;
-            context.globalAlpha = 1;
-            context.fillStyle = colors.steelBright;
+          const mochiPulse = reducedMotion
+            ? 1
+            : 1 + beatKick * 0.07 + positiveImpact * 0.1;
+          context.save();
+          context.scale(1 + positiveImpact * 0.07, mochiPulse - positiveImpact * 0.05);
+          context.shadowColor = colors.washiLight;
+          context.shadowBlur = size * (0.025 + positiveImpact * 0.055);
+          context.fillStyle = colors.washiLight;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = size * 0.01;
+          context.beginPath();
+          context.moveTo(-size * 0.145, size * 0.02);
+          context.bezierCurveTo(
+            -size * 0.155,
+            -size * 0.115,
+            -size * 0.055,
+            -size * 0.16,
+            size * 0.01,
+            -size * 0.14
+          );
+          context.bezierCurveTo(
+            size * 0.13,
+            -size * 0.175,
+            size * 0.18,
+            -size * 0.055,
+            size * 0.145,
+            size * 0.06
+          );
+          context.bezierCurveTo(
+            size * 0.08,
+            size * 0.145,
+            -size * 0.1,
+            size * 0.135,
+            -size * 0.145,
+            size * 0.02
+          );
+          context.closePath();
+          context.fill();
+          context.stroke();
+          context.restore();
+
+          for (let marker = 0; marker < 4; marker += 1) {
+            const angle = -Math.PI / 2 + marker * Math.PI / 2;
+            const isActive = marker === activeBeat;
+            context.fillStyle = isActive ? colors.pink : colors.sand;
             context.strokeStyle = colors.ink;
-            context.lineWidth = size * 0.004;
+            context.lineWidth = size * 0.005;
             context.beginPath();
             context.arc(
-              Math.cos(angle) * size * 0.185,
-              Math.sin(angle) * size * 0.185,
-              size * 0.014,
+              Math.cos(angle) * size * 0.285,
+              Math.sin(angle) * size * 0.245 + size * 0.03,
+              size * (isActive ? 0.021 + beatKick * 0.012 : 0.014),
               0,
               Math.PI * 2
             );
             context.fill();
             context.stroke();
           }
+
+          if (beatKick > 0.05 && !reducedMotion) {
+            context.fillStyle = colors.washiLight;
+            for (let dust = 0; dust < 8; dust += 1) {
+              const angle = (dust / 8) * Math.PI * 2 + time * 0.0002;
+              const radius = size * (0.17 + beatKick * 0.08);
+              context.globalAlpha = beatKick * 0.5;
+              context.beginPath();
+              context.arc(
+                Math.cos(angle) * radius,
+                Math.sin(angle) * radius - size * 0.025,
+                size * 0.008,
+                0,
+                Math.PI * 2
+              );
+              context.fill();
+            }
+          }
+          context.globalAlpha = 1;
           context.restore();
         }
 
-        function drawWoodfish(x, y, size, time) {
+        function drawPhotoWoodfish(x, y, size, time, beatKick) {
+          const photoPulse = reducedMotion
+            ? 1
+            : 1 + beatKick * 0.018 + Math.sin(time * 0.002) * 0.005;
+          const radius = size * 0.285;
+          context.save();
+          context.translate(x, y);
+          context.scale(photoPulse, photoPulse);
+
+          context.shadowColor = colors.shadow;
+          context.shadowBlur = size * 0.06;
+          context.shadowOffsetY = size * 0.025;
+          context.fillStyle = colors.ink;
+          context.beginPath();
+          context.arc(0, 0, radius + size * 0.035, 0, Math.PI * 2);
+          context.fill();
+          context.shadowColor = "transparent";
+
+          context.save();
+          context.beginPath();
+          context.arc(0, 0, radius, 0, Math.PI * 2);
+          context.clip();
+          if (customPhotoImage) {
+            context.drawImage(
+              customPhotoImage,
+              -radius,
+              -radius,
+              radius * 2,
+              radius * 2
+            );
+            const photoShade = context.createLinearGradient(
+              -radius,
+              -radius,
+              radius,
+              radius
+            );
+            photoShade.addColorStop(0, colors.inkFaintAlpha);
+            photoShade.addColorStop(0.72, colors.inkFaintAlpha);
+            photoShade.addColorStop(1, colors.inkAlpha);
+            context.fillStyle = photoShade;
+            context.fillRect(-radius, -radius, radius * 2, radius * 2);
+          } else {
+            context.fillStyle = colors.washiDeep;
+            context.fillRect(-radius, -radius, radius * 2, radius * 2);
+            context.strokeStyle = colors.ink;
+            context.lineWidth = size * 0.018;
+            context.beginPath();
+            context.moveTo(-size * 0.065, 0);
+            context.lineTo(size * 0.065, 0);
+            context.moveTo(0, -size * 0.065);
+            context.lineTo(0, size * 0.065);
+            context.stroke();
+            context.fillStyle = colors.ink;
+            context.font = `${Math.round(size * 0.04)}px ${cssValue("--fontFamilyBase")}`;
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillText("上传照片", 0, size * 0.115);
+          }
+          context.restore();
+
+          context.strokeStyle = colors.washiLight;
+          context.globalAlpha = 0.72;
+          context.lineWidth = size * 0.009;
+          context.beginPath();
+          context.arc(-size * 0.045, -size * 0.045, radius * 0.72, Math.PI * 1.08, Math.PI * 1.74);
+          context.stroke();
+          context.globalAlpha = 1;
+          context.restore();
+        }
+
+        function drawWoodfish(
+          x,
+          y,
+          size,
+          time,
+          forcedStyleIndex = woodfishStyleIndex,
+          styleOnly = false
+        ) {
           const elapsed = (time - woodStrikeStarted) / 1000;
           const duration = reducedMotion ? 0.001 : WOOD_STRIKE_DURATION;
           const progress = Math.min(1, Math.max(0, elapsed / duration));
@@ -5016,19 +5455,63 @@
           const strikePointX = bodyX + size * (woodStrikeFromAuto ? -0.17 : 0.17);
           const strikePointY = bodyY + size * 0.13;
 
-          drawEnso(x, y, size, time);
-          drawMeritImprints(time, size);
-          drawCushion(x, bodyY, size);
+          if (!styleOnly) {
+            drawEnso(x, y, size, time);
+            drawMeritImprints(time, size);
+            drawCushion(x, bodyY, size);
+          }
 
+          const transitionProgress = Math.min(
+            1,
+            Math.max(0, (time - woodfishStyleChangedAt) / 480)
+          );
+          const hasSlideTransition = !reducedMotion
+            && !styleOnly
+            && previousWoodfishStyleIndex !== woodfishStyleIndex
+            && transitionProgress < 1;
+          if (hasSlideTransition) {
+            const eased = 1 - Math.pow(1 - transitionProgress, 3);
+            const travel = size * 0.92;
+            context.save();
+            context.beginPath();
+            context.rect(
+              x - size * 0.58,
+              y - size * 0.54,
+              size * 1.16,
+              size * 1.08
+            );
+            context.clip();
+            drawWoodfish(
+              x - woodfishTransitionDirection * travel * eased,
+              y,
+              size,
+              time,
+              previousWoodfishStyleIndex,
+              true
+            );
+            drawWoodfish(
+              x + woodfishTransitionDirection * travel * (1 - eased),
+              y,
+              size,
+              time,
+              woodfishStyleIndex,
+              true
+            );
+            context.restore();
+          }
+
+          if (!hasSlideTransition) {
           context.save();
-          const styleProgress = Math.min(1, Math.max(0, (time - woodfishStyleChangedAt) / 420));
+          const styleProgress = styleOnly
+            ? 1
+            : Math.min(1, Math.max(0, (time - woodfishStyleChangedAt) / 420));
           const styleEnter = reducedMotion ? 1 : 1 - Math.pow(1 - styleProgress, 3);
           const styleScale = 0.84 + styleEnter * 0.16;
           context.translate(bodyX, bodyY);
           context.rotate(
             reducedMotion
               ? 0
-              : (1 - styleProgress) * (woodfishStyleIndex === 1 ? -0.055 : 0.055)
+              : (1 - styleProgress) * (forcedStyleIndex === 1 ? -0.055 : 0.055)
           );
           context.scale(
             styleScale * (1 + positiveImpact * 0.034 + beatKick * 0.006),
@@ -5036,7 +5519,7 @@
           );
           context.translate(-bodyX, -bodyY);
 
-          if (woodfishStyleIndex === 0) {
+          if (forcedStyleIndex === 0) {
             for (let layer = 5; layer >= 1; layer -= 1) {
             const depth = bodyPath(
               bodyX,
@@ -5185,10 +5668,12 @@
           context.stroke();
           context.restore();
 
-          } else if (woodfishStyleIndex === 1) {
-            drawLacquerGateWoodfish(bodyX, bodyY, size, time, beatKick);
+          } else if (forcedStyleIndex === 1) {
+            drawAncientDoorWoodfish(bodyX, bodyY, size, time, beatKick);
+          } else if (forcedStyleIndex === 2) {
+            drawMochiPoundingWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
           } else {
-            drawMeritReactorWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
+            drawPhotoWoodfish(bodyX, bodyY, size, time, beatKick);
           }
 
           if (positiveImpact > 0.05) {
@@ -5240,6 +5725,9 @@
             context.restore();
           }
           context.restore();
+          }
+
+          if (styleOnly) return;
 
           const woodStrikePointX = bodyX + size * 0.17;
           const cyberStrikePointX = bodyX - size * 0.17;
@@ -6302,6 +6790,8 @@
         releaseAction.addEventListener("click", handleStageActionClick);
         woodfishPrevious.addEventListener("click", () => cycleWoodfishStyle(-1));
         woodfishNext.addEventListener("click", () => cycleWoodfishStyle(1));
+        woodfishPhotoUpload.addEventListener("click", () => woodfishPhotoInput.click());
+        woodfishPhotoInput.addEventListener("change", handlePhotoUpload);
         autoToggle.addEventListener("click", toggleAuto);
         soundToggle.addEventListener("click", toggleSound);
         fortuneContinue.addEventListener("click", () => closeFortuneSummary());
@@ -6500,13 +6990,14 @@
           reducedMotionQuery.addListener(handleReducedMotion);
         }
 
+        window.addEventListener("online", () => {
+          void connectRitualStats(true);
+        });
         window.setInterval(() => {
-          if (document.hidden) return;
-          if (demoTick % 2 === 0) demoRemoteMerit += 1;
-          if (demoTick % 3 === 0) demoRemoteRelease += 1;
-          demoTick += 1;
-          renderUi();
-        }, 5200);
+          if (!document.hidden && RITUAL_API_ENDPOINT) {
+            void connectRitualStats(false);
+          }
+        }, 30000);
 
         loadState();
         renderUi();
@@ -6514,6 +7005,7 @@
         startAnimation();
         resetIdleHint();
         resolveLocation();
+        void connectRitualStats(false);
 
         window.__ritualPrototype = {
           merit: () => strikeMerit(false),
@@ -6553,6 +7045,8 @@
           nextWoodfishStyle: () => cycleWoodfishStyle(1, false),
           toggleAuto,
           startBgm,
+          connectRitualStats: () => connectRitualStats(false),
+          flushRitualStats: flushPendingRitualEvents,
           draw: () => draw(performance.now()),
           get state() {
             const debugGeometry = stageGeometry();
@@ -6562,7 +7056,7 @@
               mode,
               merit: meritTotal,
               release: releaseTotal,
-              global: getDemoGlobal(),
+              global: getGlobalTotal(),
               sound: soundEnabled,
               bgmEnabled: soundEnabled,
               ritualEffectsAlwaysAudible: true,
@@ -6580,7 +7074,26 @@
                 name: WOODFISH_STYLES[woodfishStyleIndex].name,
                 selectable: canChooseWoodfishStyle(),
                 count: WOODFISH_STYLES.length,
-                swipeThresholdPx: 48
+                swipeThresholdPx: 48,
+                transition: {
+                  previousIndex: previousWoodfishStyleIndex,
+                  direction: woodfishTransitionDirection,
+                  durationMs: reducedMotion ? 0 : 480,
+                  style: "horizontal-old-out-new-in"
+                },
+                customPhoto: {
+                  selected: isCustomPhotoStyle(),
+                  loaded: Boolean(customPhotoImage),
+                  storedLocally: Boolean(customPhotoDataUrl)
+                }
+              },
+              ritualNetwork: {
+                endpoint: RITUAL_API_ENDPOINT,
+                state: ritualNetworkState,
+                identity: "hmac-sha256-ip-v1",
+                rawIpStored: false,
+                pendingEvents: pendingRitualEvents.length,
+                global: { ...ritualGlobal }
               },
               bgm: {
                 bpm: BGM_BPM,
