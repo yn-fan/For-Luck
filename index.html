@@ -189,9 +189,9 @@
         --rhythmPeriod: 960ms;
         --idleCueSize: 72px;
         --fortuneTitleLift: -40px;
-        --fortuneStickerWidth: 46px;
+        --fortuneStickerWidth: 55px;
         --fortuneMetaLift: -26px;
-        --fortuneButtonLift: -8px;
+        --fortuneButtonLift: -18px;
         --fortuneButtonDepth: 24px;
         --durationReducedMotion: 1ms;
       }
@@ -768,6 +768,7 @@
 
       .fortune-stage {
         position: relative;
+        z-index: 2;
         top: var(--spacingVerticalS);
         display: grid;
         justify-items: center;
@@ -989,52 +990,89 @@
 
       .fortune-keyword {
         justify-self: start;
-        padding-inline: var(--spacingHorizontalXXS);
+        z-index: 3;
+        padding: 1px var(--spacingHorizontalS);
+        color: var(--colorWashiLight);
+        background: var(--colorInk);
+        box-shadow: 6px 4px 0 var(--colorRustDeep);
         font-family: var(--fontFamilyInk);
         font-size: var(--fontSizeFortuneKeyword);
         line-height: var(--lineHeightFortune);
         font-weight: var(--fontWeightSemibold);
         letter-spacing: var(--spacingHorizontalXS);
-        background: linear-gradient(
-          to top,
-          var(--colorWashiDeep) 0 38%,
-          transparent 38%
-        );
-        transform: rotate(-1deg);
+        transform: rotate(-2deg) skewX(-5deg);
       }
 
       .fortune-message {
         position: absolute;
         z-index: 4;
-        top: 88%;
+        top: 84%;
         left: 50%;
-        width: min(88vw, 340px);
+        width: min(92vw, 360px);
+        isolation: isolate;
         display: grid;
         gap: var(--spacingVerticalXS);
         padding: var(--spacingVerticalM) var(--spacingHorizontalL);
-        background-color: var(--colorWashi);
-        background-image: radial-gradient(
-          circle,
-          var(--colorInkFaintAlpha) 0 1px,
-          transparent 1.2px
-        );
-        background-size: var(--spacingHorizontalS) var(--spacingVerticalS);
-        border: var(--strokeMedium) solid var(--colorInk);
+        background-color: var(--colorWashiLight);
+        background-image:
+          linear-gradient(
+            135deg,
+            transparent 0 87%,
+            var(--colorRustDeep) 87% 92%,
+            var(--colorInk) 92% 100%
+          ),
+          radial-gradient(
+            circle,
+            var(--colorInkFaintAlpha) 0 1px,
+            transparent 1.2px
+          );
+        background-size: 100% 100%, var(--spacingHorizontalS) var(--spacingVerticalS);
+        border: 4px solid var(--colorInk);
         box-shadow:
-          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPurple),
-          calc(0px - var(--spacingHorizontalXS))
-          calc(0px - var(--spacingVerticalXS))
-          0
-          var(--colorWashiDeep);
-        transform: translate(-53%, -50%) translateZ(12px) rotate(1deg);
+          9px 9px 0 var(--colorInk),
+          -6px 5px 0 var(--colorRustDeep);
+        transform: translate(-50%, -50%) translateZ(12px) rotate(-1.3deg) skewX(-0.8deg);
+        overflow: visible;
+      }
+
+      .fortune-message::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        top: 12px;
+        bottom: 10px;
+        left: -12px;
+        width: 16px;
+        background: var(--colorInk);
+        clip-path: polygon(24% 0, 100% 7%, 76% 46%, 100% 92%, 0 100%, 18% 54%);
+        transform: rotate(-3deg);
+      }
+
+      .fortune-message::after {
+        content: "";
+        position: absolute;
+        z-index: 2;
+        top: 18px;
+        right: -10px;
+        width: 18px;
+        height: 56px;
+        background: var(--colorRustDeep);
+        clip-path: polygon(12% 0, 100% 8%, 70% 42%, 100% 100%, 0 88%, 28% 52%);
+        transform: rotate(4deg);
       }
 
       .fortune-english {
         color: var(--colorRustDeep);
+        justify-self: start;
+        padding: 1px var(--spacingHorizontalS);
+        background: var(--colorWashiDeep);
+        border: var(--strokeThin) solid var(--colorInk);
+        box-shadow: 3px 3px 0 var(--colorInk);
         font-size: var(--fontSizeBase300);
         line-height: var(--lineHeightBase300);
         font-weight: var(--fontWeightBold);
         letter-spacing: var(--labelTracking);
+        transform: rotate(1deg);
       }
 
       .fortune-explanation {
@@ -1091,6 +1129,7 @@
       .fortune-continue {
         position: relative;
         z-index: 99;
+        width: min(78vw, 310px);
         min-width: 168px;
         min-height: var(--controlMinSize);
         padding: var(--controlPadBlock) var(--spacingHorizontalXXL);
@@ -1126,6 +1165,100 @@
       .fortune-overlay[data-fortune-tone="inauspicious"] .fortune-title {
         color: var(--colorWashiLight);
         background: var(--colorFortuneDark);
+      }
+
+      .fortune-overlay[data-fortune-tone="special"] {
+        background: var(--colorFortuneDark);
+      }
+
+      .fortune-overlay[data-fortune-tone="special"] .fortune-slip {
+        box-shadow:
+          16px 16px 0 var(--colorAccentLime),
+          -8px -8px 0 var(--colorAccentPink),
+          var(--shadow28);
+      }
+
+      .fortune-overlay[data-fortune-tone="special"] .fortune-title {
+        color: var(--colorInk);
+        background: var(--colorWashiDeep);
+        transform: rotate(-2deg) scale(1.05);
+      }
+
+      .fortune-overlay[data-fortune-tone="special"] .fortune-count {
+        background: var(--colorAccentLime);
+      }
+
+      .fortune-overlay[data-fortune-tone="special"] .fortune-continue {
+        color: var(--colorInk);
+        background: var(--colorAccentLime);
+        box-shadow:
+          8px 8px 0 var(--colorWashiDeep),
+          12px 12px 0 var(--colorInk);
+      }
+
+      .fortune-overlay[data-fortune-level="大吉"] .fortune-aura span {
+        opacity: 1;
+        animation: fortune-grand-bounce 780ms var(--curveEasyEase) infinite alternate;
+      }
+
+      .fortune-special-celebration {
+        position: absolute;
+        z-index: 3;
+        inset: 0;
+        display: none;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .fortune-overlay[data-fortune-tone="special"] .fortune-special-celebration {
+        display: block;
+      }
+
+      .fortune-special-marquee {
+        position: absolute;
+        top: 3%;
+        left: -3%;
+        width: 106%;
+        overflow: hidden;
+        color: var(--colorInk);
+        background: var(--colorWashiDeep);
+        border-block: 4px solid var(--colorInk);
+        box-shadow: 0 7px 0 var(--colorAccentPink);
+        transform: rotate(-3deg);
+      }
+
+      .fortune-special-marquee-track {
+        display: flex;
+        width: max-content;
+        font-family: var(--fontFamilyDisplay);
+        font-size: clamp(28px, 9vw, 64px);
+        font-weight: var(--fontWeightBold);
+        line-height: 1.05;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
+        animation: fortune-marquee 6s linear infinite;
+      }
+
+      .fortune-special-marquee-track span {
+        padding-right: var(--spacingHorizontalXXL);
+      }
+
+      .fortune-dog {
+        position: absolute;
+        top: 25%;
+        left: -40px;
+        width: min(46vw, 210px);
+        height: auto;
+        display: block;
+        background: var(--colorWashiDeep);
+        border: 5px solid var(--colorInk);
+        box-shadow:
+          10px 10px 0 var(--colorAccentPink),
+          16px 16px 0 var(--colorInk);
+        clip-path: polygon(5% 0, 98% 4%, 94% 96%, 3% 100%, 0 10%);
+        transform: rotate(-6deg);
+        transform-origin: 52% 100%;
+        animation: fortune-dog-jump 720ms var(--curveEasyEase) infinite;
       }
 
       .fortune-fire {
@@ -1299,6 +1432,36 @@
         100% {
           opacity: 0;
           transform: translateY(calc(0px - var(--spacingVerticalXXXL))) rotate(4deg) scale(0.86);
+        }
+      }
+
+      @keyframes fortune-grand-bounce {
+        from {
+          opacity: 0.76;
+          transform: translateY(var(--spacingVerticalS)) rotate(-7deg) scale(0.86);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(calc(0px - var(--spacingVerticalL))) rotate(7deg) scale(1.16);
+        }
+      }
+
+      @keyframes fortune-marquee {
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      @keyframes fortune-dog-jump {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-6deg) scale(1);
+        }
+        44% {
+          transform: translateY(calc(0px - var(--spacingVerticalXXL))) rotate(4deg) scale(1.04, 0.96);
+        }
+        58% {
+          transform: translateY(calc(0px - var(--spacingVerticalXL))) rotate(1deg) scale(0.98, 1.03);
         }
       }
 
@@ -1622,12 +1785,21 @@
           transition-duration: var(--durationReducedMotion) !important;
           scroll-behavior: auto !important;
         }
+
+        .fortune-special-marquee-track {
+          transform: none !important;
+        }
       }
 
       @media (forced-colors: active) {
         body {
           color: CanvasText;
           background: Canvas;
+        }
+
+        .fortune-overlay[data-fortune-tone] {
+          color: CanvasText;
+          background: Canvas !important;
         }
 
         .fortune-overlay[data-fortune-tone] .fortune-slip,
@@ -1709,11 +1881,16 @@
         }
 
         .fortune-aura,
+        .fortune-special-celebration,
         .fortune-fire,
         .stats-title::before,
         .stats-title::after,
         .tape {
           display: none;
+        }
+
+        .fortune-special-celebration {
+          display: none !important;
         }
 
         .fortune-continue {
@@ -1871,6 +2048,22 @@
       aria-describedby="fortuneKeyword fortuneEnglish fortuneExplanation fortuneDescription"
       hidden
     >
+      <div class="fortune-special-celebration" aria-hidden="true">
+        <div class="fortune-special-marquee">
+          <div class="fortune-special-marquee-track">
+            <span>财神赐福 · 真心可逢 ·</span>
+            <span>财神赐福 · 真心可逢 ·</span>
+          </div>
+        </div>
+        <img
+          class="fortune-dog"
+          src="dogman.png"
+          alt=""
+          width="720"
+          height="471"
+          decoding="async"
+        />
+      </div>
       <div class="fortune-stage">
         <div class="fortune-aura" aria-hidden="true">
           <span></span>
@@ -1993,8 +2186,24 @@
           "☯️"
         ]);
         const AUTO_STRIKE_EMOJIS = Object.freeze(["💵", "💰"]);
-        const FORTUNE_LEVELS = ["大吉", "中吉", "小吉", "小凶", "中凶", "大凶"];
-        const AUSPICIOUS_FORTUNES = new Set(["大吉", "中吉", "小吉"]);
+        const FORTUNE_OUTCOMES = Object.freeze([
+          { level: "大吉", weight: 15, tone: "auspicious" },
+          { level: "中吉", weight: 28, tone: "auspicious" },
+          { level: "小吉", weight: 26, tone: "auspicious" },
+          { level: "小凶", weight: 18, tone: "inauspicious" },
+          { level: "中凶", weight: 8, tone: "inauspicious" },
+          { level: "大凶", weight: 4, tone: "inauspicious" },
+          { level: "神佑", weight: 1, tone: "special" }
+        ]);
+        const FORTUNE_TOTAL_WEIGHT = FORTUNE_OUTCOMES.reduce(
+          (total, outcome) => total + outcome.weight,
+          0
+        );
+        const SPECIAL_FORTUNE_MESSAGE = Object.freeze({
+          keyword: "真心可逢",
+          english: "Fortune Finds You",
+          description: "财神赐福，愿每一份真心都能被好运看见。"
+        });
         const FORTUNE_MESSAGES = [
           {
             keyword: "松弛",
@@ -2280,13 +2489,34 @@
           }, 260);
         }
 
-        function randomIndex(length) {
+        function randomUnit() {
           if (window.crypto?.getRandomValues) {
             const value = new Uint32Array(1);
             window.crypto.getRandomValues(value);
-            return value[0] % length;
+            return value[0] / 0x100000000;
           }
-          return Math.floor(Math.random() * length);
+          return Math.random();
+        }
+
+        function randomIndex(length) {
+          return Math.min(length - 1, Math.floor(randomUnit() * length));
+        }
+
+        function fortuneForRoll(roll) {
+          const boundedRoll = Math.min(
+            Math.max(Number.isFinite(roll) ? roll : 0, 0),
+            FORTUNE_TOTAL_WEIGHT - 1e-9
+          );
+          let cumulativeWeight = 0;
+          for (const outcome of FORTUNE_OUTCOMES) {
+            cumulativeWeight += outcome.weight;
+            if (boundedRoll < cumulativeWeight) return outcome;
+          }
+          return FORTUNE_OUTCOMES[FORTUNE_OUTCOMES.length - 1];
+        }
+
+        function drawFortuneOutcome() {
+          return fortuneForRoll(randomUnit() * FORTUNE_TOTAL_WEIGHT);
         }
 
         function makeStrikeEmojiParticles(fromAuto) {
@@ -2336,14 +2566,19 @@
           idleHint.hidden = true;
           focusBeforeFortune = activeAction();
 
-          const level = FORTUNE_LEVELS.includes(forcedLevel)
-            ? forcedLevel
-            : FORTUNE_LEVELS[randomIndex(FORTUNE_LEVELS.length)];
-          const message = FORTUNE_MESSAGES.find(
+          const outcome = FORTUNE_OUTCOMES.find(
+            (item) => item.level === forcedLevel
+          ) || drawFortuneOutcome();
+          const level = outcome.level;
+          const forcedMessage = FORTUNE_MESSAGES.find(
             (item) => item.keyword === forcedKeyword
-          ) || FORTUNE_MESSAGES[randomIndex(FORTUNE_MESSAGES.length)];
+          );
+          const message = forcedMessage
+            || (outcome.tone === "special"
+              ? SPECIAL_FORTUNE_MESSAGE
+              : FORTUNE_MESSAGES[randomIndex(FORTUNE_MESSAGES.length)]);
           const isMerit = mode === "merit";
-          fortuneTone = AUSPICIOUS_FORTUNES.has(level) ? "auspicious" : "inauspicious";
+          fortuneTone = outcome.tone;
           fortuneMode.textContent = "今日赛博签";
           fortuneTitle.textContent = level;
           fortuneKeyword.textContent = message.keyword;
@@ -2355,17 +2590,22 @@
           fortuneCountAccessible.textContent = isMerit
             ? `积攒 ${sessionActionCount} 功德`
             : `放生 ${sessionActionCount} 尾`;
-          const auraIcons = fortuneTone === "auspicious" ? ["👍", "🌹"] : ["❓", "😱"];
+          const auraIcons = level === "大吉" || fortuneTone === "special"
+            ? ["💰", "🌸"]
+            : fortuneTone === "auspicious"
+              ? ["👍", "🌹"]
+              : ["❓", "😱"];
           fortuneAuraItems.forEach((item, index) => {
             item.textContent = auraIcons[index % auraIcons.length];
           });
-          fortuneContinue.textContent = fortuneTone === "auspicious"
-            ? "安心收下"
-            : "🔥 立刻化解";
+          fortuneContinue.textContent = fortuneTone === "inauspicious"
+            ? "🔥 立刻化解"
+            : "安心收下";
           fortuneContinue.removeAttribute("aria-disabled");
 
           document.body.dataset.fortune = "true";
           fortuneOverlay.dataset.fortuneTone = fortuneTone;
+          fortuneOverlay.dataset.fortuneLevel = level;
           fortuneOverlay.removeAttribute("data-exit");
           window.clearTimeout(announcementTimer);
           liveStatus.textContent = "";
@@ -2378,16 +2618,16 @@
         function closeFortuneSummary() {
           if (!fortuneOpen || fortuneClosing) return;
           fortuneClosing = true;
-          fortuneOverlay.dataset.exit = fortuneTone === "auspicious" ? "keep" : "burn";
+          fortuneOverlay.dataset.exit = fortuneTone === "inauspicious" ? "burn" : "keep";
           fortuneContinue.setAttribute("aria-disabled", "true");
           window.clearTimeout(fortuneTimer);
           fortuneTimer = window.setTimeout(
             finishFortuneSummary,
             reducedMotion
               ? 20
-              : fortuneTone === "auspicious"
-                ? FORTUNE_EXIT_DURATION
-                : FORTUNE_BURN_DURATION
+              : fortuneTone === "inauspicious"
+                ? FORTUNE_BURN_DURATION
+                : FORTUNE_EXIT_DURATION
           );
         }
 
@@ -2399,6 +2639,7 @@
           fortuneOverlay.hidden = true;
           fortuneOverlay.removeAttribute("data-exit");
           fortuneOverlay.removeAttribute("data-fortune-tone");
+          fortuneOverlay.removeAttribute("data-fortune-level");
           fortuneContinue.removeAttribute("aria-disabled");
           document.body.removeAttribute("data-fortune");
           fortuneOpen = false;
@@ -2422,9 +2663,11 @@
           focusTarget.focus();
           const nextAction = mode === "merit" ? "积攒" : "放生";
           announce(
-            completedTone === "auspicious"
-              ? `签文已收好，可以继续${nextAction}`
-              : `凶签已化解，可以继续${nextAction}`
+            completedTone === "inauspicious"
+              ? `凶签已化解，可以继续${nextAction}`
+              : completedTone === "special"
+                ? `神佑签已收好，可以继续${nextAction}`
+                : `签文已收好，可以继续${nextAction}`
           );
         }
 
@@ -4708,6 +4951,8 @@
           },
           closeFortune: closeFortuneSummary,
           getFortuneMessages: () => FORTUNE_MESSAGES.map((message) => ({ ...message })),
+          getFortuneWeights: () => FORTUNE_OUTCOMES.map((outcome) => ({ ...outcome })),
+          fortuneForRoll: (roll) => ({ ...fortuneForRoll(roll) }),
           triggerFever: () => {
             perfectStreak = PERFECT_FEVER_THRESHOLD;
             comboCount = Math.max(comboCount, PERFECT_FEVER_THRESHOLD);
