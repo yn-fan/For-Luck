@@ -472,10 +472,21 @@
 
       .sound-glyph {
         grid-area: 1 / 1;
-        font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+        position: relative;
+        display: grid;
+        place-items: center;
+        font-family: ui-sans-serif, system-ui, sans-serif;
         font-size: var(--fontSizeBase500);
         line-height: var(--lineHeightBase500);
-        filter: saturate(0.82) contrast(1.12);
+        font-weight: var(--fontWeightBold);
+      }
+
+      .sound-glyph-off::after {
+        content: "";
+        position: absolute;
+        width: 1.2em;
+        border-top: var(--strokeMedium) solid currentColor;
+        transform: rotate(-52deg);
       }
 
       .sound-glyph-off,
@@ -484,7 +495,7 @@
       }
 
       .sound-button[aria-pressed="false"] .sound-glyph-off {
-        display: inline;
+        display: grid;
       }
 
       .stage {
@@ -592,6 +603,9 @@
       .woodfish-photo-upload {
         position: absolute;
         z-index: 4;
+        display: grid;
+        place-items: center;
+        gap: var(--spacingVerticalXXS);
         left: 50%;
         bottom: calc(0px - var(--spacingVerticalS));
         min-width: var(--controlMinSize);
@@ -608,6 +622,18 @@
         transition:
           transform var(--durationFast) var(--curveEasyEase),
           background var(--durationFast) var(--curveEasyEase);
+      }
+
+      .woodfish-photo-upload-label {
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+      }
+
+      .woodfish-photo-privacy {
+        font-size: 10px;
+        line-height: 12px;
+        font-weight: var(--fontWeightSemibold);
+        white-space: nowrap;
       }
 
       .woodfish-photo-upload[hidden] {
@@ -2348,7 +2374,10 @@
           aria-describedby="woodfishPhotoHelp"
           hidden
         >
-          上传照片
+          <span class="woodfish-photo-upload-label" id="woodfishPhotoUploadLabel">
+            上传照片
+          </span>
+          <span class="woodfish-photo-privacy">仅存于本地使用，永不上传</span>
         </button>
         <input id="woodfishPhotoInput" type="file" accept="image/*" hidden />
       </div>
@@ -2374,8 +2403,8 @@
             aria-describedby="songProgressDescription"
             title="背景音乐 · 128 BPM"
           >
-            <span class="sound-glyph sound-glyph-on" aria-hidden="true">🔊</span>
-            <span class="sound-glyph sound-glyph-off" aria-hidden="true">🔇</span>
+            <span class="sound-glyph sound-glyph-on" aria-hidden="true">♫</span>
+            <span class="sound-glyph sound-glyph-off" aria-hidden="true">♫</span>
           </button>
         </div>
         <span class="visually-hidden" id="autoDescription">
@@ -2388,7 +2417,7 @@
           游戏开始前可左右滑动屏幕，或使用主题左右按钮切换
         </span>
         <span class="visually-hidden" id="woodfishPhotoHelp">
-          照片只在当前设备中裁切并保存，不会上传到服务器
+          照片仅存于本地使用，永不上传
         </span>
         <dl class="stats-grid">
           <div class="stat">
@@ -2798,6 +2827,7 @@
         const woodfishStyleName = document.getElementById("woodfishStyleName");
         const woodfishStyleHelp = document.getElementById("woodfishStyleHelp");
         const woodfishPhotoUpload = document.getElementById("woodfishPhotoUpload");
+        const woodfishPhotoUploadLabel = document.getElementById("woodfishPhotoUploadLabel");
         const woodfishPhotoInput = document.getElementById("woodfishPhotoInput");
         const autoToggle = document.getElementById("autoToggle");
         const autoLabel = document.getElementById("autoLabel");
@@ -3762,7 +3792,8 @@
           woodfishPicker.hidden = !styleSelectable;
           const photoStyleSelected = isCustomPhotoStyle();
           woodfishPhotoUpload.hidden = !styleSelectable || !photoStyleSelected;
-          woodfishPhotoUpload.textContent = customPhotoImage ? "换一张照片" : "上传照片";
+          woodfishPhotoUploadLabel.textContent =
+            customPhotoImage ? "换一张照片" : "上传照片";
           woodfishPhotoUpload.setAttribute(
             "aria-label",
             customPhotoImage ? "更换敲击照片" : "上传一张圆形敲击照片"
@@ -5516,7 +5547,7 @@
           context.font = `800 ${Math.max(9, size * 0.038)}px ui-sans-serif, system-ui, sans-serif`;
           context.textAlign = "center";
           context.textBaseline = "middle";
-          context.fillText("陆振华府", 0, 0, size * 0.39);
+          context.fillText("傅家", 0, 0, size * 0.39);
           context.fillStyle = colors.washiDeep;
           context.globalAlpha = 0.78;
           context.fillRect(-size * 0.205, -size * 0.052, size * 0.055, size * 0.022);
