@@ -167,14 +167,15 @@
         --fontSizeFortune: clamp(64px, 18vw, 92px);
         --fontSizeFortuneKeyword: clamp(30px, 9vw, 42px);
         --lineHeightFortune: 1;
+        --appViewportHeight: 100vh;
         --contentMaxWidth: 1480px;
         --stageSize: clamp(320px, 64vmin, 660px);
         --releaseStageMax: 1060px;
         --controlMinSize: 44px;
         --safePadTop: calc(var(--spacingVerticalL) + env(safe-area-inset-top));
-        --safePadRight: calc(var(--spacingHorizontalXXL) + env(safe-area-inset-right));
-        --safePadBottom: calc(var(--spacingVerticalL) + env(safe-area-inset-bottom));
-        --safePadLeft: calc(var(--spacingHorizontalXXL) + env(safe-area-inset-left));
+        --safePadRight: calc(var(--spacingHorizontalL) + env(safe-area-inset-right));
+        --safePadBottom: calc(var(--spacingVerticalS) + env(safe-area-inset-bottom));
+        --safePadLeft: calc(var(--spacingHorizontalL) + env(safe-area-inset-left));
         --focusRingWidth: 3px;
         --focusRingOffset: 5px;
         --strokeThin: 2px;
@@ -196,6 +197,12 @@
         --durationReducedMotion: 1ms;
       }
 
+      @supports (height: 100dvh) {
+        :root {
+          --appViewportHeight: 100dvh;
+        }
+      }
+
       *, *::before, *::after {
         box-sizing: border-box;
       }
@@ -208,6 +215,7 @@
       }
 
       body {
+        height: var(--appViewportHeight);
         overflow: hidden;
         color: var(--colorInk);
         background: var(--colorWashi);
@@ -232,14 +240,15 @@
         position: fixed;
         inset: 0;
         width: 100%;
-        height: 100%;
+        height: var(--appViewportHeight);
         pointer-events: none;
       }
 
       .screen {
         position: relative;
         z-index: 1;
-        min-height: 100svh;
+        height: var(--appViewportHeight);
+        min-height: 0;
         display: grid;
         grid-template-rows: auto 1fr auto auto;
         gap: var(--spacingVerticalM);
@@ -276,7 +285,7 @@
         box-shadow: var(--spacingHorizontalL) var(--spacingVerticalSNudge) 0 var(--colorRust);
         clip-path: polygon(0 8%, 94% 0, 100% 74%, 92% 100%, 4% 92%);
         transform: rotate(-1.3deg) skewX(-3deg);
-        max-width: min(34vw, 360px);
+        max-width: min(40vw, 420px);
       }
 
       .brand h1 {
@@ -428,6 +437,35 @@
       .tool-button[aria-pressed="true"]::after {
         background: currentColor;
         transform: rotate(45deg);
+      }
+
+      .sound-button {
+        width: var(--controlMinSize);
+        min-width: var(--controlMinSize);
+        grid-template-columns: 1fr;
+        place-items: center;
+        padding: 0;
+      }
+
+      .sound-button::after {
+        display: none;
+      }
+
+      .sound-glyph {
+        grid-area: 1 / 1;
+        font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+        font-size: var(--fontSizeBase500);
+        line-height: var(--lineHeightBase500);
+        filter: saturate(0.82) contrast(1.12);
+      }
+
+      .sound-glyph-off,
+      .sound-button[aria-pressed="false"] .sound-glyph-on {
+        display: none;
+      }
+
+      .sound-button[aria-pressed="false"] .sound-glyph-off {
+        display: inline;
       }
 
       .stage {
@@ -1584,10 +1622,6 @@
           --safePadLeft: calc(var(--spacingHorizontalL) + env(safe-area-inset-left));
         }
 
-        body {
-          overflow: auto;
-        }
-
         .screen {
           grid-template-rows: auto minmax(0, 1fr) auto auto;
           gap: var(--spacingVerticalS);
@@ -1605,8 +1639,9 @@
         }
 
         .brand {
-          max-width: min(46vw, 180px);
-          padding-inline: var(--spacingHorizontalS);
+          width: 100%;
+          max-width: min(50vw, 210px);
+          padding-inline: var(--spacingHorizontalM);
         }
 
         body[data-mode="release"] .stage {
@@ -1652,14 +1687,23 @@
       @media (max-width: 560px) {
         :root {
           --stageSize: clamp(265px, 80vw, 360px);
-          --safePadTop: calc(var(--spacingVerticalM) + env(safe-area-inset-top));
-          --safePadRight: calc(var(--spacingHorizontalL) + env(safe-area-inset-right));
-          --safePadBottom: calc(var(--spacingVerticalM) + env(safe-area-inset-bottom));
-          --safePadLeft: calc(var(--spacingHorizontalL) + env(safe-area-inset-left));
+          --safePadTop: calc(var(--spacingVerticalS) + env(safe-area-inset-top));
+          --safePadRight: calc(var(--spacingHorizontalS) + env(safe-area-inset-right));
+          --safePadBottom: calc(var(--spacingVerticalXS) + env(safe-area-inset-bottom));
+          --safePadLeft: calc(var(--spacingHorizontalS) + env(safe-area-inset-left));
         }
 
         .screen {
-          gap: var(--spacingVerticalS);
+          gap: var(--spacingVerticalXS);
+        }
+
+        .topbar {
+          grid-template-columns: minmax(0, 1fr) minmax(156px, 164px);
+          gap: var(--spacingVerticalS) var(--spacingHorizontalS);
+        }
+
+        .brand {
+          max-width: min(54vw, 210px);
         }
 
         .brand-name {
@@ -1680,7 +1724,7 @@
 
         .stats > .tools {
           width: 100%;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-columns: minmax(0, 1fr) var(--controlMinSize);
           gap: var(--spacingHorizontalXS);
         }
 
@@ -1693,8 +1737,13 @@
           line-height: var(--lineHeightBase200);
         }
 
+        .sound-button {
+          grid-template-columns: 1fr;
+          padding-inline: 0;
+        }
+
         .stats {
-          padding: var(--spacingVerticalS);
+          padding: var(--spacingVerticalXS) var(--spacingHorizontalS);
         }
 
         body[data-mode="release"] .stage {
@@ -1729,13 +1778,13 @@
 
       @media (min-width: 390px) and (max-width: 460px) and (min-height: 830px) {
         .topbar {
-          grid-template-columns: minmax(0, 1fr) minmax(190px, 224px);
+          grid-template-columns: minmax(0, 1fr) minmax(160px, 170px);
           grid-template-areas: "brand modes";
           gap: var(--spacingVerticalS) var(--spacingHorizontalS);
         }
 
         .brand {
-          max-width: min(43vw, 168px);
+          max-width: min(52vw, 214px);
         }
 
         .mode-tabs {
@@ -1747,6 +1796,75 @@
           padding-inline: var(--spacingHorizontalS);
           font-size: var(--fontSizeBase200);
           line-height: var(--lineHeightBase200);
+        }
+      }
+
+      @media (max-width: 560px) and (max-height: 760px) {
+        :root {
+          --stageSize: min(74vw, 43vh, 300px);
+          --stageSize: min(74vw, 43dvh, 300px);
+        }
+
+        .screen {
+          grid-template-rows: auto minmax(0, 1fr) auto auto;
+          gap: var(--spacingVerticalXXS);
+        }
+
+        .topbar {
+          grid-template-columns: minmax(0, 1fr) minmax(148px, 158px);
+          gap: var(--spacingVerticalXS) var(--spacingHorizontalXS);
+        }
+
+        .brand {
+          max-width: min(55vw, 200px);
+          gap: 0;
+          padding-block: var(--spacingVerticalXS);
+        }
+
+        .brand-name {
+          font-size: var(--fontSizeBase600);
+          line-height: var(--lineHeightBase600);
+        }
+
+        .brand p {
+          font-size: var(--fontSizeBase100);
+          line-height: var(--lineHeightBase100);
+        }
+
+        .mode-tabs {
+          padding: var(--spacingVerticalXXS);
+        }
+
+        .mode-tab {
+          padding: var(--spacingVerticalXS) var(--spacingHorizontalS);
+          font-size: var(--fontSizeBase200);
+          line-height: var(--lineHeightBase200);
+        }
+
+        body[data-mode="release"] .stage {
+          height: min(45vh, 350px);
+          height: min(45dvh, 350px);
+        }
+
+        .stats {
+          gap: var(--spacingVerticalXS) var(--spacingHorizontalS);
+        }
+
+        .stats-title {
+          padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
+          font-size: var(--fontSizeBase500);
+          line-height: var(--lineHeightBase500);
+        }
+
+        .stat {
+          gap: var(--spacingVerticalXXS);
+          padding: var(--spacingVerticalXS) var(--spacingHorizontalS);
+        }
+
+        .footer-note {
+          gap: var(--spacingVerticalXXS);
+          font-size: var(--fontSizeBase100);
+          line-height: var(--lineHeightBase100);
         }
       }
 
@@ -2013,14 +2131,15 @@
             <span class="tool-label" id="autoLabel">赛博代敲</span>
           </button>
           <button
-            class="tool-button"
+            class="tool-button sound-button"
             id="soundToggle"
             type="button"
             aria-label="声音与背景音乐"
             aria-pressed="true"
             title="声音与背景音乐 · 128 BPM"
           >
-            <span class="tool-label">声音</span>
+            <span class="sound-glyph sound-glyph-on" aria-hidden="true">🔊</span>
+            <span class="sound-glyph sound-glyph-off" aria-hidden="true">🔇</span>
           </button>
         </div>
         <dl class="stats-grid">
@@ -2154,6 +2273,7 @@
         const PERFECT_FEVER_DURATION = 10000;
         const FEVER_RING_CHIP_COUNT = 20;
         const MISS_FORTUNE_THRESHOLD = 1;
+        const MISS_GRACE_RATIO = 1.15;
         const FORTUNE_AFTER_MISS_DELAY = 500;
         const WOOD_STRIKE_DURATION = 0.32;
         const WOOD_IMPACT_PHASE = 0.14;
@@ -3014,6 +3134,22 @@
           return positiveModulo(beatIndex + rhythmBeatIndex, 4) + 1;
         }
 
+        function getQuarterBeatIndex(time = performance.now()) {
+          return Math.floor(getRhythmElapsedMs(time) / BGM_QUARTER_MS);
+        }
+
+        function getQuarterBeatPhase(time = performance.now()) {
+          return positiveModulo(getRhythmElapsedMs(time), BGM_QUARTER_MS) / BGM_QUARTER_MS;
+        }
+
+        function getQuarterBeatNumber(time = performance.now()) {
+          return positiveModulo(getQuarterBeatIndex(time), 4) + 1;
+        }
+
+        function isActionQuarterBeat(quarterIndex) {
+          return positiveModulo(quarterIndex, MODES[mode].beatStep) === 0;
+        }
+
         function getMsUntilNextRhythmBeat(time = performance.now()) {
           const period = MODES[mode].autoDelay;
           const remainder = positiveModulo(getRhythmElapsedMs(time), period);
@@ -3424,10 +3560,13 @@
         }
 
         function resizeCanvas() {
-          if (!(window.innerWidth > 0 && window.innerHeight > 0)) return;
+          const viewport = window.visualViewport;
+          const viewportWidth = viewport && viewport.width > 0 ? viewport.width : window.innerWidth;
+          const viewportHeight = viewport && viewport.height > 0 ? viewport.height : window.innerHeight;
+          if (!(viewportWidth > 0 && viewportHeight > 0)) return;
           pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-          canvasWidth = window.innerWidth;
-          canvasHeight = window.innerHeight;
+          canvasWidth = viewportWidth;
+          canvasHeight = viewportHeight;
           canvas.width = Math.max(1, Math.round(canvasWidth * pixelRatio));
           canvas.height = Math.max(1, Math.round(canvasHeight * pixelRatio));
           context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
@@ -3436,6 +3575,104 @@
 
         function drawPaperTexture() {
           context.drawImage(backgroundCanvas, 0, 0, canvasWidth, canvasHeight);
+        }
+
+        function drawQuarterBeatCues(time) {
+          const quarterIndex = getQuarterBeatIndex(time);
+          const currentBeat = positiveModulo(quarterIndex, 4);
+          const nextBeat = (currentBeat + 1) % 4;
+          const phase = reducedMotion ? 0 : getQuarterBeatPhase(time);
+          const impact = reducedMotion ? 0.35 : Math.max(0, 1 - phase * 4.2);
+          const anticipation = reducedMotion ? 0 : Math.max(0, (phase - 0.52) / 0.48);
+          const edgeInset = Math.max(18, Math.min(28, Math.min(canvasWidth, canvasHeight) * 0.045));
+          const cueSize = Math.max(30, Math.min(48, Math.min(canvasWidth, canvasHeight) * 0.09));
+          const cuePositions = [
+            { x: canvasWidth * 0.54, y: edgeInset, angle: 0 },
+            { x: canvasWidth - edgeInset, y: canvasHeight * 0.43, angle: Math.PI / 2 },
+            { x: canvasWidth * 0.46, y: canvasHeight - edgeInset, angle: Math.PI },
+            { x: edgeInset, y: canvasHeight * 0.57, angle: -Math.PI / 2 }
+          ];
+          const beatColors = [colors.rust, colors.lakeDeep, colors.sand, colors.purple];
+          const currentActionBeat = isActionQuarterBeat(quarterIndex);
+
+          context.save();
+          if (currentActionBeat && impact > 0) {
+            context.globalAlpha = 0.08 + impact * 0.2;
+            context.strokeStyle = beatColors[currentBeat];
+            context.lineWidth = Math.max(3, cueSize * (0.08 + impact * 0.08));
+            context.strokeRect(
+              edgeInset * 0.55,
+              edgeInset * 0.55,
+              canvasWidth - edgeInset * 1.1,
+              canvasHeight - edgeInset * 1.1
+            );
+          }
+
+          for (let beat = 0; beat < 4; beat += 1) {
+            const position = cuePositions[beat];
+            const active = beat === currentBeat;
+            const upcoming = beat === nextBeat;
+            const actionSlot = positiveModulo(beat, MODES[mode].beatStep) === 0;
+            const activeAction = active && actionSlot;
+            const scale = 1
+              + (active ? impact * (activeAction ? 0.34 : 0.18) : 0)
+              + (upcoming ? anticipation * 0.12 : 0);
+            const cueWidth = cueSize * (activeAction ? 1.42 : actionSlot ? 1.26 : 1.08) * scale;
+            const cueHeight = cueSize * 0.62 * scale;
+
+            context.save();
+            context.translate(position.x, position.y);
+            context.rotate(position.angle);
+            context.globalAlpha = active
+              ? 0.68 + impact * 0.3
+              : upcoming
+                ? 0.13 + anticipation * 0.28
+                : 0.1;
+            context.fillStyle = actionSlot ? colors.pink : beatColors[beat];
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(2, cueSize * 0.065);
+            context.beginPath();
+            context.moveTo(-cueWidth * 0.5, -cueHeight * 0.42);
+            context.lineTo(cueWidth * 0.38, -cueHeight * 0.5);
+            context.lineTo(cueWidth * 0.5, cueHeight * 0.34);
+            context.lineTo(-cueWidth * 0.32, cueHeight * 0.5);
+            context.closePath();
+            context.fill();
+            context.stroke();
+
+            if (active && impact > 0.08) {
+              context.globalAlpha = impact * 0.7;
+              context.lineWidth = Math.max(2, cueSize * 0.05);
+              for (let ray = -1; ray <= 1; ray += 1) {
+                const rayX = ray * cueWidth * 0.22;
+                context.beginPath();
+                context.moveTo(rayX, cueHeight * 0.66);
+                context.lineTo(rayX * 1.18, cueHeight * (0.95 + impact * 0.28));
+                context.stroke();
+              }
+            }
+            context.restore();
+
+            context.save();
+            context.translate(position.x, position.y);
+            context.globalAlpha = active
+              ? 0.9
+              : upcoming
+                ? 0.22 + anticipation * 0.24
+                : 0.14;
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.lineJoin = "round";
+            context.font = `${cssValue("--fontWeightBold")} ${Math.max(14, cueSize * (activeAction ? 0.48 : 0.4))}px ${cssValue("--fontFamilyBase")}`;
+            context.lineWidth = Math.max(3, cueSize * 0.09);
+            context.strokeStyle = colors.ink;
+            const label = actionSlot ? (mode === "merit" ? "敲" : "放") : String(beat + 1);
+            context.strokeText(label, 0, 0);
+            context.fillStyle = activeAction ? colors.washiLight : colors.ink;
+            context.fillText(label, 0, 0);
+            context.restore();
+          }
+          context.restore();
         }
 
         function drawEnso(x, y, size, time) {
@@ -3447,7 +3684,7 @@
           const outerRadius = Math.hypot(farthestX, farthestY) * 1.08;
           const ringRadius = outerRadius + (targetRadius - outerRadius) * approach;
           const period = MODES.merit.autoDelay;
-          const beatNumber = ((rhythmBeatIndex + Math.floor((time - rhythmEpoch) / period)) % 4 + 4) % 4;
+          const beatNumber = positiveModulo(Math.floor(getRhythmElapsedMs(time) / period), 4);
           const beatColors = [colors.rust, colors.lakeDeep, colors.washiDeep, colors.purple];
           const beatColor = beatColors[beatNumber];
           context.save();
@@ -4848,13 +5085,14 @@
           }
 
           const beatDuration = MODES[mode].autoDelay;
+          const missWindow = beatDuration * MISS_GRACE_RATIO;
           if (!sessionMissAnchor) sessionMissAnchor = time;
 
           while (
-            time - sessionMissAnchor >= beatDuration
+            time - sessionMissAnchor >= missWindow
             && sessionMissCount < MISS_FORTUNE_THRESHOLD
           ) {
-            sessionMissAnchor += beatDuration;
+            sessionMissAnchor += missWindow;
             sessionMissCount += 1;
             comboCount = 0;
             perfectStreak = 0;
@@ -4902,6 +5140,7 @@
               delta
             );
           }
+          drawQuarterBeatCues(time);
           drawRipples(time);
           drawFever(time, geometry);
           drawBursts(time, geometry.size);
@@ -4996,8 +5235,67 @@
           }
         });
 
-        window.addEventListener("resize", resizeCanvas, { passive: true });
-        document.addEventListener("pointerdown", resetIdleHint, { passive: true, capture: true });
+        let screenPointerStart = null;
+
+        function syncViewportMetrics() {
+          const viewport = window.visualViewport;
+          const width = viewport && viewport.width > 0 ? viewport.width : window.innerWidth;
+          const height = viewport && viewport.height > 0 ? viewport.height : window.innerHeight;
+          document.documentElement.style.setProperty("--appViewportHeight", `${Math.round(height)}px`);
+          if (Math.round(width) !== Math.round(canvasWidth) || Math.round(height) !== Math.round(canvasHeight)) {
+            resizeCanvas();
+          }
+        }
+
+        function handleDocumentPointerDown(event) {
+          resetIdleHint();
+          if (!event.isPrimary) return;
+          screenPointerStart = {
+            id: event.pointerId,
+            x: event.clientX,
+            y: event.clientY
+          };
+        }
+
+        function handleDocumentPointerUp(event) {
+          if (
+            !event.isPrimary
+            || !screenPointerStart
+            || screenPointerStart.id !== event.pointerId
+            || fortuneOpen
+            || fortunePending
+          ) {
+            screenPointerStart = null;
+            return;
+          }
+
+          const distance = Math.hypot(
+            event.clientX - screenPointerStart.x,
+            event.clientY - screenPointerStart.y
+          );
+          screenPointerStart = null;
+          if (distance > 18 || (event.pointerType === "mouse" && event.button !== 0)) return;
+
+          const target = event.target;
+          if (
+            !(target instanceof Element)
+            || target.closest("button, a[href], input, textarea, select, [contenteditable='true'], [role='dialog']")
+          ) {
+            return;
+          }
+          performUserAction();
+        }
+
+        window.addEventListener("resize", syncViewportMetrics, { passive: true });
+        window.addEventListener("orientationchange", syncViewportMetrics, { passive: true });
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", syncViewportMetrics, { passive: true });
+        }
+        document.addEventListener("pointerdown", handleDocumentPointerDown, { passive: true, capture: true });
+        document.addEventListener("pointerup", handleDocumentPointerUp, { passive: true });
+        document.addEventListener("pointercancel", () => {
+          screenPointerStart = null;
+        }, { passive: true });
         document.addEventListener("visibilitychange", () => {
           if (document.hidden) {
             window.clearTimeout(idleHintTimer);
@@ -5054,7 +5352,7 @@
 
         loadState();
         renderUi();
-        resizeCanvas();
+        syncViewportMetrics();
         startAnimation();
         resetIdleHint();
         resolveLocation();
@@ -5117,6 +5415,14 @@
               })),
               rhythmPhase: Number(getRhythmPhase().toFixed(3)),
               rhythmBeat: getRhythmBeatNumber(),
+              quarterBeatPhase: Number(getQuarterBeatPhase().toFixed(3)),
+              quarterBeat: getQuarterBeatNumber(),
+              quarterBeatIsAction: isActionQuarterBeat(getQuarterBeatIndex()),
+              missGraceRatio: MISS_GRACE_RATIO,
+              viewport: {
+                width: canvasWidth,
+                height: canvasHeight
+              },
               timingGrade: lastTimingGrade,
               combo: comboCount,
               perfectStreak,
