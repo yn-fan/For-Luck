@@ -2139,8 +2139,14 @@
       <aside class="stats" aria-labelledby="statsTitle">
         <p class="stats-title" id="statsTitle">功德记录</p>
         <div class="tools" role="group" aria-label="体验设置">
-          <button class="tool-button" id="autoToggle" type="button" aria-pressed="false">
-            <span class="tool-label" id="autoLabel">赛博代敲</span>
+          <button
+            class="tool-button"
+            id="autoToggle"
+            type="button"
+            aria-pressed="false"
+            aria-describedby="autoDescription"
+          >
+            <span class="tool-label" id="autoLabel">赛博对敲</span>
           </button>
           <button
             class="tool-button sound-button"
@@ -2154,6 +2160,9 @@
             <span class="sound-glyph sound-glyph-off" aria-hidden="true">🔇</span>
           </button>
         </div>
+        <span class="visually-hidden" id="autoDescription">
+          开启后你敲正拍，赛博鼓槌敲反拍；功德时刻会自动加入
+        </span>
         <dl class="stats-grid">
           <div class="stat">
             <dt id="globalLabel">全球功德</dt>
@@ -2299,6 +2308,7 @@
         const AUTO_BEAT_LATE_WINDOW_MS = 80;
         const AUTO_TIMER_SAFETY_MS = 8;
         const START_TIMING = Object.freeze({ label: "START", rank: "start" });
+        const CYBER_DUET_TIMING = Object.freeze({ label: "对敲", rank: "duet" });
         const MERIT_BEAT_PLATE_ROTATION = -0.13;
         const MERIT_BEAT_CORNERS = Object.freeze([
           { x: 0.33, y: -0.42 },
@@ -2308,7 +2318,8 @@
         ]);
         const MODES = {
           merit: {
-            autoLabel: "赛博代敲",
+            autoLabel: "赛博对敲",
+            autoDescription: "开启后你敲正拍，赛博鼓槌敲反拍；功德时刻会自动加入",
             globalLabel: "全球功德",
             personalLabel: "我已积攒的功德",
             globalBase: 1286420,
@@ -2317,6 +2328,7 @@
           },
           release: {
             autoLabel: "赛博代放",
+            autoDescription: "开启后按背景音乐节拍自动放生",
             globalLabel: "全球放生",
             personalLabel: "我的放生",
             globalBase: 48216,
@@ -2330,7 +2342,7 @@
           audioBlocked: "浏览器暂时阻止了声音，请再次操作",
           bgmUnavailable: "背景音乐加载失败，音效与计数仍可正常使用",
           locationUnavailable: "暂时无法获取 IP 所在地，已显示“苏州”",
-          autoStoppedOnSwitch: "已切换模式，自动操作已关闭",
+          autoStoppedOnSwitch: "已切换模式，协作或自动操作已关闭",
           modeMerit: "已切换到木鱼模式",
           modeRelease: "已切换到放生模式",
           meritStatus: (grade, personal, combo) =>
@@ -2492,6 +2504,7 @@
         const releaseAction = document.getElementById("releaseAction");
         const autoToggle = document.getElementById("autoToggle");
         const autoLabel = document.getElementById("autoLabel");
+        const autoDescription = document.getElementById("autoDescription");
         const soundToggle = document.getElementById("soundToggle");
         const bgmAudio = document.getElementById("bgmAudio");
         const globalLabel = document.getElementById("globalLabel");
@@ -2597,6 +2610,8 @@
         let feverUntil = 0;
         let feverWasActive = false;
         let sessionActionCount = 0;
+        let sessionManualActionCount = 0;
+        let sessionCyberCount = 0;
         let sessionMissCount = 0;
         let sessionMissAnchor = 0;
         let fortuneOpen = false;
@@ -2620,6 +2635,7 @@
         let strikeEmojiAnchor = {
           x: 0,
           y: 0,
+          fromCyber: false,
           strikeStarted: Number.NEGATIVE_INFINITY
         };
         let rhythmEpoch = performance.now();
@@ -2718,17 +2734,22 @@
           fortuneTimer = 0;
           fortunePending = false;
           sessionActionCount = 0;
+          sessionManualActionCount = 0;
+          sessionCyberCount = 0;
           sessionMissCount = 0;
           sessionMissAnchor = 0;
           lastActionWasCountIn = false;
         }
 
-        function registerSessionAction(time = performance.now()) {
+        function registerSessionAction(time = performance.now(), fromAuto = false) {
           window.clearTimeout(fortuneTimer);
           fortuneTimer = 0;
           fortunePending = false;
           sessionActionCount += 1;
-          sessionMissAnchor = time;
+          if (!fromAuto) {
+            sessionManualActionCount += 1;
+            sessionMissAnchor = time;
+          }
         }
 
         function showFortuneSummary(forcedLevel = "", forcedKeyword = "") {
@@ -2849,7 +2870,13 @@
         }
 
         function showIdleHint() {
-          if (autoActive || fortuneOpen || fortunePending || document.hidden) {
+          if (
+            isHandsFreeAutoActive()
+            || isFeverActive()
+            || fortuneOpen
+            || fortunePending
+            || document.hidden
+          ) {
             return;
           }
           const hint = mode === "merit"
@@ -2869,7 +2896,13 @@
         function resetIdleHint() {
           window.clearTimeout(idleHintTimer);
           idleHint.hidden = true;
-          if (!autoActive && !fortuneOpen && !fortunePending && !document.hidden) {
+          if (
+            !isHandsFreeAutoActive()
+            && !isFeverActive()
+            && !fortuneOpen
+            && !fortunePending
+            && !document.hidden
+          ) {
             idleHintTimer = window.setTimeout(showIdleHint, IDLE_HINT_DELAY);
           }
         }
@@ -2977,6 +3010,8 @@
           releaseAction.tabIndex = mode === "release" ? 0 : -1;
 
           autoLabel.textContent = config.autoLabel;
+          autoDescription.textContent = config.autoDescription;
+          autoToggle.title = config.autoDescription;
           autoToggle.setAttribute("aria-pressed", String(autoActive));
           soundToggle.setAttribute("aria-pressed", String(soundEnabled));
 
@@ -3194,8 +3229,24 @@
           return period - remainder;
         }
 
-        function alignMissAnchorToBgm(expectedSessionActions) {
-          if (!isBgmPlaying() || sessionActionCount !== expectedSessionActions) return false;
+        function getCyberOffbeatPhaseMs(time = performance.now()) {
+          return positiveModulo(
+            getRhythmElapsedMs(time) - BGM_QUARTER_MS,
+            MODES.merit.autoDelay
+          );
+        }
+
+        function getMsUntilNextCyberOffbeat(time = performance.now()) {
+          return MODES.merit.autoDelay - getCyberOffbeatPhaseMs(time);
+        }
+
+        function alignMissAnchorToBgm(expectedManualActions) {
+          if (
+            !isBgmPlaying()
+            || sessionManualActionCount !== expectedManualActions
+          ) {
+            return false;
+          }
           const now = performance.now();
           const mediaTimeMs = bgmAudio.currentTime * 1000;
           const beatOffsetMs = BGM_BEAT_OFFSET_SECONDS * 1000;
@@ -3235,11 +3286,26 @@
           return time < feverUntil;
         }
 
+        function isMeritDuetActive(time = performance.now()) {
+          return mode === "merit" && (autoActive || isFeverActive(time));
+        }
+
+        function isHandsFreeAutoActive() {
+          return mode === "release" && autoActive;
+        }
+
+        function shouldScheduleAuto(time = performance.now()) {
+          return isHandsFreeAutoActive() || isMeritDuetActive(time);
+        }
+
         function triggerFever(time = performance.now()) {
           feverStarted = time;
           feverUntil = time + PERFECT_FEVER_DURATION;
           feverWasActive = true;
           document.body.dataset.fever = "true";
+          window.clearTimeout(idleHintTimer);
+          idleHint.hidden = true;
+          if (mode === "merit") scheduleAuto();
         }
 
         function updateCombo(timing) {
@@ -3313,7 +3379,9 @@
             rank: timing.rank,
             gain,
             detail,
-            combo: comboCount > 1 ? `COMBO ×${comboCount}` : "",
+            combo: timing.rank !== "duet" && comboCount > 1
+              ? `COMBO ×${comboCount}`
+              : "",
             x: slot.x,
             y: slot.y,
             type,
@@ -3323,25 +3391,15 @@
           bursts = bursts.slice(-10);
         }
 
-        function strikeMerit(fromAuto = false, countIn = false) {
-          if (fortuneOpen || fortunePending) return;
-          const actionTime = performance.now();
-          const timing = countIn ? START_TIMING : getTimingGrade(actionTime, fromAuto);
-          registerSessionAction(actionTime);
-          resetIdleHint();
-          triggerUiHit(timing);
-          const feverTriggered = countIn ? false : updateCombo(timing);
-          lastTimingGrade = timing.label;
-          lastActionWasCountIn = countIn;
-          meritTotal += 1;
+        function addMeritHitVisual(actionTime, fromCyber, geometry) {
           woodStrikeStarted = actionTime;
-          woodStrikeFromAuto = fromAuto;
-          const geometry = stageGeometry();
-          strikeEmojiParticles = makeStrikeEmojiParticles(fromAuto);
+          woodStrikeFromAuto = fromCyber;
+          strikeEmojiParticles = makeStrikeEmojiParticles(fromCyber);
           strikeEmojiAnchor = {
-            x: geometry.x + geometry.size * (fromAuto ? -0.17 : 0.17),
+            x: geometry.x + geometry.size * (fromCyber ? -0.17 : 0.17),
             y: geometry.y + geometry.size * 0.13,
-            strikeStarted: woodStrikeStarted
+            strikeStarted: actionTime,
+            fromCyber
           };
           const imprintAngle = Math.random() * Math.PI * 2;
           const imprintRadiusX = geometry.size * (0.42 + Math.random() * 0.28);
@@ -3355,12 +3413,27 @@
           });
           meritImprints = meritImprints.slice(-10);
           addRipple(
-            geometry.x,
-            geometry.y + geometry.size * 0.1,
+            strikeEmojiAnchor.x,
+            strikeEmojiAnchor.y,
             geometry.size * 0.19,
             geometry.size * 0.55,
-            colors.rust
+            fromCyber ? colors.cyberCyan : colors.rust
           );
+        }
+
+        function strikeMerit(fromAuto = false, countIn = false) {
+          if (fortuneOpen || fortunePending) return;
+          const actionTime = performance.now();
+          const timing = countIn ? START_TIMING : getTimingGrade(actionTime, fromAuto);
+          registerSessionAction(actionTime, fromAuto);
+          resetIdleHint();
+          triggerUiHit(timing);
+          const feverTriggered = countIn ? false : updateCombo(timing);
+          lastTimingGrade = timing.label;
+          lastActionWasCountIn = countIn;
+          meritTotal += 1;
+          const geometry = stageGeometry();
+          addMeritHitVisual(actionTime, fromAuto, geometry);
           addBurst(timing, "功德 +1", "", geometry, "merit");
           renderUi();
           saveState();
@@ -3369,12 +3442,35 @@
             countIn
               ? STRINGS.meritStart(formatter.format(meritTotal))
               : feverTriggered
-              ? "连续 3 次 PERFECT，功德时刻开始，持续 10 秒"
+              ? "连续 3 次 PERFECT，功德时刻开始，赛博鼓槌已加入反拍对敲，持续 10 秒"
               : STRINGS.meritStatus(timing.label, formatter.format(meritTotal), comboCount)
           );
           if (!fromAuto && navigator.vibrate) {
             navigator.vibrate(timing.rank === "perfect" ? [12, 18, 18] : 8);
           }
+        }
+
+        function strikeCyberDuet() {
+          if (mode !== "merit" || fortuneOpen || fortunePending) return;
+          const actionTime = performance.now();
+          const geometry = stageGeometry();
+          window.clearTimeout(fortuneTimer);
+          fortuneTimer = 0;
+          fortunePending = false;
+          sessionActionCount += 1;
+          sessionCyberCount += 1;
+          meritTotal += 1;
+          addMeritHitVisual(actionTime, true, geometry);
+          addBurst(
+            CYBER_DUET_TIMING,
+            "功德 +1",
+            isFeverActive(actionTime) ? "功德时刻助力" : "反拍",
+            geometry,
+            "merit"
+          );
+          renderUi();
+          saveState();
+          playWoodSound(true);
         }
 
         function releaseFish(fromAuto = false, countIn = false) {
@@ -3384,7 +3480,7 @@
           const item = species[Math.floor(Math.random() * species.length)];
           const fish = createReleasedFish(item);
           const timing = countIn ? START_TIMING : getTimingGrade(actionTime, fromAuto);
-          registerSessionAction(actionTime);
+          registerSessionAction(actionTime, fromAuto);
           resetIdleHint();
           triggerUiHit(timing);
           const feverTriggered = countIn ? false : updateCombo(timing);
@@ -3439,21 +3535,25 @@
 
         function performUserAction() {
           const actionTime = performance.now();
-          const countIn = sessionActionCount === 0 && !isBgmPlaying();
-          const expectedSessionActions = sessionActionCount + 1;
+          const countIn = sessionManualActionCount === 0 && !isBgmPlaying();
+          const expectedManualActions = sessionManualActionCount + 1;
           if (countIn) {
             rhythmBeatIndex = 0;
             rhythmEpoch = actionTime;
           }
           const bgmReady = startBgm();
           performCurrentAction(false, countIn);
-          if (!countIn) return;
+          if (!countIn) {
+            if (isMeritDuetActive() && !autoTimer) scheduleAuto();
+            return;
+          }
           void bgmReady.then((started) => {
-            if (sessionActionCount !== expectedSessionActions) return;
-            if (!started || !alignMissAnchorToBgm(expectedSessionActions)) {
+            if (sessionManualActionCount !== expectedManualActions) return;
+            if (!started || !alignMissAnchorToBgm(expectedManualActions)) {
               rhythmEpoch = actionTime;
               sessionMissAnchor = actionTime;
             }
+            if (isMeritDuetActive()) scheduleAuto();
           });
         }
 
@@ -3462,28 +3562,46 @@
           autoTimer = 0;
           if (!autoActive) return;
           autoActive = false;
-          if (sessionActionCount > 0) sessionMissAnchor = performance.now();
+          if (sessionManualActionCount > 0) sessionMissAnchor = performance.now();
           renderUi();
           resetIdleHint();
-          if (shouldAnnounce) announce("自动操作已关闭");
+          if (mode === "merit" && isFeverActive()) scheduleAuto();
+          if (shouldAnnounce) {
+            announce(mode === "merit" ? "赛博对敲已关闭" : "赛博代放已关闭");
+          }
         }
 
         function scheduleAuto() {
           window.clearTimeout(autoTimer);
-          if (!autoActive) return;
-          const delay = isBgmPlaying()
-            ? getMsUntilNextRhythmBeat() + AUTO_TIMER_SAFETY_MS
-            : MODES[mode].autoDelay;
+          autoTimer = 0;
+          if (!shouldScheduleAuto()) return;
+          const cyberDuet = mode === "merit";
+          const delay = (
+            cyberDuet
+              ? getMsUntilNextCyberOffbeat()
+              : getMsUntilNextRhythmBeat()
+          ) + AUTO_TIMER_SAFETY_MS;
           autoTimer = window.setTimeout(() => {
-            if (isBgmPlaying()) {
+            autoTimer = 0;
+            if (!shouldScheduleAuto()) return;
+            if (mode === "merit") {
+              const phaseMs = getCyberOffbeatPhaseMs();
+              if (phaseMs > AUTO_BEAT_LATE_WINDOW_MS) {
+                scheduleAuto();
+                return;
+              }
+              strikeCyberDuet();
+            } else if (isBgmPlaying()) {
               const period = MODES[mode].autoDelay;
               const phaseMs = positiveModulo(getRhythmElapsedMs(), period);
               if (phaseMs > AUTO_BEAT_LATE_WINDOW_MS) {
                 scheduleAuto();
                 return;
               }
+              performCurrentAction(true);
+            } else {
+              performCurrentAction(true);
             }
-            performCurrentAction(true);
             scheduleAuto();
           }, delay);
         }
@@ -3497,13 +3615,19 @@
           autoActive = true;
           renderUi();
           window.clearTimeout(autoTimer);
+          autoTimer = 0;
           resetIdleHint();
+          if (mode === "merit") {
+            if (sessionManualActionCount > 0 || isBgmPlaying()) scheduleAuto();
+            announce("赛博对敲已就位：你敲正拍，赛博鼓槌敲反拍");
+            return;
+          }
           rhythmEpoch = performance.now();
           const bgmReady = await startBgm();
           if (!autoActive) return;
           if (!bgmReady) performCurrentAction(true);
           scheduleAuto();
-          announce(`${MODES[mode].autoLabel}已开启，跟随背景音乐节拍`);
+          announce("赛博代放已开启，跟随背景音乐节拍");
         }
 
         function toggleSound() {
@@ -3525,10 +3649,14 @@
           if (soundEnabled) {
             void ensureAudio();
             void startBgm().then((started) => {
-              if (started && sessionActionCount > 0 && !autoActive) {
-                alignMissAnchorToBgm(sessionActionCount);
+              if (
+                started
+                && sessionManualActionCount > 0
+                && !isHandsFreeAutoActive()
+              ) {
+                alignMissAnchorToBgm(sessionManualActionCount);
               }
-              if (autoActive) scheduleAuto();
+              if (shouldScheduleAuto()) scheduleAuto();
             });
           }
         }
@@ -3769,13 +3897,25 @@
             const active = beat === currentBeat;
             const upcoming = beat === nextBeat;
             const actionSlot = positiveModulo(beat, MODES[mode].beatStep) === 0;
+            const cyberSlot = integratedWithPlate
+              && !actionSlot
+              && isMeritDuetActive(time);
             const isActiveAction = active && actionSlot;
+            const isActiveCyber = active && cyberSlot;
             const scale = 1
-              + (active ? impact * (isActiveAction ? 0.34 : 0.18) : 0)
+              + (
+                active
+                  ? impact * (isActiveAction || isActiveCyber ? 0.34 : 0.18)
+                  : 0
+              )
               + (upcoming ? anticipation * 0.12 : 0);
             const cueWidth = cueSize * (
               integratedWithPlate
-                ? isActiveAction ? 1.18 : actionSlot ? 1.08 : 0.88
+                ? isActiveAction || isActiveCyber
+                  ? 1.18
+                  : actionSlot || cyberSlot
+                    ? 1.08
+                    : 0.88
                 : isActiveAction ? 1.42 : actionSlot ? 1.26 : 1.08
             ) * scale;
             const cueHeight = cueSize * (integratedWithPlate ? 0.72 : 0.62) * scale;
@@ -3790,8 +3930,12 @@
                 : 0.1;
             context.fillStyle = integratedWithPlate
               ? active
-                ? colors.washiLight
-                : colors.pink
+                ? cyberSlot
+                  ? colors.cyberCyan
+                  : colors.washiLight
+                : cyberSlot
+                  ? colors.lakeDeep
+                  : colors.pink
               : actionSlot
                 ? colors.pink
                 : beatColors[beat];
@@ -3843,6 +3987,13 @@
                 ? colors.washiLight
                 : colors.ink;
               context.fillText(label, 0, 0);
+            } else if (cyberSlot) {
+              context.font = `${cssValue("--fontWeightBold")} ${Math.max(13, cueSize * (isActiveCyber ? 0.46 : 0.38))}px ${cssValue("--fontFamilyBase")}`;
+              context.lineWidth = Math.max(3, cueSize * 0.085);
+              context.strokeStyle = colors.ink;
+              context.strokeText("对", 0, 0);
+              context.fillStyle = isActiveCyber ? colors.washiLight : colors.cyberCyan;
+              context.fillText("对", 0, 0);
             } else {
               context.fillStyle = colors.ink;
               context.strokeStyle = active ? colors.washiLight : colors.ink;
@@ -4282,7 +4433,7 @@
           const bodyX = x + tiltX;
           const bodyY = y + idle + tiltY - beatKick * size * 0.006 + positiveImpact * size * 0.008;
           const useCyberMallet = woodStrikeFromAuto
-            && (autoActive || elapsed <= duration + 0.18);
+            && (isMeritDuetActive(time) || elapsed <= duration + 0.18);
           const strikePointX = bodyX + size * (useCyberMallet ? -0.17 : 0.17);
           const strikePointY = bodyY + size * 0.13;
 
@@ -4529,14 +4680,28 @@
           }
           context.restore();
 
-          const baseX = useCyberMallet ? -size * 0.12 : x + size * 0.46;
-          const baseY = useCyberMallet ? -size * 0.1 : canvasHeight + size * 0.08;
-          const contactAngle = Math.atan2(strikePointY - baseY, strikePointX - baseX);
-          const restAngle = contactAngle + (useCyberMallet ? -0.4 : 0.38);
-          const angle = restAngle + (contactAngle - restAngle) * malletSwing;
-          const handleLength = Math.hypot(strikePointX - baseX, strikePointY - baseY);
-          const headX = baseX + Math.cos(angle) * handleLength;
-          const headY = baseY + Math.sin(angle) * handleLength;
+          let baseX;
+          let baseY;
+          let headX;
+          let headY;
+          let angle;
+          if (useCyberMallet) {
+            baseX = -size * 0.18;
+            baseY = strikePointY - size * 0.015;
+            const retractedX = strikePointX - size * 0.38;
+            headX = retractedX + (strikePointX - retractedX) * malletSwing;
+            headY = baseY + (strikePointY - baseY) * malletSwing;
+            angle = Math.atan2(headY - baseY, headX - baseX);
+          } else {
+            baseX = x + size * 0.46;
+            baseY = canvasHeight + size * 0.08;
+            const contactAngle = Math.atan2(strikePointY - baseY, strikePointX - baseX);
+            const restAngle = contactAngle + 0.38;
+            angle = restAngle + (contactAngle - restAngle) * malletSwing;
+            const handleLength = Math.hypot(strikePointX - baseX, strikePointY - baseY);
+            headX = baseX + Math.cos(angle) * handleLength;
+            headY = baseY + Math.sin(angle) * handleLength;
+          }
           const normalX = -Math.sin(angle);
           const normalY = Math.cos(angle);
 
@@ -4569,14 +4734,14 @@
 
         function drawWoodStrikeEmojis(x, y, size, time) {
           const impactTime = WOOD_STRIKE_DURATION * WOOD_IMPACT_PHASE;
-          const elapsed = (time - woodStrikeStarted) / 1000 - impactTime;
+          const elapsed = (time - strikeEmojiAnchor.strikeStarted) / 1000 - impactTime;
           const effectDuration = reducedMotion ? 0.28 : 0.72;
           if (elapsed < 0 || elapsed > effectDuration) return;
 
-          const anchorX = strikeEmojiAnchor.strikeStarted === woodStrikeStarted
+          const anchorX = Number.isFinite(strikeEmojiAnchor.x)
             ? strikeEmojiAnchor.x
             : x + size * 0.17;
-          const anchorY = strikeEmojiAnchor.strikeStarted === woodStrikeStarted
+          const anchorY = Number.isFinite(strikeEmojiAnchor.y)
             ? strikeEmojiAnchor.y
             : y + size * 0.13;
 
@@ -4604,7 +4769,7 @@
               ? 0
               : Math.sin(progress * Math.PI * 2 + particle.angle) * size * 0.014;
             const emojiSize = size
-              * (woodStrikeFromAuto ? 0.07 : 0.066)
+              * (strikeEmojiAnchor.fromCyber ? 0.07 : 0.066)
               * particle.scale;
             context.save();
             context.translate(originX + drift + wobble, originY - lift);
@@ -4924,7 +5089,9 @@
         function drawBursts(time, size) {
           const feedbackLife = (burst) => burst.rank === "miss"
             ? (reducedMotion ? 520 : 760)
-            : (reducedMotion ? 900 : 1350);
+            : burst.rank === "duet"
+              ? (reducedMotion ? 620 : 920)
+              : (reducedMotion ? 900 : 1350);
           bursts = bursts.filter((burst) => time - burst.born < feedbackLife(burst));
           for (const burst of bursts) {
             const life = feedbackLife(burst);
@@ -4970,13 +5137,16 @@
               ? 1.18
               : burst.rank === "cool"
                 ? 0.82
-                : 1;
+                : burst.rank === "duet"
+                  ? 0.68
+                  : 1;
             const gradeSize = baseGradeSize * gradeScale * RATING_EFFECT_SCALE;
             const gainSize = Math.max(22, gradeSize * 0.46);
             const comboSize = Math.max(19, gradeSize * 0.38);
             const gradePalette = {
               perfect: { primary: colors.washiDeep, accent: colors.pink },
               cool: { primary: colors.lake, accent: colors.lime },
+              duet: { primary: colors.cyberCyan, accent: colors.pink },
               start: { primary: colors.lime, accent: colors.lakeDeep },
               miss: { primary: colors.washiLight, accent: colors.purple },
               good: { primary: colors.purple, accent: colors.rust }
@@ -5071,6 +5241,73 @@
           }
         }
 
+        function getBgmRemainingSeconds() {
+          if (!isBgmPlaying() || !Number.isFinite(bgmAudio.duration)) return null;
+          return Math.max(0, Math.ceil(bgmAudio.duration - bgmAudio.currentTime));
+        }
+
+        function formatSongTime(totalSeconds) {
+          const minutes = Math.floor(totalSeconds / 60);
+          const seconds = String(totalSeconds % 60).padStart(2, "0");
+          return `${minutes}:${seconds}`;
+        }
+
+        function drawSongProgress(time, geometry) {
+          const remainingSeconds = getBgmRemainingSeconds();
+          if (remainingSeconds === null || !(bgmAudio.duration > 0)) return;
+          const progress = Math.max(
+            0,
+            Math.min(1, bgmAudio.currentTime / bgmAudio.duration)
+          );
+          const stageTop = geometry.y - geometry.height * 0.5;
+          const trackY = Math.max(
+            86,
+            Math.max(stageTop + 24, geometry.y - geometry.size * 0.49)
+          );
+          const trackWidth = Math.min(
+            canvasWidth - 32,
+            Math.max(188, geometry.width * 0.74)
+          );
+          const labelSize = Math.max(13, Math.min(17, geometry.size * 0.046));
+          const label = `本曲剩 ${formatSongTime(remainingSeconds)}`;
+          const segmentCount = 18;
+          const gap = Math.max(2, trackWidth * 0.008);
+          const segmentWidth = (trackWidth - gap * (segmentCount - 1)) / segmentCount;
+          const activeSegments = Math.ceil((1 - progress) * segmentCount);
+          const feverActive = isFeverActive(time);
+
+          context.save();
+          context.translate(geometry.x, trackY);
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.font = `${cssValue("--fontWeightBold")} ${labelSize}px ${cssValue("--fontFamilyBase")}`;
+          const labelWidth = context.measureText(label).width + labelSize * 1.2;
+          context.globalAlpha = feverActive ? 0.92 : 0.72;
+          context.fillStyle = feverActive ? colors.washiLight : colors.ink;
+          context.beginPath();
+          context.moveTo(-labelWidth * 0.54, -labelSize * 0.62);
+          context.lineTo(labelWidth * 0.5, -labelSize * 0.72);
+          context.lineTo(labelWidth * 0.54, labelSize * 0.48);
+          context.lineTo(-labelWidth * 0.48, labelSize * 0.62);
+          context.closePath();
+          context.fill();
+          context.fillStyle = feverActive ? colors.ink : colors.washiLight;
+          context.globalAlpha = 1;
+          context.fillText(label, 0, -labelSize * 0.06);
+
+          const lineY = labelSize * 0.88;
+          const lineHeight = Math.max(4, geometry.size * 0.014);
+          for (let segment = 0; segment < segmentCount; segment += 1) {
+            const segmentX = -trackWidth * 0.5 + segment * (segmentWidth + gap);
+            context.globalAlpha = segment < activeSegments ? 0.88 : 0.2;
+            context.fillStyle = segment < activeSegments
+              ? (feverActive ? colors.cyberCyan : colors.pink)
+              : (feverActive ? colors.washiLight : colors.ink);
+            context.fillRect(segmentX, lineY, segmentWidth, lineHeight);
+          }
+          context.restore();
+        }
+
         function drawFeverBackdrop(time) {
           if (!isFeverActive(time)) return;
           const elapsed = Math.max(0, time - feverStarted);
@@ -5105,13 +5342,17 @@
             if (feverWasActive) {
               feverWasActive = false;
               document.body.removeAttribute("data-fever");
+              if (mode === "merit" && !autoActive) {
+                window.clearTimeout(autoTimer);
+                autoTimer = 0;
+              }
+              resetIdleHint();
               announce(mode === "merit" ? "功德时刻结束" : "放生时刻结束");
             }
             return;
           }
 
           const elapsed = Math.max(0, time - feverStarted);
-          const remainingSeconds = Math.max(1, Math.ceil((feverUntil - time) / 1000));
           const minSide = Math.min(canvasWidth, canvasHeight);
           const pulse = reducedMotion ? 1 : 1 + Math.sin(elapsed * 0.018) * 0.045;
           const spin = reducedMotion ? 0 : elapsed * 0.00018;
@@ -5200,48 +5441,120 @@
             context.restore();
           }
           context.restore();
+          context.restore();
+        }
 
-          const titleSize = Math.max(25, Math.min(52, geometry.size * 0.105));
+        function drawFeverBanner(time, geometry) {
+          if (!isFeverActive(time)) return;
+          const remainingSeconds = Math.max(1, Math.ceil((feverUntil - time) / 1000));
+          const titleSize = Math.max(32, Math.min(56, geometry.size * 0.14));
           const bannerWidth = Math.min(
-            canvasWidth - Math.max(24, edgeWidth * 2.2),
-            Math.max(250, titleSize * 7.2)
+            canvasWidth - 24,
+            Math.max(272, titleSize * 6.4)
           );
-          const bannerHeight = titleSize * 1.72;
-          const bannerY = Math.max(
-            92,
-            Math.min(canvasHeight - bannerHeight, geometry.y - geometry.size * 0.31)
-          );
+          const bannerHeight = titleSize * 2.05;
+          const topbarBottom = document.querySelector(".topbar").getBoundingClientRect().bottom;
+          const statsTop = document.querySelector(".stats").getBoundingClientRect().top;
+          const minimumY = topbarBottom + bannerHeight * 0.58 + 8;
+          const maximumY = statsTop - bannerHeight * 0.58 - 8;
+          const desiredY = geometry.y - geometry.size * 0.32;
+          const bannerY = maximumY > minimumY
+            ? Math.max(minimumY, Math.min(maximumY, desiredY))
+            : (topbarBottom + statsTop) * 0.5;
+
+          const drawBannerPath = () => {
+            context.beginPath();
+            context.moveTo(-bannerWidth * 0.51, -bannerHeight * 0.38);
+            context.lineTo(bannerWidth * 0.47, -bannerHeight * 0.5);
+            context.lineTo(bannerWidth * 0.52, bannerHeight * 0.34);
+            context.lineTo(-bannerWidth * 0.46, bannerHeight * 0.48);
+            context.closePath();
+          };
+
+          context.save();
           context.translate(geometry.x, bannerY);
           context.rotate(-0.025);
+          context.translate(7, 7);
+          context.fillStyle = colors.pink;
           context.globalAlpha = 0.96;
-          context.fillStyle = colors.washiDeep;
-          context.strokeStyle = colors.ink;
-          context.lineWidth = Math.max(3, titleSize * 0.09);
-          context.beginPath();
-          context.moveTo(-bannerWidth * 0.52, -bannerHeight * 0.43);
-          context.lineTo(bannerWidth * 0.48, -bannerHeight * 0.54);
-          context.lineTo(bannerWidth * 0.52, bannerHeight * 0.35);
-          context.lineTo(-bannerWidth * 0.46, bannerHeight * 0.5);
-          context.closePath();
+          drawBannerPath();
+          context.fill();
+          context.translate(-7, -7);
+          context.fillStyle = colors.ink;
+          context.strokeStyle = colors.washiLight;
+          context.lineWidth = Math.max(3, titleSize * 0.08);
+          context.globalAlpha = 1;
+          drawBannerPath();
           context.fill();
           context.stroke();
 
+          const kickerSize = Math.max(13, titleSize * 0.34);
+          const kickerText = `PERFECT ×${PERFECT_FEVER_THRESHOLD}`;
+          context.font = `${cssValue("--fontWeightBold")} ${kickerSize}px ${cssValue("--fontFamilyBase")}`;
+          const kickerWidth = context.measureText(kickerText).width + kickerSize * 0.9;
+          context.fillStyle = colors.washiDeep;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(2, kickerSize * 0.12);
+          context.fillRect(
+            -bannerWidth * 0.39,
+            -bannerHeight * 0.61,
+            kickerWidth,
+            kickerSize * 1.25
+          );
+          context.strokeRect(
+            -bannerWidth * 0.39,
+            -bannerHeight * 0.61,
+            kickerWidth,
+            kickerSize * 1.25
+          );
+          context.fillStyle = colors.ink;
           context.textAlign = "center";
           context.textBaseline = "middle";
-          context.lineJoin = "round";
-          context.font = `${cssValue("--fontWeightBold")} ${titleSize}px ${cssValue("--fontFamilyBase")}`;
-          context.lineWidth = Math.max(5, titleSize * 0.14);
-          context.strokeStyle = colors.ink;
-          context.strokeText(`PERFECT ×${PERFECT_FEVER_THRESHOLD}`, 0, -titleSize * 0.14);
-          context.fillStyle = primary;
-          context.fillText(`PERFECT ×${PERFECT_FEVER_THRESHOLD}`, 0, -titleSize * 0.14);
+          context.fillText(
+            kickerText,
+            -bannerWidth * 0.39 + kickerWidth * 0.5,
+            -bannerHeight * 0.61 + kickerSize * 0.62
+          );
 
-          context.font = `${cssValue("--fontWeightBold")} ${Math.max(14, titleSize * 0.38)}px ${cssValue("--fontFamilyBase")}`;
+          const timerSize = Math.max(14, titleSize * 0.38);
+          const timerText = `${remainingSeconds}s`;
+          context.font = `${cssValue("--fontWeightBold")} ${timerSize}px ${cssValue("--fontFamilyBase")}`;
+          const timerWidth = context.measureText(timerText).width + timerSize * 0.9;
+          context.fillStyle = colors.lime;
+          context.fillRect(
+            bannerWidth * 0.39 - timerWidth,
+            -bannerHeight * 0.6,
+            timerWidth,
+            timerSize * 1.22
+          );
+          context.strokeRect(
+            bannerWidth * 0.39 - timerWidth,
+            -bannerHeight * 0.6,
+            timerWidth,
+            timerSize * 1.22
+          );
           context.fillStyle = colors.ink;
           context.fillText(
-            `${mode === "merit" ? "功德时刻" : "放生时刻"} · ${remainingSeconds}s`,
+            timerText,
+            bannerWidth * 0.39 - timerWidth * 0.5,
+            -bannerHeight * 0.6 + timerSize * 0.61
+          );
+
+          context.font = `${cssValue("--fontWeightBold")} ${titleSize}px ${cssValue("--fontFamilyBase")}`;
+          context.lineJoin = "round";
+          context.lineWidth = Math.max(5, titleSize * 0.12);
+          context.strokeStyle = colors.ink;
+          const title = mode === "merit" ? "功德时刻" : "放生时刻";
+          context.strokeText(title, 0, -titleSize * 0.02);
+          context.fillStyle = colors.washiLight;
+          context.fillText(title, 0, -titleSize * 0.02);
+
+          context.font = `${cssValue("--fontWeightBold")} ${Math.max(13, titleSize * 0.36)}px ${cssValue("--fontFamilyBase")}`;
+          context.fillStyle = mode === "merit" ? colors.cyberCyan : colors.washiDeep;
+          context.fillText(
+            mode === "merit" ? "赛博对敲 · 反拍助力 +1" : "连击加速中",
             0,
-            titleSize * 0.58
+            titleSize * 0.78
           );
           context.restore();
         }
@@ -5250,13 +5563,13 @@
           if (
             fortuneOpen
             || fortunePending
-            || sessionActionCount < 1
+            || sessionManualActionCount < 1
             || document.hidden
           ) {
             return;
           }
 
-          if (autoActive || isFeverActive(time)) {
+          if (isHandsFreeAutoActive() || isFeverActive(time)) {
             sessionMissAnchor = time;
             return;
           }
@@ -5310,6 +5623,7 @@
           drawFeverBackdrop(time);
 
           const geometry = stageGeometry();
+          drawSongProgress(time, geometry);
           updateSessionMissClock(time, geometry);
           if (mode === "merit") {
             drawWoodfish(geometry.x, geometry.y, geometry.size, time);
@@ -5330,6 +5644,7 @@
           context = feedbackContext;
           try {
             drawBursts(time, geometry.size);
+            drawFeverBanner(time, geometry);
           } finally {
             context = sceneContext;
           }
@@ -5499,16 +5814,19 @@
               });
             }
           } else {
-            if (sessionActionCount > 0) sessionMissAnchor = performance.now();
+            if (sessionManualActionCount > 0) sessionMissAnchor = performance.now();
             startAnimation();
             resetIdleHint();
             if (soundEnabled && bgmResumeOnVisible) {
               bgmResumeOnVisible = false;
               void startBgm().then((started) => {
-                if (started && sessionActionCount > 0) {
-                  alignMissAnchorToBgm(sessionActionCount);
+                if (started && sessionManualActionCount > 0) {
+                  alignMissAnchorToBgm(sessionManualActionCount);
                 }
+                if (shouldScheduleAuto()) scheduleAuto();
               });
+            } else if (shouldScheduleAuto()) {
+              scheduleAuto();
             }
           }
         });
@@ -5521,7 +5839,7 @@
           }
         });
         bgmAudio.addEventListener("seeked", () => {
-          if (autoActive) scheduleAuto();
+          if (shouldScheduleAuto()) scheduleAuto();
         });
 
         const handleReducedMotion = (event) => {
@@ -5553,6 +5871,7 @@
         window.__ritualPrototype = {
           merit: () => strikeMerit(false),
           meritPerfect: () => strikeMerit(true),
+          cyberDuet: strikeCyberDuet,
           release: () => releaseFish(false),
           releasePerfect: () => releaseFish(true),
           previewMiss: (count = MISS_FORTUNE_THRESHOLD) => {
@@ -5603,10 +5922,16 @@
                 duration: Number.isFinite(bgmAudio.duration)
                   ? Number(bgmAudio.duration.toFixed(3))
                   : null,
+                remainingSeconds: getBgmRemainingSeconds(),
                 modeBeatStep: MODES[mode].beatStep,
                 modePeriodMs: MODES[mode].autoDelay
               },
               auto: autoActive,
+              autoBehavior: mode === "merit" ? "cyber-offbeat-duet" : "hands-free",
+              cyberDuetActive: isMeritDuetActive(),
+              cyberOffbeatPhaseMs: mode === "merit"
+                ? Math.round(getCyberOffbeatPhaseMs())
+                : null,
               fish: fishSchool.length,
               fishDirections: fishSchool.slice(-8).map((fish) => ({
                 lane: Number(fish.lane.toFixed(3)),
@@ -5628,7 +5953,9 @@
               beatCueLabels: Array.from({ length: 4 }, (_, beat) =>
                 positiveModulo(beat, MODES[mode].beatStep) === 0
                   ? (mode === "merit" ? "敲" : "放")
-                  : "dot"
+                  : mode === "merit" && isMeritDuetActive()
+                    ? "对"
+                    : "dot"
               ),
               beatCueLayout: cueLayout.positions.map((position) => ({
                 x: Math.round(position.x),
@@ -5645,6 +5972,8 @@
               feverActive: isFeverActive(),
               feverRemainingMs: Math.max(0, Math.round(feverUntil - performance.now())),
               sessionActions: sessionActionCount,
+              sessionManualActions: sessionManualActionCount,
+              sessionCyberBonuses: sessionCyberCount,
               sessionMisses: sessionMissCount,
               fortuneOpen,
               fortunePending,
@@ -5663,25 +5992,32 @@
               woodStrikeDurationMs: Math.round(WOOD_STRIKE_DURATION * 1000),
               malletOrigin: woodStrikeFromAuto
                 && (
-                  autoActive
+                  isMeritDuetActive()
                   || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
                 )
-                ? "top-left"
+                ? "left-edge"
                 : "bottom",
               malletMaterial: woodStrikeFromAuto
                 && (
-                  autoActive
+                  isMeritDuetActive()
                   || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
                 )
                 ? "cyber-stainless"
                 : "wood",
               malletImpactSide: woodStrikeFromAuto
                 && (
-                  autoActive
+                  isMeritDuetActive()
                   || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
                 )
                 ? "left"
                 : "right",
+              malletTravelDirection: woodStrikeFromAuto
+                && (
+                  isMeritDuetActive()
+                  || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
+                )
+                ? "left-to-right"
+                : "bottom-to-top",
               strikeEmojis: strikeEmojiParticles.map((particle) => particle.icon),
               strikeEmojiAnchor: {
                 x: Math.round(strikeEmojiAnchor.x),
