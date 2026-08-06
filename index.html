@@ -869,6 +869,15 @@
       .fortune-aura span:nth-child(6) { right: -3%; bottom: 23%; animation-delay: 200ms; }
       .fortune-aura span:nth-child(7) { bottom: 3%; left: 10%; animation-delay: 240ms; }
       .fortune-aura span:nth-child(8) { right: 8%; bottom: 1%; animation-delay: 280ms; }
+      .fortune-aura span:nth-child(n + 9) { display: none; }
+      .fortune-aura span:nth-child(9) { top: -5%; left: 24%; animation-delay: 90ms; }
+      .fortune-aura span:nth-child(10) { top: 18%; left: -14%; animation-delay: 150ms; }
+      .fortune-aura span:nth-child(11) { top: 20%; right: -15%; animation-delay: 210ms; }
+      .fortune-aura span:nth-child(12) { top: 52%; left: -16%; animation-delay: 270ms; }
+      .fortune-aura span:nth-child(13) { top: 56%; right: -17%; animation-delay: 330ms; }
+      .fortune-aura span:nth-child(14) { bottom: 8%; left: -8%; animation-delay: 390ms; }
+      .fortune-aura span:nth-child(15) { right: -7%; bottom: 6%; animation-delay: 450ms; }
+      .fortune-aura span:nth-child(16) { right: 28%; bottom: -7%; animation-delay: 510ms; }
 
       .fortune-slip {
         position: relative;
@@ -1247,6 +1256,12 @@
       .fortune-overlay[data-fortune-level="大吉"] .fortune-aura span {
         opacity: 1;
         animation: fortune-grand-bounce 780ms var(--curveEasyEase) infinite alternate;
+      }
+
+      .fortune-overlay[data-fortune-level="大吉"] .fortune-aura span:nth-child(n + 9) {
+        display: grid;
+        width: clamp(34px, 11vw, 58px);
+        font-size: clamp(28px, 9vw, 48px);
       }
 
       .fortune-special-celebration {
@@ -2154,6 +2169,7 @@
             type="button"
             aria-label="声音与背景音乐"
             aria-pressed="true"
+            aria-describedby="songProgressDescription"
             title="声音与背景音乐 · 128 BPM"
           >
             <span class="sound-glyph sound-glyph-on" aria-hidden="true">🔊</span>
@@ -2162,6 +2178,9 @@
         </div>
         <span class="visually-hidden" id="autoDescription">
           开启后你敲正拍，赛博鼓槌敲反拍；功德时刻会自动加入
+        </span>
+        <span class="visually-hidden" id="songProgressDescription">
+          歌曲播放时，背景颜色会像沙漏一样向下退场，表示剩余进度
         </span>
         <dl class="stats-grid">
           <div class="stat">
@@ -2213,6 +2232,14 @@
       </div>
       <div class="fortune-stage">
         <div class="fortune-aura" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
           <span></span>
           <span></span>
           <span></span>
@@ -3902,17 +3929,32 @@
               && isMeritDuetActive(time);
             const isActiveAction = active && actionSlot;
             const isActiveCyber = active && cyberSlot;
+            const actionThump = integratedWithPlate && isActiveAction && !reducedMotion
+              ? impact
+              : 0;
+            const directionX = position.x - center.x;
+            const directionY = position.y - center.y;
+            const directionLength = Math.max(1, Math.hypot(directionX, directionY));
+            const kickDistance = cueSize * actionThump * 0.46;
+            const cueX = position.x + directionX / directionLength * kickDistance;
+            const cueY = position.y + directionY / directionLength * kickDistance;
+            const cueRotation = position.angle
+              + (beat % 2 === 0 ? -1 : 1) * actionThump * 0.17;
             const scale = 1
               + (
                 active
-                  ? impact * (isActiveAction || isActiveCyber ? 0.34 : 0.18)
+                  ? impact * (
+                      isActiveAction
+                        ? integratedWithPlate ? 0.82 : 0.4
+                        : isActiveCyber ? 0.48 : 0.18
+                    )
                   : 0
               )
               + (upcoming ? anticipation * 0.12 : 0);
             const cueWidth = cueSize * (
               integratedWithPlate
                 ? isActiveAction || isActiveCyber
-                  ? 1.18
+                  ? isActiveAction ? 1.32 : 1.18
                   : actionSlot || cyberSlot
                     ? 1.08
                     : 0.88
@@ -3921,8 +3963,8 @@
             const cueHeight = cueSize * (integratedWithPlate ? 0.72 : 0.62) * scale;
 
             context.save();
-            context.translate(position.x, position.y);
-            context.rotate(position.angle);
+            context.translate(cueX, cueY);
+            context.rotate(cueRotation);
             context.globalAlpha = active
               ? 0.68 + impact * 0.3
               : upcoming
@@ -3957,18 +3999,38 @@
             if (active && impact > 0.08) {
               context.globalAlpha = impact * 0.7;
               context.lineWidth = Math.max(2, cueSize * 0.05);
-              for (let ray = -1; ray <= 1; ray += 1) {
-                const rayX = ray * cueWidth * 0.22;
+              if (actionThump > 0) {
+                context.globalAlpha = Math.min(0.9, actionThump * 0.82);
                 context.beginPath();
-                context.moveTo(rayX, cueHeight * 0.66);
-                context.lineTo(rayX * 1.18, cueHeight * (0.95 + impact * 0.28));
+                context.arc(0, 0, cueWidth * (0.46 + actionThump * 0.16), 0, Math.PI * 2);
                 context.stroke();
+                for (let ray = 0; ray < 8; ray += 1) {
+                  const rayAngle = ray / 8 * Math.PI * 2;
+                  const inner = cueWidth * 0.52;
+                  const outer = cueWidth * (0.7 + actionThump * 0.16);
+                  context.beginPath();
+                  context.moveTo(Math.cos(rayAngle) * inner, Math.sin(rayAngle) * inner);
+                  context.lineTo(Math.cos(rayAngle) * outer, Math.sin(rayAngle) * outer);
+                  context.stroke();
+                }
+              } else {
+                for (let ray = -1; ray <= 1; ray += 1) {
+                  const rayX = ray * cueWidth * 0.22;
+                  context.beginPath();
+                  context.moveTo(rayX, cueHeight * 0.66);
+                  context.lineTo(rayX * 1.18, cueHeight * (0.95 + impact * 0.28));
+                  context.stroke();
+                }
               }
             }
             context.restore();
 
             context.save();
-            context.translate(position.x, position.y);
+            context.translate(cueX, cueY);
+            context.rotate(cueRotation);
+            if (actionThump > 0) {
+              context.scale(1 + actionThump * 0.18, 1 + actionThump * 0.18);
+            }
             context.globalAlpha = active
               ? 0.9
               : upcoming
@@ -3982,7 +4044,7 @@
               context.lineWidth = Math.max(3, cueSize * 0.09);
               context.strokeStyle = colors.ink;
               const label = mode === "merit" ? "敲" : "放";
-              context.strokeText(label, 0, 0);
+              if (mode !== "merit") context.strokeText(label, 0, 0);
               context.fillStyle = isActiveAction && !integratedWithPlate
                 ? colors.washiLight
                 : colors.ink;
@@ -4024,11 +4086,16 @@
           const plateBeat = positiveModulo(quarterIndex, 4);
           const quarterPhase = reducedMotion ? 0.65 : getQuarterBeatPhase(time);
           const plateImpact = reducedMotion ? 0.22 : Math.max(0, 1 - quarterPhase * 4.2);
-          const platePulse = 1 + plateImpact * 0.035;
+          const plateActionBeat = isActionQuarterBeat(quarterIndex);
+          const platePulse = 1 + plateImpact * (plateActionBeat ? 0.095 : 0.035);
+          const plateKick = reducedMotion || !plateActionBeat ? 0 : plateImpact * size * 0.018;
+          const plateTwist = reducedMotion || !plateActionBeat
+            ? 0
+            : (plateBeat === 0 ? -1 : 1) * plateImpact * 0.025;
           context.save();
 
-          context.translate(x - size * 0.03, y + size * 0.01);
-          context.rotate(MERIT_BEAT_PLATE_ROTATION);
+          context.translate(x - size * 0.03, y + size * 0.01 - plateKick);
+          context.rotate(MERIT_BEAT_PLATE_ROTATION + plateTwist);
           context.scale(platePulse, platePulse);
           context.fillStyle = colors.pink;
           context.globalAlpha = 0.78 + plateImpact * 0.12;
@@ -4686,11 +4753,12 @@
           let headY;
           let angle;
           if (useCyberMallet) {
-            baseX = -size * 0.18;
-            baseY = strikePointY - size * 0.015;
-            const retractedX = strikePointX - size * 0.38;
+            baseX = strikePointX - size * 0.16;
+            baseY = -size * 0.22;
+            const retractedX = baseX + size * 0.04;
+            const retractedY = -size * 0.035;
             headX = retractedX + (strikePointX - retractedX) * malletSwing;
-            headY = baseY + (strikePointY - baseY) * malletSwing;
+            headY = retractedY + (strikePointY - retractedY) * malletSwing;
             angle = Math.atan2(headY - baseY, headX - baseX);
           } else {
             baseX = x + size * 0.46;
@@ -5246,64 +5314,105 @@
           return Math.max(0, Math.ceil(bgmAudio.duration - bgmAudio.currentTime));
         }
 
-        function formatSongTime(totalSeconds) {
-          const minutes = Math.floor(totalSeconds / 60);
-          const seconds = String(totalSeconds % 60).padStart(2, "0");
-          return `${minutes}:${seconds}`;
-        }
-
-        function drawSongProgress(time, geometry) {
-          const remainingSeconds = getBgmRemainingSeconds();
-          if (remainingSeconds === null || !(bgmAudio.duration > 0)) return;
+        function drawSongHourglass(time, geometry) {
+          if (getBgmRemainingSeconds() === null || !(bgmAudio.duration > 0)) return;
           const progress = Math.max(
             0,
             Math.min(1, bgmAudio.currentTime / bgmAudio.duration)
           );
-          const stageTop = geometry.y - geometry.height * 0.5;
-          const trackY = Math.max(
-            86,
-            Math.max(stageTop + 24, geometry.y - geometry.size * 0.49)
-          );
-          const trackWidth = Math.min(
-            canvasWidth - 32,
-            Math.max(188, geometry.width * 0.74)
-          );
-          const labelSize = Math.max(13, Math.min(17, geometry.size * 0.046));
-          const label = `本曲剩 ${formatSongTime(remainingSeconds)}`;
-          const segmentCount = 18;
-          const gap = Math.max(2, trackWidth * 0.008);
-          const segmentWidth = (trackWidth - gap * (segmentCount - 1)) / segmentCount;
-          const activeSegments = Math.ceil((1 - progress) * segmentCount);
           const feverActive = isFeverActive(time);
+          const boundaryY = canvasHeight * progress;
+          const remainingHeight = Math.max(0, canvasHeight - boundaryY);
+          const accent = feverActive
+            ? colors.cyberCyan
+            : mode === "merit"
+              ? colors.pink
+              : colors.lakeDeep;
+          const fadeDepth = Math.max(42, Math.min(92, geometry.size * 0.22));
+          const waveHeight = reducedMotion
+            ? 0
+            : Math.max(4, Math.min(11, geometry.size * 0.026));
 
           context.save();
-          context.translate(geometry.x, trackY);
-          context.textAlign = "center";
-          context.textBaseline = "middle";
-          context.font = `${cssValue("--fontWeightBold")} ${labelSize}px ${cssValue("--fontFamilyBase")}`;
-          const labelWidth = context.measureText(label).width + labelSize * 1.2;
-          context.globalAlpha = feverActive ? 0.92 : 0.72;
-          context.fillStyle = feverActive ? colors.washiLight : colors.ink;
-          context.beginPath();
-          context.moveTo(-labelWidth * 0.54, -labelSize * 0.62);
-          context.lineTo(labelWidth * 0.5, -labelSize * 0.72);
-          context.lineTo(labelWidth * 0.54, labelSize * 0.48);
-          context.lineTo(-labelWidth * 0.48, labelSize * 0.62);
-          context.closePath();
-          context.fill();
-          context.fillStyle = feverActive ? colors.ink : colors.washiLight;
-          context.globalAlpha = 1;
-          context.fillText(label, 0, -labelSize * 0.06);
+          context.fillStyle = accent;
+          context.globalAlpha = feverActive ? 0.2 : 0.14;
+          context.fillRect(0, boundaryY, canvasWidth, remainingHeight);
 
-          const lineY = labelSize * 0.88;
-          const lineHeight = Math.max(4, geometry.size * 0.014);
-          for (let segment = 0; segment < segmentCount; segment += 1) {
-            const segmentX = -trackWidth * 0.5 + segment * (segmentWidth + gap);
-            context.globalAlpha = segment < activeSegments ? 0.88 : 0.2;
-            context.fillStyle = segment < activeSegments
-              ? (feverActive ? colors.cyberCyan : colors.pink)
-              : (feverActive ? colors.washiLight : colors.ink);
-            context.fillRect(segmentX, lineY, segmentWidth, lineHeight);
+          const edgeGradient = context.createLinearGradient(
+            0,
+            boundaryY - fadeDepth,
+            0,
+            boundaryY + fadeDepth
+          );
+          edgeGradient.addColorStop(0, "transparent");
+          edgeGradient.addColorStop(0.46, accent);
+          edgeGradient.addColorStop(1, accent);
+          context.fillStyle = edgeGradient;
+          context.globalAlpha = feverActive ? 0.32 : 0.22;
+          context.fillRect(
+            0,
+            Math.max(0, boundaryY - fadeDepth),
+            canvasWidth,
+            Math.min(canvasHeight, fadeDepth * 2)
+          );
+
+          context.strokeStyle = feverActive ? colors.washiLight : accent;
+          context.lineWidth = Math.max(3, geometry.size * 0.012);
+          context.globalAlpha = feverActive ? 0.72 : 0.5;
+          context.beginPath();
+          const edgeStep = Math.max(18, canvasWidth / 18);
+          for (let x = -edgeStep; x <= canvasWidth + edgeStep; x += edgeStep) {
+            const wave = Math.sin(x * 0.035 + time * 0.0046) * waveHeight;
+            const edgeY = boundaryY + wave;
+            if (x === -edgeStep) context.moveTo(x, edgeY);
+            else context.lineTo(x, edgeY);
+          }
+          context.stroke();
+
+          if (remainingHeight > 3) {
+            const streamLength = Math.min(
+              remainingHeight,
+              Math.max(80, geometry.size * 0.34)
+            );
+            const streamWidth = Math.max(3, geometry.size * 0.012);
+            const streamGradient = context.createLinearGradient(
+              0,
+              boundaryY,
+              0,
+              boundaryY + streamLength
+            );
+            streamGradient.addColorStop(0, accent);
+            streamGradient.addColorStop(1, "transparent");
+            context.fillStyle = streamGradient;
+            context.globalAlpha = feverActive ? 0.5 : 0.34;
+            context.fillRect(
+              geometry.x - streamWidth * 0.5,
+              boundaryY,
+              streamWidth,
+              streamLength
+            );
+
+            if (!reducedMotion) {
+              for (let grain = 0; grain < 18; grain += 1) {
+                const laneSeed = positiveModulo(
+                  Math.sin((grain + 1) * 12.9898) * 43758.5453,
+                  1
+                );
+                const grainPhase = positiveModulo(time * 0.00022 + grain * 0.173, 1);
+                const grainX = laneSeed * canvasWidth
+                  + Math.sin(time * 0.003 + grain * 1.7) * waveHeight;
+                const grainY = boundaryY + grainPhase * streamLength;
+                const grainSize = Math.max(2, geometry.size * (0.006 + grain % 3 * 0.0015));
+                context.globalAlpha = (1 - grainPhase) * (feverActive ? 0.55 : 0.38);
+                context.fillStyle = accent;
+                context.fillRect(
+                  grainX,
+                  grainY,
+                  grainSize,
+                  grainSize * (1.4 + grain % 2 * 0.5)
+                );
+              }
+            }
           }
           context.restore();
         }
@@ -5623,7 +5732,7 @@
           drawFeverBackdrop(time);
 
           const geometry = stageGeometry();
-          drawSongProgress(time, geometry);
+          drawSongHourglass(time, geometry);
           updateSessionMissClock(time, geometry);
           if (mode === "merit") {
             drawWoodfish(geometry.x, geometry.y, geometry.size, time);
@@ -5923,6 +6032,10 @@
                   ? Number(bgmAudio.duration.toFixed(3))
                   : null,
                 remainingSeconds: getBgmRemainingSeconds(),
+                progress: isBgmPlaying() && bgmAudio.duration > 0
+                  ? Number((bgmAudio.currentTime / bgmAudio.duration).toFixed(3))
+                  : null,
+                progressStyle: "descending-background-hourglass",
                 modeBeatStep: MODES[mode].beatStep,
                 modePeriodMs: MODES[mode].autoDelay
               },
@@ -5995,7 +6108,7 @@
                   isMeritDuetActive()
                   || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
                 )
-                ? "left-edge"
+                ? "top-edge"
                 : "bottom",
               malletMaterial: woodStrikeFromAuto
                 && (
@@ -6016,7 +6129,7 @@
                   isMeritDuetActive()
                   || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
                 )
-                ? "left-to-right"
+                ? "top-to-bottom"
                 : "bottom-to-top",
               strikeEmojis: strikeEmojiParticles.map((particle) => particle.icon),
               strikeEmojiAnchor: {
