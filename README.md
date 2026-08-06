@@ -91,28 +91,29 @@ python3 -m http.server 4173
 
 ## 真实计数与隐私
 
+- 生产入口：<https://for-luck.pages.dev/>。同源 `/api/ritual` 已部署到 Cloudflare Pages，全球功德和全球放生写入亚太区 D1。
 - Cloudflare Pages Function 从 `CF-Connecting-IP` 读取公网 IP，只在内存中使用 `IP_HASH_SECRET` 做 HMAC-SHA256；D1 仅保存不可逆哈希，不保存原始 IP。
 - 同一公网 IP 会共用个人记录；更换网络、VPN、运营商出口或 IPv6 地址后，个人记录可能变化。
 - 每次敲击 / 放生携带唯一事件 ID，D1 事务保证重试不会重复累计。
 - 照片只在浏览器中裁切并写入本地存储，不会发送到 `/api/ritual`。
-- GitHub Pages 只能展示前端；真实计数需要按下方步骤部署到 Cloudflare Pages。
+- GitHub Pages 只能展示前端，不能执行 `/api/ritual`；真实入口必须使用上方 Cloudflare Pages 地址。
 - 静态预览不会请求第三方定位服务；生产环境可通过 `data-location-endpoint` 接入同源 IP 地理接口，有结果时自动显示所在地，无结果时默认显示“苏州”。
 
 ## Cloudflare Pages + D1 部署
 
-1. 创建 D1 数据库：
+当前 `wrangler.toml` 已绑定正式 `for-luck` D1。仅在迁移到新的 Cloudflare 账号时重新创建数据库：
 
    ```bash
    npx wrangler d1 create for-luck
    ```
 
-2. 把返回的 `database_id` 写入 `wrangler.toml`，再初始化数据库：
+1. 把新返回的 `database_id` 写入 `wrangler.toml`，再初始化数据库：
 
    ```bash
    npx wrangler d1 execute for-luck --remote --file=schema.sql
    ```
 
-3. 为 IP 哈希设置至少 16 字符的随机密钥：
+2. 为 IP 哈希设置至少 16 字符的随机密钥：
 
    ```bash
    openssl rand -hex 32 | npx wrangler pages secret put IP_HASH_SECRET --project-name for-luck
@@ -120,7 +121,7 @@ python3 -m http.server 4173
 
    上线后不要轮换该密钥，否则已有 IP 哈希会失去连续性。
 
-4. 部署当前目录：
+3. 部署当前目录：
 
    ```bash
    npx wrangler pages deploy . --project-name for-luck

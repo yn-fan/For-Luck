@@ -5,4 +5,4 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "for-luck"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "8cfdc0e0-8349-4409-a675-299363054639"
