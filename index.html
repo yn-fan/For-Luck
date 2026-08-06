@@ -2547,7 +2547,7 @@
         const CYBER_STRIKE_OFFSET_Y = 20;
         const THEME_ROTATION_QUARTER_BEATS = 16;
         const THEME_SCHEMA_VERSION = 3;
-        const PRAYER_BEAD_COUNT = 11;
+        const PRAYER_BEAD_COUNT = 14;
         const PRAYER_BEAD_LOOP_DURATION_MS = 12000;
         const PRAYER_BEAD_MANUAL_IMPULSE = 0.00105;
         const PRAYER_BEAD_CYBER_IMPULSE = 0.00068;
@@ -5873,9 +5873,9 @@
           }
 
           const loopCenterX = 0;
-          const loopCenterY = size * 0.005;
-          const radiusX = size * (0.31 + impactPulse * 0.008);
-          const radiusY = size * (0.3 - impactPulse * 0.005);
+          const loopCenterY = -size * 0.02;
+          const radiusX = size * (0.295 + impactPulse * 0.008);
+          const radiusY = size * (0.235 - impactPulse * 0.004);
           const continuousSpin = reducedMotion
             ? 0
             : positiveModulo(time, PRAYER_BEAD_LOOP_DURATION_MS)
@@ -5890,9 +5890,14 @@
               index,
               angle,
               depth,
-              x: loopCenterX + Math.cos(angle) * radiusX,
-              y: loopCenterY + Math.sin(angle) * radiusY,
-              radius: size * (0.054 + depth * 0.019 + beatKick * 0.002)
+              x:
+                loopCenterX
+                + Math.cos(angle) * radiusX * (0.96 + depth * 0.04),
+              y:
+                loopCenterY
+                + Math.sin(angle) * radiusY
+                + depth * depth * size * 0.05,
+              radius: size * (0.049 + depth * 0.04 + beatKick * 0.0025)
             };
           });
 
@@ -5917,24 +5922,45 @@
             beadShade.addColorStop(1, colors.ink);
 
             context.shadowColor = colors.shadow;
-            context.shadowBlur = bead.radius * (0.3 + bead.depth * 0.2);
-            context.shadowOffsetX = bead.radius * 0.1;
-            context.shadowOffsetY = bead.radius * 0.18;
+            context.shadowBlur = bead.radius * (0.26 + bead.depth * 0.45);
+            context.shadowOffsetX = bead.radius * (0.08 + bead.depth * 0.08);
+            context.shadowOffsetY = bead.radius * (0.14 + bead.depth * 0.2);
             context.fillStyle = beadShade;
             context.strokeStyle = isMarker ? markerColor : colors.ink;
-            context.lineWidth = size * (isMarker ? 0.012 : 0.008);
+            context.lineWidth = size * (isMarker ? 0.013 : 0.008);
+            context.globalAlpha = 0.74 + bead.depth * 0.26;
             context.beginPath();
             context.arc(bead.x, bead.y, bead.radius, 0, Math.PI * 2);
             context.fill();
             context.shadowColor = "transparent";
+
+            context.save();
+            context.clip();
+            context.fillStyle = colors.ink;
+            context.globalAlpha = 0.08 + bead.depth * 0.12;
+            context.beginPath();
+            context.ellipse(
+              bead.x + bead.radius * 0.08,
+              bead.y + bead.radius * 0.48,
+              bead.radius * 0.94,
+              bead.radius * 0.54,
+              -0.08,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.restore();
+
+            context.globalAlpha = 0.82 + bead.depth * 0.18;
             context.stroke();
+            context.globalAlpha = 1;
 
             context.save();
             context.translate(bead.x, bead.y);
             context.rotate(bead.angle + bead.index * 0.37);
             context.strokeStyle = colors.woodHighlight;
             context.globalAlpha = 0.54;
-            context.lineWidth = size * 0.005;
+            context.lineWidth = size * (0.0045 + bead.depth * 0.0015);
             context.beginPath();
             context.arc(
               -bead.radius * 0.12,
@@ -5981,13 +6007,13 @@
           context.rotate(-0.06);
 
           context.fillStyle = colors.shadow;
-          context.globalAlpha = 0.24;
+          context.globalAlpha = 0.28;
           context.beginPath();
           context.ellipse(
             size * 0.025,
-            size * 0.09,
-            size * 0.41,
-            size * 0.33,
+            size * 0.1,
+            size * 0.405,
+            size * 0.285,
             -0.06,
             0,
             Math.PI * 2
@@ -6006,7 +6032,7 @@
                 loopCenterX,
                 loopCenterY,
                 radiusX + size * (0.045 + trail * 0.026),
-                radiusY + size * (0.04 + trail * 0.024),
+                radiusY + size * (0.032 + trail * 0.022),
                 0,
                 spin - 0.8 - trail * 0.28,
                 spin - 0.2 - trail * 0.24
@@ -6050,7 +6076,7 @@
                 loopCenterX,
                 loopCenterY,
                 radiusX + size * (0.055 + ring * 0.038),
-                radiusY + size * (0.05 + ring * 0.035),
+                radiusY + size * (0.04 + ring * 0.03),
                 0,
                 spin - 1.08 + ring * 0.08,
                 spin - 0.34 + ring * 0.1
@@ -8012,9 +8038,11 @@
                   : "wood",
               prayerBeads: {
                 active: isPrayerBeadsStyle(),
-                perspective: "floating-loop",
+                perspective: "tilted-depth-loop",
                 hand: "none",
                 beadCount: PRAYER_BEAD_COUNT,
+                density: "close-overlap",
+                depthScale: { back: 0.55, front: 1 },
                 continuous: true,
                 loopDurationMs: PRAYER_BEAD_LOOP_DURATION_MS,
                 reducedMotionStatic: reducedMotion,
