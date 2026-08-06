@@ -566,6 +566,10 @@
         white-space: pre-line;
       }
 
+      .woodfish-picker-label strong > span {
+        display: block;
+      }
+
       .woodfish-picker-label span {
         color: var(--colorWashiDeep);
         font-family: var(--fontFamilyMonospace);
@@ -2557,7 +2561,7 @@
           {
             id: "ancient-door",
             name: "开门啊我知道你在家！",
-            displayName: "开门啊\n我知道你在家！"
+            nameLines: ["开门啊", "我知道你在家！"]
           },
           { id: "mochi-pounding", name: "年糕捣捣" },
           { id: "custom-photo", name: "敲张照片" }
@@ -3651,9 +3655,18 @@
             "aria-label",
             customPhotoImage ? "更换敲击照片" : "上传一张圆形敲击照片"
           );
-          woodfishStyleName.textContent =
-            WOODFISH_STYLES[woodfishStyleIndex].displayName
-            || WOODFISH_STYLES[woodfishStyleIndex].name;
+          const selectedWoodfishStyle = WOODFISH_STYLES[woodfishStyleIndex];
+          if (selectedWoodfishStyle.nameLines) {
+            woodfishStyleName.replaceChildren(
+              ...selectedWoodfishStyle.nameLines.map((line) => {
+                const lineElement = document.createElement("span");
+                lineElement.textContent = line;
+                return lineElement;
+              })
+            );
+          } else {
+            woodfishStyleName.textContent = selectedWoodfishStyle.name;
+          }
           woodfishStylePosition.textContent =
             `${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length} · 左右滑动`;
           woodfishPicker.setAttribute(
