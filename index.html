@@ -2547,6 +2547,12 @@
         const CYBER_STRIKE_OFFSET_Y = 20;
         const THEME_ROTATION_QUARTER_BEATS = 16;
         const THEME_SCHEMA_VERSION = 3;
+        const PRAYER_BEAD_COUNT = 11;
+        const PRAYER_BEAD_LOOP_DURATION_MS = 12000;
+        const PRAYER_BEAD_MANUAL_IMPULSE = 0.00105;
+        const PRAYER_BEAD_CYBER_IMPULSE = 0.00068;
+        const PRAYER_BEAD_MAX_SPIN_VELOCITY = 0.0024;
+        const PRAYER_BEAD_IMPULSE_DECAY = 0.96;
         const WOOD_SOUND_PEAK = Object.freeze({
           normal: 0.54,
           perfect: 0.62
@@ -2890,6 +2896,8 @@
         let themeBeatsUntilRotation = THEME_ROTATION_QUARTER_BEATS;
         let automaticThemeSwitchCount = 0;
         let prayerBeadTurns = 0;
+        let prayerBeadSpinVelocity = 0;
+        let prayerBeadLastFrame = performance.now();
         let autoActive = false;
         let autoTimer = 0;
         let ritualNetworkState = RITUAL_API_ENDPOINT ? "connecting" : "unavailable";
@@ -3216,7 +3224,7 @@
             ? isPrayerBeadsStyle()
               ? {
                   visual: "轻转",
-                  announcement: "跟随收拢节拍，用右手依次拨动佛珠"
+                  announcement: "跟随收拢节拍，让佛珠循环转动"
                 }
               : {
                   visual: "轻敲",
@@ -3781,7 +3789,7 @@
 
           const autoLabelText = prayerBeadsSelected ? "赛博助盘" : config.autoLabel;
           const autoDescriptionText = prayerBeadsSelected
-            ? "开启后你在正拍拨珠，赛博助力在反拍推动下一颗"
+            ? "开启后你在正拍转珠，赛博助力在反拍加速"
             : config.autoDescription;
           autoLabel.textContent = autoLabelText;
           autoDescription.textContent = autoDescriptionText;
@@ -3791,7 +3799,7 @@
           meritAction.setAttribute(
             "aria-label",
             prayerBeadsSelected
-              ? "用右手转动佛珠，积攒一份功德"
+              ? "转动佛珠，积攒一份功德"
               : "敲击木鱼，积攒一份功德"
           );
           meritHcLabel.textContent = prayerBeadsSelected ? "转动佛珠" : "敲击木鱼";
@@ -4315,8 +4323,8 @@
           woodStrikeStarted = actionTime;
           woodStrikeFromAuto = fromCyber;
           strikeEmojiParticles = [];
-          const turnX = geometry.x - geometry.size * 0.12;
-          const turnY = geometry.y - geometry.size * 0.02;
+          const turnX = geometry.x;
+          const turnY = geometry.y;
           strikeEmojiAnchor = {
             x: turnX,
             y: turnY,
@@ -4343,7 +4351,13 @@
           lastTimingGrade = timing.label;
           lastActionWasCountIn = countIn;
           const prayerBeadsSelected = isPrayerBeadsStyle();
-          if (prayerBeadsSelected) prayerBeadTurns += fromAuto ? 0.44 : 0.72;
+          if (prayerBeadsSelected) {
+            prayerBeadSpinVelocity = Math.min(
+              PRAYER_BEAD_MAX_SPIN_VELOCITY,
+              prayerBeadSpinVelocity
+                + (fromAuto ? PRAYER_BEAD_CYBER_IMPULSE : PRAYER_BEAD_MANUAL_IMPULSE)
+            );
+          }
           meritTotal += 1;
           sessionMeritCount += 1;
           enqueueRitualAction("merit");
@@ -4367,11 +4381,11 @@
           announce(
             countIn
               ? prayerBeadsSelected
-                ? `START，功德加一，跟随佛珠周围的拍点继续拨珠，我已积攒的功德 ${formatter.format(meritTotal)}`
+                ? `START，功德加一，跟随佛珠周围的拍点继续转珠，我已积攒的功德 ${formatter.format(meritTotal)}`
                 : STRINGS.meritStart(formatter.format(meritTotal))
               : feverTriggered
               ? prayerBeadsSelected
-                ? "连续 3 次 PERFECT，功德时刻开始，赛博助盘已加入反拍拨珠，持续 10 秒"
+                ? "连续 3 次 PERFECT，功德时刻开始，赛博助盘已加入反拍加速，持续 10 秒"
                 : "连续 3 次 PERFECT，功德时刻开始，赛博鼓槌已加入反拍对敲，持续 10 秒"
               : STRINGS.meritStatus(timing.label, formatter.format(meritTotal), comboCount)
           );
@@ -4395,7 +4409,10 @@
           const prayerBeadsSelected = isPrayerBeadsStyle();
           const timing = prayerBeadsSelected ? CYBER_BEAD_TIMING : CYBER_DUET_TIMING;
           if (prayerBeadsSelected) {
-            prayerBeadTurns += 0.44;
+            prayerBeadSpinVelocity = Math.min(
+              PRAYER_BEAD_MAX_SPIN_VELOCITY,
+              prayerBeadSpinVelocity + PRAYER_BEAD_CYBER_IMPULSE
+            );
             addPrayerBeadTurnVisual(actionTime, true, geometry);
           } else {
             addMeritHitVisual(actionTime, true, geometry);
@@ -4406,7 +4423,7 @@
             isFeverActive(actionTime)
               ? "功德时刻助力"
               : prayerBeadsSelected
-                ? "反拍拨珠"
+                ? "反拍加速"
                 : "反拍",
             geometry,
             "merit"
@@ -4578,7 +4595,7 @@
             if (sessionManualActionCount > 0 || isBgmPlaying()) scheduleAuto();
             announce(
               isPrayerBeadsStyle()
-                ? "赛博助盘已就位：你在正拍拨珠，赛博助力推动反拍"
+                ? "赛博助盘已就位：你在正拍转珠，赛博助力在反拍加速"
                 : "赛博对敲已就位：你敲正拍，赛博鼓槌敲反拍"
             );
             return;
@@ -5837,18 +5854,37 @@
           const turnPulse = turnElapsed >= 0 && turnElapsed <= 0.42
             ? Math.sin(turnProgress * Math.PI)
             : 0;
-          const handPulse = reducedMotion ? positiveImpact * 0.35 : turnPulse;
-          const beadCount = 11;
-          const loopCenterX = -size * 0.08;
-          const loopCenterY = -size * 0.015;
-          const radiusX = size * (0.285 + handPulse * 0.012);
-          const radiusY = size * (0.315 - handPulse * 0.01);
-          const spin = prayerBeadTurns
-            + handPulse * (woodStrikeFromAuto ? 0.12 : 0.2)
-            + (reducedMotion ? 0 : Math.sin(time * 0.001) * 0.012);
-          const pinchPoint = { x: -size * 0.21, y: -size * 0.015 };
-          const beads = Array.from({ length: beadCount }, (_, index) => {
-            const angle = index / beadCount * Math.PI * 2 + spin;
+          const impactPulse = reducedMotion ? positiveImpact * 0.35 : turnPulse;
+          const frameElapsed = Math.max(0, time - prayerBeadLastFrame);
+          prayerBeadLastFrame = time;
+
+          if (reducedMotion) {
+            prayerBeadSpinVelocity = 0;
+          } else {
+            prayerBeadTurns = positiveModulo(
+              prayerBeadTurns + prayerBeadSpinVelocity * Math.min(frameElapsed, 80),
+              Math.PI * 2
+            );
+            prayerBeadSpinVelocity *= Math.pow(
+              PRAYER_BEAD_IMPULSE_DECAY,
+              frameElapsed / (1000 / 60)
+            );
+            if (prayerBeadSpinVelocity < 0.00001) prayerBeadSpinVelocity = 0;
+          }
+
+          const loopCenterX = 0;
+          const loopCenterY = size * 0.005;
+          const radiusX = size * (0.31 + impactPulse * 0.008);
+          const radiusY = size * (0.3 - impactPulse * 0.005);
+          const continuousSpin = reducedMotion
+            ? 0
+            : positiveModulo(time, PRAYER_BEAD_LOOP_DURATION_MS)
+              / PRAYER_BEAD_LOOP_DURATION_MS
+              * Math.PI
+              * 2;
+          const spin = continuousSpin + prayerBeadTurns;
+          const beads = Array.from({ length: PRAYER_BEAD_COUNT }, (_, index) => {
+            const angle = index / PRAYER_BEAD_COUNT * Math.PI * 2 + spin;
             const depth = (Math.sin(angle) + 1) * 0.5;
             return {
               index,
@@ -5856,18 +5892,14 @@
               depth,
               x: loopCenterX + Math.cos(angle) * radiusX,
               y: loopCenterY + Math.sin(angle) * radiusY,
-              radius: size * (0.052 + depth * 0.02 + beatKick * 0.002)
+              radius: size * (0.054 + depth * 0.019 + beatKick * 0.002)
             };
           });
-          const activeBead = beads.reduce((nearest, bead) => {
-            const distance = Math.hypot(bead.x - pinchPoint.x, bead.y - pinchPoint.y);
-            return !nearest || distance < nearest.distance
-              ? { index: bead.index, distance }
-              : nearest;
-          }, null)?.index;
 
+          const markerColor =
+            woodStrikeFromAuto && impactPulse > 0.02 ? colors.cyberCyan : colors.pink;
           const drawBead = (bead) => {
-            const isActive = bead.index === activeBead;
+            const isMarker = bead.index === 0;
             const beadShade = context.createRadialGradient(
               bead.x - bead.radius * 0.34,
               bead.y - bead.radius * 0.38,
@@ -5877,77 +5909,126 @@
               bead.radius
             );
             beadShade.addColorStop(0, colors.woodHighlight);
-            beadShade.addColorStop(0.38, isActive ? colors.woodLight : colors.wood);
+            beadShade.addColorStop(
+              0.38,
+              bead.index % 3 === 0 ? colors.woodLight : colors.wood
+            );
             beadShade.addColorStop(0.78, colors.woodDeep);
             beadShade.addColorStop(1, colors.ink);
+
             context.shadowColor = colors.shadow;
-            context.shadowBlur = bead.radius * 0.42;
-            context.shadowOffsetX = bead.radius * 0.12;
-            context.shadowOffsetY = bead.radius * 0.2;
+            context.shadowBlur = bead.radius * (0.3 + bead.depth * 0.2);
+            context.shadowOffsetX = bead.radius * 0.1;
+            context.shadowOffsetY = bead.radius * 0.18;
             context.fillStyle = beadShade;
-            context.strokeStyle = isActive ? colors.pink : colors.ink;
-            context.lineWidth = size * (isActive ? 0.012 : 0.008);
+            context.strokeStyle = isMarker ? markerColor : colors.ink;
+            context.lineWidth = size * (isMarker ? 0.012 : 0.008);
             context.beginPath();
             context.arc(bead.x, bead.y, bead.radius, 0, Math.PI * 2);
             context.fill();
             context.shadowColor = "transparent";
             context.stroke();
 
+            context.save();
+            context.translate(bead.x, bead.y);
+            context.rotate(bead.angle + bead.index * 0.37);
             context.strokeStyle = colors.woodHighlight;
-            context.globalAlpha = 0.56;
-            context.lineWidth = size * 0.006;
+            context.globalAlpha = 0.54;
+            context.lineWidth = size * 0.005;
             context.beginPath();
             context.arc(
-              bead.x - bead.radius * 0.14,
-              bead.y - bead.radius * 0.12,
-              bead.radius * 0.55,
-              Math.PI * 1.03,
-              Math.PI * 1.58
+              -bead.radius * 0.12,
+              -bead.radius * 0.08,
+              bead.radius * 0.54,
+              Math.PI * 1.02,
+              Math.PI * 1.57
             );
             context.stroke();
             context.globalAlpha = 1;
             context.fillStyle = colors.ink;
             context.beginPath();
             context.ellipse(
-              bead.x,
-              bead.y,
+              0,
+              0,
               bead.radius * 0.16,
-              bead.radius * 0.1,
-              bead.angle + Math.PI / 2,
+              bead.radius * 0.095,
+              Math.PI / 2,
               0,
               Math.PI * 2
             );
             context.fill();
+            context.restore();
+
+            if (isMarker) {
+              context.strokeStyle = markerColor;
+              context.globalAlpha = 0.52 + impactPulse * 0.34;
+              context.lineWidth = size * 0.006;
+              context.beginPath();
+              context.arc(
+                bead.x,
+                bead.y,
+                bead.radius * (1.18 + impactPulse * 0.14),
+                0,
+                Math.PI * 2
+              );
+              context.stroke();
+              context.globalAlpha = 1;
+            }
           };
 
           context.save();
-          context.translate(x, y + size * 0.01);
-          context.rotate(-0.08);
+          context.translate(x, y + size * 0.005);
+          context.rotate(-0.06);
 
           context.fillStyle = colors.shadow;
-          context.globalAlpha = 0.28;
+          context.globalAlpha = 0.24;
           context.beginPath();
           context.ellipse(
             size * 0.025,
-            size * 0.13,
-            size * 0.42,
-            size * 0.34,
-            -0.08,
+            size * 0.09,
+            size * 0.41,
+            size * 0.33,
+            -0.06,
             0,
             Math.PI * 2
           );
           context.fill();
           context.globalAlpha = 1;
 
+          if (!reducedMotion) {
+            context.lineCap = "round";
+            for (let trail = 0; trail < 3; trail += 1) {
+              context.strokeStyle = trail === 1 ? colors.cyberCyan : colors.pink;
+              context.globalAlpha = 0.12 + beatKick * 0.05 + trail * 0.035;
+              context.lineWidth = size * (0.006 + trail * 0.002);
+              context.beginPath();
+              context.ellipse(
+                loopCenterX,
+                loopCenterY,
+                radiusX + size * (0.045 + trail * 0.026),
+                radiusY + size * (0.04 + trail * 0.024),
+                0,
+                spin - 0.8 - trail * 0.28,
+                spin - 0.2 - trail * 0.24
+              );
+              context.stroke();
+            }
+            context.globalAlpha = 1;
+          }
+
           context.strokeStyle = colors.sandDeep;
-          context.lineWidth = size * 0.02;
+          context.lineWidth = size * 0.022;
           context.lineJoin = "round";
           context.beginPath();
-          beads.forEach((bead, index) => {
-            if (index === 0) context.moveTo(bead.x, bead.y);
-            else context.lineTo(bead.x, bead.y);
-          });
-          context.closePath();
+          context.ellipse(
+            loopCenterX,
+            loopCenterY,
+            radiusX,
+            radiusY,
+            0,
+            0,
+            Math.PI * 2
+          );
           context.stroke();
           context.strokeStyle = colors.ink;
           context.globalAlpha = 0.5;
@@ -5956,207 +6037,23 @@
           context.globalAlpha = 1;
 
           beads
-            .filter((bead) => bead.depth < 0.5)
             .sort((first, second) => first.depth - second.depth)
             .forEach(drawBead);
 
-          context.save();
-          context.translate(
-            handPulse * size * (woodStrikeFromAuto ? 0.008 : -0.022),
-            handPulse * size * 0.018
-          );
-          context.rotate(handPulse * (woodStrikeFromAuto ? 0.012 : -0.035));
-
-          context.strokeStyle = colors.ink;
-          context.lineCap = "round";
-          context.lineJoin = "round";
-          for (const finger of [
-            {
-              start: [size * 0.19, size * 0.03],
-              control: [size * 0.06, size * 0.03],
-              end: [-size * 0.09, size * 0.15]
-            },
-            {
-              start: [size * 0.22, size * 0.09],
-              control: [size * 0.08, size * 0.1],
-              end: [-size * 0.045, size * 0.23]
-            }
-          ]) {
-            context.lineWidth = size * 0.095;
-            context.beginPath();
-            context.moveTo(...finger.start);
-            context.quadraticCurveTo(...finger.control, ...finger.end);
-            context.stroke();
-            context.strokeStyle = colors.sand;
-            context.lineWidth = size * 0.07;
-            context.stroke();
-            context.strokeStyle = colors.ink;
-          }
-
-          const skinShade = context.createLinearGradient(
-            size * 0.46,
-            size * 0.55,
-            -size * 0.18,
-            -size * 0.2
-          );
-          skinShade.addColorStop(0, colors.sandDeep);
-          skinShade.addColorStop(0.42, colors.sand);
-          skinShade.addColorStop(1, colors.washiDeep);
-
-          context.fillStyle = skinShade;
-          context.strokeStyle = colors.ink;
-          context.lineWidth = size * 0.012;
-          context.beginPath();
-          context.moveTo(size * 0.58, size * 0.68);
-          context.lineTo(size * 0.25, size * 0.68);
-          context.bezierCurveTo(
-            size * 0.18,
-            size * 0.52,
-            size * 0.08,
-            size * 0.35,
-            size * 0.035,
-            size * 0.23
-          );
-          context.bezierCurveTo(
-            -size * 0.015,
-            size * 0.1,
-            size * 0.035,
-            -size * 0.08,
-            size * 0.16,
-            -size * 0.15
-          );
-          context.bezierCurveTo(
-            size * 0.29,
-            -size * 0.21,
-            size * 0.38,
-            -size * 0.08,
-            size * 0.38,
-            size * 0.1
-          );
-          context.bezierCurveTo(
-            size * 0.4,
-            size * 0.3,
-            size * 0.5,
-            size * 0.48,
-            size * 0.58,
-            size * 0.68
-          );
-          context.closePath();
-          context.fill();
-          context.stroke();
-
-          context.fillStyle = skinShade;
-          context.beginPath();
-          context.moveTo(size * 0.17, -size * 0.11);
-          context.bezierCurveTo(
-            size * 0.04,
-            -size * 0.23,
-            -size * 0.13,
-            -size * 0.31,
-            -size * 0.22,
-            -size * 0.26
-          );
-          context.bezierCurveTo(
-            -size * 0.28,
-            -size * 0.22,
-            -size * 0.27,
-            -size * 0.15,
-            -size * 0.2,
-            -size * 0.12
-          );
-          context.bezierCurveTo(
-            -size * 0.09,
-            -size * 0.08,
-            size * 0.04,
-            -size * 0.015,
-            size * 0.14,
-            size * 0.045
-          );
-          context.closePath();
-          context.fill();
-          context.stroke();
-
-          context.beginPath();
-          context.moveTo(size * 0.075, size * 0.015);
-          context.bezierCurveTo(
-            -size * 0.03,
-            -size * 0.035,
-            -size * 0.16,
-            -size * 0.07,
-            -size * 0.225,
-            -size * 0.035
-          );
-          context.bezierCurveTo(
-            -size * 0.285,
-            0,
-            -size * 0.26,
-            size * 0.085,
-            -size * 0.175,
-            size * 0.105
-          );
-          context.bezierCurveTo(
-            -size * 0.075,
-            size * 0.13,
-            size * 0.025,
-            size * 0.16,
-            size * 0.125,
-            size * 0.205
-          );
-          context.closePath();
-          context.fill();
-          context.stroke();
-
-          context.fillStyle = colors.washiLight;
-          context.globalAlpha = 0.68;
-          context.beginPath();
-          context.ellipse(
-            -size * 0.205,
-            -size * 0.215,
-            size * 0.036,
-            size * 0.02,
-            0.18,
-            0,
-            Math.PI * 2
-          );
-          context.fill();
-          context.beginPath();
-          context.ellipse(
-            -size * 0.22,
-            size * 0.012,
-            size * 0.032,
-            size * 0.018,
-            -0.12,
-            0,
-            Math.PI * 2
-          );
-          context.fill();
-          context.globalAlpha = 1;
-          context.strokeStyle = colors.sandDeep;
-          context.lineWidth = size * 0.006;
-          context.beginPath();
-          context.moveTo(size * 0.12, size * 0.2);
-          context.quadraticCurveTo(size * 0.23, size * 0.17, size * 0.3, size * 0.23);
-          context.stroke();
-          context.restore();
-
-          beads
-            .filter((bead) => bead.depth >= 0.5)
-            .sort((first, second) => first.depth - second.depth)
-            .forEach(drawBead);
-
-          if (handPulse > 0.04) {
-            context.strokeStyle = woodStrikeFromAuto ? colors.cyberCyan : colors.pink;
-            context.globalAlpha = 0.28 + handPulse * 0.58;
-            context.lineWidth = size * 0.01;
-            context.lineCap = "round";
-            for (let arc = 0; arc < 3; arc += 1) {
+          if (impactPulse > 0.04) {
+            context.strokeStyle = markerColor;
+            context.globalAlpha = 0.18 + impactPulse * 0.44;
+            context.lineWidth = size * 0.009;
+            for (let ring = 0; ring < 3; ring += 1) {
               context.beginPath();
-              context.arc(
+              context.ellipse(
                 loopCenterX,
                 loopCenterY,
-                size * (0.36 + arc * 0.035),
-                -Math.PI * (0.82 - arc * 0.03),
-                -Math.PI * (0.4 - arc * 0.02)
+                radiusX + size * (0.055 + ring * 0.038),
+                radiusY + size * (0.05 + ring * 0.035),
+                0,
+                spin - 1.08 + ring * 0.08,
+                spin - 0.34 + ring * 0.1
               );
               context.stroke();
             }
@@ -7476,7 +7373,7 @@
           context.fillText(
             mode === "merit"
               ? isPrayerBeadsStyle()
-                ? "赛博助盘 · 反拍拨珠 +1"
+                ? "赛博助盘 · 反拍加速 +1"
                 : "赛博对敲 · 反拍助力 +1"
               : "连击加速中",
             0,
@@ -7876,6 +7773,8 @@
 
         const handleReducedMotion = (event) => {
           reducedMotion = event.matches;
+          prayerBeadSpinVelocity = 0;
+          prayerBeadLastFrame = performance.now();
           ripples = [];
           bursts = [];
         };
@@ -8113,10 +8012,22 @@
                   : "wood",
               prayerBeads: {
                 active: isPrayerBeadsStyle(),
-                perspective: "first-person",
-                hand: "right",
-                beadCount: 11,
-                turns: Number(prayerBeadTurns.toFixed(3))
+                perspective: "floating-loop",
+                hand: "none",
+                beadCount: PRAYER_BEAD_COUNT,
+                continuous: true,
+                loopDurationMs: PRAYER_BEAD_LOOP_DURATION_MS,
+                reducedMotionStatic: reducedMotion,
+                loopPhase: reducedMotion
+                  ? 0
+                  : Number(
+                    (
+                      positiveModulo(performance.now(), PRAYER_BEAD_LOOP_DURATION_MS)
+                      / PRAYER_BEAD_LOOP_DURATION_MS
+                    ).toFixed(4)
+                  ),
+                turns: Number(prayerBeadTurns.toFixed(3)),
+                spinVelocity: Number(prayerBeadSpinVelocity.toFixed(6))
               },
               automaticThemeSwitchCount,
               themeBeatsUntilRotation,
