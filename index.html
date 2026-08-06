@@ -11,7 +11,7 @@
     <meta name="color-scheme" content="light" />
     <meta
       name="description"
-      content="佛了 for luck：在原创复古漫画网点风格的木鱼与无边海之间切换，跟随节拍积攒功德，或放生一尾鱼。"
+      content="佛了 for luck：在六款原创复古漫画仪式主题间切换，跟随节拍敲木鱼、拍古门、捣青团、盘珠、敲照片或放生。"
     />
     <title>佛了 for luck · 苏州</title>
     <link rel="icon" href="data:," />
@@ -364,6 +364,10 @@
         transform: rotate(0.8deg) skewX(-2deg);
       }
 
+      .mode-tabs[hidden] {
+        display: none;
+      }
+
       .mode-tab {
         min-height: var(--controlMinSize);
         padding: var(--spacingVerticalS) var(--spacingHorizontalL);
@@ -501,15 +505,24 @@
       }
 
       .woodfish-picker {
-        position: absolute;
+        grid-area: modes;
+        position: relative;
         z-index: 4;
-        top: var(--spacingVerticalXS);
-        left: 50%;
         display: grid;
-        grid-template-columns: var(--controlMinSize) minmax(128px, auto) var(--controlMinSize);
+        grid-template-columns: var(--controlMinSize) minmax(68px, 1fr) var(--controlMinSize);
         align-items: stretch;
         gap: var(--spacingHorizontalXS);
-        transform: translateX(-50%) rotate(-0.6deg);
+        width: min(100%, 184px);
+        padding: var(--spacingVerticalXXS);
+        background: var(--colorInk);
+        border: var(--strokeThin) solid var(--colorInk);
+        box-shadow:
+          calc(0px - var(--spacingHorizontalXS))
+          var(--spacingVerticalXS)
+          0
+          var(--colorLakeDeep);
+        clip-path: polygon(2% 0, 100% 5%, 97% 100%, 0 94%);
+        transform: rotate(0.7deg);
       }
 
       .woodfish-picker[hidden] {
@@ -521,10 +534,10 @@
         min-height: var(--controlMinSize);
         padding: 0;
         color: var(--colorInk);
-        background: var(--colorWashiDeep);
-        border: var(--strokeMedium) solid var(--colorInk);
+        background: var(--colorLake);
+        border: var(--strokeThin) solid var(--colorInk);
         border-radius: var(--borderRadiusNone);
-        box-shadow: var(--spacingHorizontalXXS) var(--spacingVerticalXXS) 0 var(--colorAccentPurple);
+        box-shadow: none;
         cursor: pointer;
         font-family: var(--fontFamilyMonospace);
         font-size: var(--fontSizeBase500);
@@ -533,6 +546,10 @@
         transition:
           transform var(--durationFast) var(--curveEasyEase),
           background var(--durationFast) var(--curveEasyEase);
+      }
+
+      .woodfish-picker-button:last-child {
+        background: var(--colorAccentPink);
       }
 
       .woodfish-picker-button:hover {
@@ -550,28 +567,30 @@
         align-content: center;
         min-height: var(--controlMinSize);
         margin: 0;
-        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
-        color: var(--colorWashiLight);
-        background: var(--colorInk);
-        border: var(--strokeMedium) solid var(--colorInk);
-        box-shadow: var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorAccentPink);
+        min-width: 0;
+        padding: var(--spacingVerticalXXS) var(--spacingHorizontalXS);
+        color: var(--colorInk);
+        background: var(--colorWashiDeep);
+        border: var(--strokeThin) solid var(--colorInk);
+        box-shadow: none;
         text-align: center;
         pointer-events: none;
       }
 
       .woodfish-picker-label strong {
-        font-size: var(--fontSizeBase300);
-        line-height: var(--lineHeightBase300);
-        letter-spacing: var(--labelTracking);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+        letter-spacing: 0;
         white-space: pre-line;
       }
 
       .woodfish-picker-label strong > span {
         display: block;
+        white-space: nowrap;
       }
 
-      .woodfish-picker-label span {
-        color: var(--colorWashiDeep);
+      .woodfish-picker-label > span {
+        color: var(--colorInkSoft);
         font-family: var(--fontFamilyMonospace);
         font-size: var(--fontSizeBase100);
         line-height: var(--lineHeightBase100);
@@ -1850,8 +1869,8 @@
         }
 
         .woodfish-picker {
-          top: 0;
-          grid-template-columns: var(--controlMinSize) minmax(116px, auto) var(--controlMinSize);
+          width: 100%;
+          grid-template-columns: var(--controlMinSize) minmax(0, 1fr) var(--controlMinSize);
         }
 
         .woodfish-picker-label {
@@ -1859,12 +1878,12 @@
         }
 
         .woodfish-picker-label strong {
-          font-size: var(--fontSizeBase200);
-          line-height: var(--lineHeightBase200);
+          font-size: var(--fontSizeBase100);
+          line-height: var(--lineHeightBase100);
         }
 
         .topbar {
-          grid-template-columns: minmax(0, 1fr) minmax(156px, 164px);
+          grid-template-columns: minmax(0, 1fr) minmax(170px, 184px);
           gap: var(--spacingVerticalS) var(--spacingHorizontalS);
         }
 
@@ -1944,7 +1963,7 @@
 
       @media (min-width: 390px) and (max-width: 460px) and (min-height: 830px) {
         .topbar {
-          grid-template-columns: minmax(0, 1fr) minmax(160px, 170px);
+          grid-template-columns: minmax(0, 1fr) minmax(170px, 184px);
           grid-template-areas: "brand modes";
           gap: var(--spacingVerticalS) var(--spacingHorizontalS);
         }
@@ -1977,7 +1996,7 @@
         }
 
         .topbar {
-          grid-template-columns: minmax(0, 1fr) minmax(148px, 158px);
+          grid-template-columns: minmax(0, 1fr) 170px;
           gap: var(--spacingVerticalXS) var(--spacingHorizontalXS);
         }
 
@@ -2229,7 +2248,7 @@
     <canvas id="feedbackCanvas" aria-hidden="true"></canvas>
     <p id="idleHint" class="idle-hint" aria-hidden="true" hidden>轻敲</p>
 
-    <main class="screen" data-screen-label="01 佛了 for luck · 功德与放生" data-active="true">
+    <main class="screen" data-screen-label="01 佛了 for luck · 六主题仪式" data-active="true">
       <header class="topbar">
         <div class="brand">
           <h1>
@@ -2239,7 +2258,35 @@
           <p>在<span id="locationName">苏州</span>，凡事只求半称心</p>
         </div>
 
-        <div class="mode-tabs" role="tablist" aria-label="体验模式">
+        <div
+          class="woodfish-picker"
+          id="woodfishPicker"
+          role="group"
+          aria-label="开局主题"
+        >
+          <button
+            class="woodfish-picker-button"
+            id="woodfishPrevious"
+            type="button"
+            aria-label="上一个主题"
+          >
+            <span aria-hidden="true">←</span>
+          </button>
+          <p class="woodfish-picker-label">
+            <strong id="woodfishStyleName">玄木共鸣</strong>
+            <span id="woodfishStylePosition">1 / 6 · 左右滑动</span>
+          </p>
+          <button
+            class="woodfish-picker-button"
+            id="woodfishNext"
+            type="button"
+            aria-label="下一个主题"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <div class="mode-tabs" role="tablist" aria-label="体验模式" hidden aria-hidden="true">
           <button
             class="mode-tab"
             id="meritTab"
@@ -2270,8 +2317,8 @@
         <section
           class="mode-panel"
           id="meritPanel"
-          role="tabpanel"
-          aria-labelledby="meritTab"
+          role="group"
+          aria-label="积攒功德"
         >
           <button
             class="stage-action"
@@ -2287,8 +2334,8 @@
         <section
           class="mode-panel"
           id="releasePanel"
-          role="tabpanel"
-          aria-labelledby="releaseTab"
+          role="group"
+          aria-label="放生"
           hidden
         >
           <button
@@ -2304,33 +2351,6 @@
             <p class="mode-detail" id="releaseDetail">鱼儿会从近岸游向远海</p>
           </div>
         </section>
-        <div
-          class="woodfish-picker"
-          id="woodfishPicker"
-          role="group"
-          aria-label="开局木鱼样式"
-        >
-          <button
-            class="woodfish-picker-button"
-            id="woodfishPrevious"
-            type="button"
-            aria-label="上一个木鱼样式"
-          >
-            <span aria-hidden="true">←</span>
-          </button>
-          <p class="woodfish-picker-label">
-            <strong id="woodfishStyleName">玄木共鸣</strong>
-            <span id="woodfishStylePosition">1 / 4 · 左右滑动</span>
-          </p>
-          <button
-            class="woodfish-picker-button"
-            id="woodfishNext"
-            type="button"
-            aria-label="下一个木鱼样式"
-          >
-            <span aria-hidden="true">→</span>
-          </button>
-        </div>
         <button
           class="woodfish-photo-upload"
           id="woodfishPhotoUpload"
@@ -2375,7 +2395,7 @@
           歌曲播放时，背景颜色会像沙漏一样向下退场，表示剩余进度
         </span>
         <span class="visually-hidden" id="woodfishStyleHelp">
-          游戏开始前可左右滑动屏幕，或使用木鱼样式左右按钮切换造型
+          游戏开始前可左右滑动屏幕，或使用主题左右按钮切换
         </span>
         <span class="visually-hidden" id="woodfishPhotoHelp">
           照片只在当前设备中裁切并保存，不会上传到服务器
@@ -2536,6 +2556,7 @@
         const PHOTO_OUTPUT_SIZE = 512;
         const CYBER_STRIKE_OFFSET_Y = 20;
         const THEME_ROTATION_QUARTER_BEATS = 32;
+        const THEME_SCHEMA_VERSION = 2;
         const WOOD_SOUND_PEAK = Object.freeze({
           normal: 0.54,
           perfect: 0.62
@@ -2557,14 +2578,17 @@
           { x: -0.43, y: -0.2 }
         ]);
         const WOODFISH_STYLES = Object.freeze([
-          { id: "resonance", name: "玄木共鸣" },
+          { id: "resonance", name: "玄木共鸣", mode: "merit" },
           {
             id: "ancient-door",
             name: "开门啊我知道你在家！",
-            nameLines: ["开门啊", "我知道你在家！"]
+            nameLines: ["开门啊", "我知道你在家！"],
+            mode: "merit"
           },
-          { id: "mochi-pounding", name: "年糕捣捣" },
-          { id: "custom-photo", name: "敲张照片" }
+          { id: "qingtuan-pounding", name: "青团捣捣", mode: "merit" },
+          { id: "prayer-beads", name: "盘珠子", mode: "merit" },
+          { id: "custom-photo", name: "敲张照片", mode: "merit" },
+          { id: "release", name: "放生", mode: "release" }
         ]);
         const MODES = {
           merit: {
@@ -2860,6 +2884,7 @@
         let observedThemeQuarterBeat = null;
         let themeBeatsUntilRotation = THEME_ROTATION_QUARTER_BEATS;
         let automaticThemeSwitchCount = 0;
+        let prayerBeadTurns = 0;
         let autoActive = false;
         let autoTimer = 0;
         let ritualNetworkState = RITUAL_API_ENDPOINT ? "connecting" : "unavailable";
@@ -2890,6 +2915,8 @@
         let feverUntil = 0;
         let feverWasActive = false;
         let sessionActionCount = 0;
+        let sessionMeritCount = 0;
+        let sessionReleaseCount = 0;
         let sessionManualActionCount = 0;
         let sessionCyberCount = 0;
         let sessionMissCount = 0;
@@ -3014,6 +3041,8 @@
           fortuneTimer = 0;
           fortunePending = false;
           sessionActionCount = 0;
+          sessionMeritCount = 0;
+          sessionReleaseCount = 0;
           sessionManualActionCount = 0;
           sessionCyberCount = 0;
           sessionMissCount = 0;
@@ -3056,7 +3085,8 @@
             || (outcome.tone === "special"
               ? SPECIAL_FORTUNE_MESSAGE
               : FORTUNE_MESSAGES[randomIndex(FORTUNE_MESSAGES.length)]);
-          const isMerit = mode === "merit";
+          const hasMixedActions = sessionMeritCount > 0 && sessionReleaseCount > 0;
+          const isMerit = sessionMeritCount > 0;
           fortuneTone = outcome.tone;
           void playFortuneSound(fortuneTone);
           fortuneMode.textContent = "今日赛博签";
@@ -3064,10 +3094,20 @@
           fortuneKeyword.textContent = message.keyword;
           fortuneEnglish.textContent = message.english;
           fortuneExplanation.textContent = message.description;
-          fortuneCountLead.textContent = isMerit ? "积攒" : "放生";
+          fortuneCountLead.textContent = hasMixedActions
+            ? "本轮"
+            : isMerit
+            ? "积攒"
+            : "放生";
           fortuneCountValue.textContent = sessionActionCount;
-          fortuneCountUnit.textContent = isMerit ? "功德" : "尾";
-          fortuneCountAccessible.textContent = isMerit
+          fortuneCountUnit.textContent = hasMixedActions
+            ? "次"
+            : isMerit
+            ? "功德"
+            : "尾";
+          fortuneCountAccessible.textContent = hasMixedActions
+            ? `本轮完成 ${sessionActionCount} 次，积攒 ${sessionMeritCount} 功德，放生 ${sessionReleaseCount} 尾`
+            : isMerit
             ? `积攒 ${sessionActionCount} 功德`
             : `放生 ${sessionActionCount} 尾`;
           const auraIcons = level === "大吉" || fortuneTone === "special"
@@ -3236,6 +3276,10 @@
           return WOODFISH_STYLES[index]?.id === "custom-photo";
         }
 
+        function isReleaseStyle(index = woodfishStyleIndex) {
+          return WOODFISH_STYLES[index]?.id === "release";
+        }
+
         function setCustomPhotoDataUrl(dataUrl) {
           customPhotoDataUrl = typeof dataUrl === "string" ? dataUrl : "";
           customPhotoImage = null;
@@ -3351,9 +3395,16 @@
               meritTotal = Number.isFinite(saved.merit) ? Math.max(0, saved.merit) : 0;
               releaseTotal = Number.isFinite(saved.release) ? Math.max(0, saved.release) : 0;
               soundEnabled = saved.sound !== false;
-              woodfishStyleIndex = Number.isInteger(saved.woodfishStyle)
-                ? positiveModulo(saved.woodfishStyle, WOODFISH_STYLES.length)
+              const savedStyleIndex = Number.isInteger(saved.woodfishStyle)
+                ? saved.woodfishStyle
                 : 0;
+              woodfishStyleIndex =
+                saved.themeSchemaVersion === THEME_SCHEMA_VERSION
+                  ? positiveModulo(savedStyleIndex, WOODFISH_STYLES.length)
+                  : savedStyleIndex === 3
+                    ? 4
+                    : positiveModulo(savedStyleIndex, 4);
+              mode = WOODFISH_STYLES[woodfishStyleIndex]?.mode || "merit";
               previousWoodfishStyleIndex = woodfishStyleIndex;
               pendingRitualEvents = Array.isArray(saved.pendingRitualEvents)
                 ? saved.pendingRitualEvents.filter(
@@ -3387,6 +3438,7 @@
                 merit: meritTotal,
                 release: releaseTotal,
                 sound: soundEnabled,
+                themeSchemaVersion: THEME_SCHEMA_VERSION,
                 woodfishStyle: woodfishStyleIndex,
                 customPhoto: customPhotoDataUrl,
                 pendingRitualEvents
@@ -3542,8 +3594,7 @@
         }
 
         function canChooseWoodfishStyle() {
-          return mode === "merit"
-            && sessionActionCount === 0
+          return sessionActionCount === 0
             && !isBgmPlaying()
             && !fortuneOpen
             && !fortunePending;
@@ -3570,12 +3621,22 @@
               ? 1
               : -1;
           woodfishStyleIndex = normalizedIndex;
+          const nextMode = WOODFISH_STYLES[woodfishStyleIndex].mode;
+          const modeChanged = nextMode !== mode;
+          if (modeChanged) {
+            window.clearTimeout(autoTimer);
+            autoTimer = 0;
+            if (!allowDuringSession) autoActive = false;
+            mode = nextMode;
+            sessionMissAnchor = performance.now();
+          }
           woodfishStyleChangedAt = performance.now();
           renderUi();
           saveState();
+          if (modeChanged && allowDuringSession && autoActive) scheduleAuto();
           if (shouldAnnounce) {
             announce(
-              `已选择木鱼样式：${WOODFISH_STYLES[woodfishStyleIndex].name}，轻敲开始`
+              `已选择主题：${WOODFISH_STYLES[woodfishStyleIndex].name}，轻触开始`
             );
           }
           return true;
@@ -3590,8 +3651,7 @@
 
         function maybeRotateWoodfishStyle(time) {
           if (
-            mode !== "merit"
-            || sessionActionCount < 1
+            sessionActionCount < 1
             || fortuneOpen
             || fortunePending
           ) {
@@ -3671,10 +3731,10 @@
             `${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length} · 左右滑动`;
           woodfishPicker.setAttribute(
             "aria-label",
-            `开局木鱼样式，当前${WOODFISH_STYLES[woodfishStyleIndex].name}，${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length}`
+            `开局主题，当前${WOODFISH_STYLES[woodfishStyleIndex].name}，${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length}`
           );
           woodfishStyleHelp.textContent =
-            `当前木鱼样式：${WOODFISH_STYLES[woodfishStyleIndex].name}。游戏开始前可左右滑动屏幕，或使用木鱼样式左右按钮切换造型`;
+            `当前主题：${WOODFISH_STYLES[woodfishStyleIndex].name}。游戏开始前可左右滑动屏幕，或使用主题左右按钮切换`;
 
           autoLabel.textContent = config.autoLabel;
           autoDescription.textContent = config.autoDescription;
@@ -4166,7 +4226,11 @@
           const feverTriggered = countIn ? false : updateCombo(timing);
           lastTimingGrade = timing.label;
           lastActionWasCountIn = countIn;
+          if (WOODFISH_STYLES[woodfishStyleIndex].id === "prayer-beads") {
+            prayerBeadTurns += fromAuto ? 0.34 : 0.62;
+          }
           meritTotal += 1;
+          sessionMeritCount += 1;
           enqueueRitualAction("merit");
           const geometry = stageGeometry();
           addMeritHitVisual(actionTime, fromAuto, geometry);
@@ -4196,6 +4260,7 @@
           sessionActionCount += 1;
           sessionCyberCount += 1;
           meritTotal += 1;
+          sessionMeritCount += 1;
           enqueueRitualAction("merit");
           addMeritHitVisual(actionTime, true, geometry);
           addBurst(
@@ -4226,6 +4291,7 @@
           fishSchool.push(fish);
           fishSchool = fishSchool.slice(-42);
           releaseTotal += 1;
+          sessionReleaseCount += 1;
           enqueueRitualAction("release");
           releaseDetail.textContent = `${timing.label} · 刚刚放生：${item.name}`;
           const entry = projectSea(
@@ -4409,13 +4475,21 @@
         function setMode(nextMode, focusTab = false) {
           if (fortuneOpen || fortunePending) return;
           if (nextMode === mode) {
-            if (focusTab) (mode === "merit" ? meritTab : releaseTab).focus();
+            if (focusTab) woodfishNext.focus();
             return;
           }
           const hadAuto = autoActive;
           stopAuto(false);
           resetSessionCycle();
           mode = nextMode;
+          const targetStyleIndex = nextMode === "release"
+            ? WOODFISH_STYLES.findIndex((style) => style.mode === "release")
+            : WOODFISH_STYLES[woodfishStyleIndex].mode === "merit"
+              ? woodfishStyleIndex
+              : 0;
+          previousWoodfishStyleIndex = woodfishStyleIndex;
+          woodfishStyleIndex = Math.max(0, targetStyleIndex);
+          woodfishStyleChangedAt = performance.now();
           comboCount = 0;
           perfectStreak = 0;
           feverStarted = 0;
@@ -4427,7 +4501,7 @@
           rhythmEpoch = performance.now();
           resetIdleHint();
           renderUi();
-          if (focusTab) (mode === "merit" ? meritTab : releaseTab).focus();
+          if (focusTab) woodfishNext.focus();
           if (hadAuto) announce(STRINGS.autoStoppedOnSwitch);
           else announce(mode === "merit" ? STRINGS.modeMerit : STRINGS.modeRelease);
         }
@@ -4932,15 +5006,28 @@
         }
 
         function drawCushion(x, y, size) {
-          const cushionColors = [colors.moss, colors.sand, colors.purple];
-          const stitchColors = [colors.lime, colors.rust, colors.pink];
+          const cushionColors = [
+            colors.moss,
+            colors.sand,
+            colors.mossDeep,
+            colors.lakeDeep,
+            colors.purple
+          ];
+          const stitchColors = [
+            colors.lime,
+            colors.rust,
+            colors.lime,
+            colors.washiDeep,
+            colors.pink
+          ];
+          const cushionIndex = positiveModulo(woodfishStyleIndex, cushionColors.length);
           context.save();
           context.fillStyle = colors.ink;
           context.beginPath();
           context.ellipse(x + size * 0.018, y + size * 0.035, size * 0.32, size * 0.25, 0, 0, Math.PI * 2);
           context.fill();
 
-          context.fillStyle = cushionColors[woodfishStyleIndex];
+          context.fillStyle = cushionColors[cushionIndex];
           context.beginPath();
           context.ellipse(x, y, size * 0.305, size * 0.235, 0, 0, Math.PI * 2);
           context.fill();
@@ -4948,7 +5035,7 @@
           context.lineWidth = size * 0.015;
           context.stroke();
 
-          context.strokeStyle = stitchColors[woodfishStyleIndex];
+          context.strokeStyle = stitchColors[cushionIndex];
           context.lineWidth = size * 0.012;
           context.setLineDash([size * 0.026, size * 0.018]);
           context.beginPath();
@@ -5239,16 +5326,28 @@
           context.fillRect(size * 0.23, -size * 0.23, size * 0.08, size * 0.55);
           context.strokeRect(size * 0.23, -size * 0.23, size * 0.08, size * 0.55);
 
-          context.fillStyle = colors.ink;
-          context.strokeStyle = colors.sand;
+          context.save();
+          context.translate(0, -size * 0.254);
+          context.rotate(-0.025);
+          context.shadowColor = colors.ink;
+          context.shadowOffsetX = size * 0.014;
+          context.shadowOffsetY = size * 0.014;
+          context.fillStyle = colors.rustDeep;
+          context.strokeStyle = colors.ink;
           context.lineWidth = size * 0.008;
-          context.fillRect(-size * 0.225, -size * 0.295, size * 0.45, size * 0.082);
-          context.strokeRect(-size * 0.225, -size * 0.295, size * 0.45, size * 0.082);
-          context.fillStyle = colors.washiDeep;
+          context.fillRect(-size * 0.225, -size * 0.041, size * 0.45, size * 0.082);
+          context.strokeRect(-size * 0.225, -size * 0.041, size * 0.45, size * 0.082);
+          context.shadowColor = "transparent";
+          context.fillStyle = colors.washiLight;
           context.font = `800 ${Math.max(9, size * 0.038)}px ui-sans-serif, system-ui, sans-serif`;
           context.textAlign = "center";
           context.textBaseline = "middle";
-          context.fillText("情深深雨蒙蒙", 0, -size * 0.254, size * 0.39);
+          context.fillText("情深深雨蒙蒙", 0, 0, size * 0.39);
+          context.fillStyle = colors.washiDeep;
+          context.globalAlpha = 0.78;
+          context.fillRect(-size * 0.205, -size * 0.052, size * 0.055, size * 0.022);
+          context.fillRect(size * 0.15, size * 0.03, size * 0.055, size * 0.022);
+          context.restore();
 
           for (const side of [-1, 1]) {
             const panelX = side * size * 0.115;
@@ -5325,16 +5424,47 @@
             context.restore();
           }
 
-          context.fillStyle = colors.sand;
+          const stonePath = context.createLinearGradient(
+            0,
+            size * 0.28,
+            0,
+            size * 0.43
+          );
+          stonePath.addColorStop(0, colors.lakeLight);
+          stonePath.addColorStop(0.58, colors.lake);
+          stonePath.addColorStop(1, colors.lakeDeep);
+          context.fillStyle = stonePath;
           context.strokeStyle = colors.ink;
           context.lineWidth = size * 0.01;
-          context.fillRect(-size * 0.35, size * 0.29, size * 0.7, size * 0.07);
-          context.strokeRect(-size * 0.35, size * 0.29, size * 0.7, size * 0.07);
+          context.beginPath();
+          context.moveTo(-size * 0.35, size * 0.285);
+          context.lineTo(size * 0.35, size * 0.285);
+          context.lineTo(size * 0.46, size * 0.43);
+          context.lineTo(-size * 0.46, size * 0.43);
+          context.closePath();
+          context.fill();
+          context.stroke();
+          context.strokeStyle = colors.inkSoft;
+          context.globalAlpha = 0.55;
+          context.lineWidth = size * 0.006;
+          for (let row = 1; row <= 2; row += 1) {
+            const rowY = size * (0.285 + row * 0.048);
+            context.beginPath();
+            context.moveTo(-size * (0.35 + row * 0.036), rowY);
+            context.lineTo(size * (0.35 + row * 0.036), rowY);
+            context.stroke();
+          }
+          for (let joint = -2; joint <= 2; joint += 1) {
+            context.beginPath();
+            context.moveTo(joint * size * 0.115, size * 0.285);
+            context.lineTo(joint * size * 0.15, size * 0.43);
+            context.stroke();
+          }
           context.restore();
         }
 
-        function drawMochiPoundingWoodfish(x, y, size, time, beatKick, positiveImpact) {
-          const activeBeat = getQuarterBeatIndex(time);
+        function drawQingtuanPoundingWoodfish(x, y, size, time, beatKick, positiveImpact) {
+          const activeBeat = positiveModulo(getQuarterBeatIndex(time), 4);
           context.save();
           context.translate(x, y);
 
@@ -5376,7 +5506,7 @@
           context.globalAlpha = 1;
 
           const squish = Math.min(1, positiveImpact * 1.75 + beatKick * 0.12);
-          const mochiPulse = reducedMotion ? 1 : 1 + beatKick * 0.055;
+          const qingtuanPulse = reducedMotion ? 1 : 1 + beatKick * 0.055;
           if (squish > 0.04) {
             const spread = context.createRadialGradient(
               0,
@@ -5386,9 +5516,9 @@
               size * 0.02,
               size * 0.27
             );
-            spread.addColorStop(0, colors.washiLight);
-            spread.addColorStop(0.72, colors.washiDeep);
-            spread.addColorStop(1, colors.sand);
+            spread.addColorStop(0, colors.lime);
+            spread.addColorStop(0.72, colors.moss);
+            spread.addColorStop(1, colors.mossDeep);
             context.globalAlpha = 0.28 + squish * 0.36;
             context.fillStyle = spread;
             context.beginPath();
@@ -5406,8 +5536,8 @@
           }
 
           context.save();
-          context.scale(1 + squish * 0.34, mochiPulse - squish * 0.38);
-          context.shadowColor = colors.washiLight;
+          context.scale(1 + squish * 0.34, qingtuanPulse - squish * 0.38);
+          context.shadowColor = colors.moss;
           context.shadowBlur = size * (0.025 + squish * 0.065);
           const dough = context.createLinearGradient(
             -size * 0.12,
@@ -5415,9 +5545,9 @@
             size * 0.14,
             size * 0.12
           );
-          dough.addColorStop(0, colors.washiLight);
-          dough.addColorStop(0.5, colors.washiDeep);
-          dough.addColorStop(1, colors.sand);
+          dough.addColorStop(0, colors.lime);
+          dough.addColorStop(0.5, colors.moss);
+          dough.addColorStop(1, colors.mossDeep);
           context.fillStyle = dough;
           context.strokeStyle = colors.ink;
           context.lineWidth = size * 0.01;
@@ -5469,7 +5599,7 @@
             );
             context.stroke();
           }
-          context.fillStyle = colors.woodLight;
+          context.fillStyle = colors.mossDeep;
           context.globalAlpha = 0.16 + squish * 0.2;
           context.beginPath();
           context.ellipse(
@@ -5485,7 +5615,7 @@
           context.restore();
 
           if (squish > 0.16) {
-            context.strokeStyle = colors.washiDeep;
+            context.strokeStyle = colors.moss;
             context.globalAlpha = Math.min(0.75, squish);
             context.lineWidth = size * 0.012;
             context.lineCap = "round";
@@ -5508,7 +5638,7 @@
           for (let marker = 0; marker < 4; marker += 1) {
             const angle = -Math.PI / 2 + marker * Math.PI / 2;
             const isActive = marker === activeBeat;
-            context.fillStyle = isActive ? colors.pink : colors.sand;
+            context.fillStyle = isActive ? colors.pink : colors.moss;
             context.strokeStyle = colors.ink;
             context.lineWidth = size * 0.005;
             context.beginPath();
@@ -5541,6 +5671,106 @@
             }
           }
           context.globalAlpha = 1;
+          context.restore();
+        }
+
+        function drawPrayerBeadsWoodfish(x, y, size, time, beatKick, positiveImpact) {
+          const activeBeat = positiveModulo(getQuarterBeatIndex(time), 4);
+          const spin = prayerBeadTurns
+            + positiveImpact * 0.48
+            + (reducedMotion ? 0 : Math.sin(time * 0.0012) * 0.018);
+          const radiusX = size * (0.285 + positiveImpact * 0.018);
+          const radiusY = size * (0.205 - positiveImpact * 0.012);
+          context.save();
+          context.translate(x, y);
+          context.rotate(-0.08);
+
+          context.fillStyle = colors.shadow;
+          context.globalAlpha = 0.34;
+          context.beginPath();
+          context.ellipse(size * 0.015, size * 0.035, size * 0.34, size * 0.255, 0, 0, Math.PI * 2);
+          context.fill();
+          context.globalAlpha = 1;
+
+          context.strokeStyle = colors.sandDeep;
+          context.lineWidth = size * 0.018;
+          context.beginPath();
+          context.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
+          context.stroke();
+          context.strokeStyle = colors.ink;
+          context.lineWidth = size * 0.005;
+          context.stroke();
+
+          const beadCount = 18;
+          for (let bead = 0; bead < beadCount; bead += 1) {
+            const angle = (bead / beadCount) * Math.PI * 2 + spin;
+            const beadX = Math.cos(angle) * radiusX;
+            const beadY = Math.sin(angle) * radiusY;
+            const depth = (Math.sin(angle) + 1) * 0.5;
+            const beadRadius = size * (0.034 + depth * 0.015 + beatKick * 0.002);
+            const isBeatBead = bead % 4 === activeBeat;
+            context.fillStyle = isBeatBead
+              ? colors.pink
+              : bead % 3 === 0
+                ? colors.woodLight
+                : colors.wood;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = size * 0.006;
+            context.beginPath();
+            context.arc(beadX, beadY, beadRadius, 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
+            context.fillStyle = colors.woodHighlight;
+            context.globalAlpha = 0.68;
+            context.beginPath();
+            context.arc(
+              beadX - beadRadius * 0.28,
+              beadY - beadRadius * 0.32,
+              beadRadius * 0.2,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.globalAlpha = 1;
+            context.fillStyle = colors.ink;
+            context.beginPath();
+            context.arc(beadX, beadY, beadRadius * 0.15, 0, Math.PI * 2);
+            context.fill();
+          }
+
+          context.fillStyle = colors.washiDeep;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = size * 0.012;
+          context.beginPath();
+          context.arc(0, size * 0.015, size * 0.105, 0, Math.PI * 2);
+          context.fill();
+          context.stroke();
+          context.fillStyle = colors.rustDeep;
+          context.beginPath();
+          context.arc(0, size * 0.015, size * 0.076, 0, Math.PI * 2);
+          context.fill();
+          context.fillStyle = colors.washiLight;
+          context.font = `800 ${Math.round(size * 0.075)}px ${cssValue("--fontFamilyInk")}`;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillText("佛", 0, size * 0.02);
+
+          context.strokeStyle = colors.rustDeep;
+          context.lineWidth = size * 0.014;
+          context.beginPath();
+          context.moveTo(0, size * 0.11);
+          context.lineTo(0, size * 0.25);
+          context.stroke();
+          context.fillStyle = colors.rust;
+          context.beginPath();
+          context.moveTo(-size * 0.06, size * 0.24);
+          context.lineTo(size * 0.06, size * 0.24);
+          context.lineTo(size * 0.035, size * 0.37);
+          context.lineTo(0, size * 0.325);
+          context.lineTo(-size * 0.035, size * 0.37);
+          context.closePath();
+          context.fill();
+          context.stroke();
           context.restore();
         }
 
@@ -5668,6 +5898,8 @@
           const hasSlideTransition = !reducedMotion
             && !styleOnly
             && previousWoodfishStyleIndex !== woodfishStyleIndex
+            && !isReleaseStyle(previousWoodfishStyleIndex)
+            && !isReleaseStyle(woodfishStyleIndex)
             && transitionProgress < 1;
           if (hasSlideTransition) {
             const eased = 1 - Math.pow(1 - transitionProgress, 3);
@@ -5871,8 +6103,10 @@
           } else if (forcedStyleIndex === 1) {
             drawAncientDoorWoodfish(bodyX, bodyY, size, time, beatKick);
           } else if (forcedStyleIndex === 2) {
-            drawMochiPoundingWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
-          } else {
+            drawQingtuanPoundingWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
+          } else if (forcedStyleIndex === 3) {
+            drawPrayerBeadsWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
+          } else if (forcedStyleIndex === 4) {
             drawPhotoWoodfish(bodyX, bodyY, size, time, beatKick);
           }
 
@@ -6918,8 +7152,8 @@
           const geometry = stageGeometry();
           drawSongHourglass(time, geometry);
           updateSessionMissClock(time, geometry);
+          maybeRotateWoodfishStyle(time);
           if (mode === "merit") {
-            maybeRotateWoodfishStyle(time);
             drawWoodfish(geometry.x, geometry.y, geometry.size, time);
             drawWoodStrikeEmojis(geometry.x, geometry.y, geometry.size, time);
           } else {
@@ -7035,6 +7269,7 @@
             || target instanceof HTMLSelectElement
             || target.isContentEditable;
           const isStyleShortcutTarget = target === meritAction
+            || target === releaseAction
             || target === document.body
             || target === document.documentElement;
           if (
