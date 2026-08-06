@@ -6004,7 +6004,7 @@
 
           context.save();
           context.translate(x, y + size * 0.005);
-          context.rotate(-0.06);
+          context.rotate(-Math.PI / 2 - 0.06);
 
           context.fillStyle = colors.shadow;
           context.globalAlpha = 0.28;
@@ -8043,6 +8043,8 @@
                 beadCount: PRAYER_BEAD_COUNT,
                 density: "close-overlap",
                 depthScale: { back: 0.55, front: 1 },
+                orientation: "counterclockwise-quarter-turn",
+                orientationDegrees: -90,
                 continuous: true,
                 loopDurationMs: PRAYER_BEAD_LOOP_DURATION_MS,
                 reducedMotionStatic: reducedMotion,
