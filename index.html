@@ -563,6 +563,7 @@
         font-size: var(--fontSizeBase300);
         line-height: var(--lineHeightBase300);
         letter-spacing: var(--labelTracking);
+        white-space: pre-line;
       }
 
       .woodfish-picker-label span {
@@ -2529,6 +2530,8 @@
           document.documentElement.dataset.ritualApi?.trim() || "";
         const MAX_PHOTO_BYTES = 12 * 1024 * 1024;
         const PHOTO_OUTPUT_SIZE = 512;
+        const CYBER_STRIKE_OFFSET_Y = 20;
+        const THEME_ROTATION_QUARTER_BEATS = 32;
         const WOOD_SOUND_PEAK = Object.freeze({
           normal: 0.54,
           perfect: 0.62
@@ -2551,7 +2554,11 @@
         ]);
         const WOODFISH_STYLES = Object.freeze([
           { id: "resonance", name: "玄木共鸣" },
-          { id: "ancient-door", name: "开门啊 我知道你在家！" },
+          {
+            id: "ancient-door",
+            name: "开门啊我知道你在家！",
+            displayName: "开门啊\n我知道你在家！"
+          },
           { id: "mochi-pounding", name: "年糕捣捣" },
           { id: "custom-photo", name: "敲张照片" }
         ]);
@@ -2846,6 +2853,9 @@
         let woodfishStyleChangedAt = performance.now();
         let customPhotoDataUrl = "";
         let customPhotoImage = null;
+        let observedThemeQuarterBeat = null;
+        let themeBeatsUntilRotation = THEME_ROTATION_QUARTER_BEATS;
+        let automaticThemeSwitchCount = 0;
         let autoActive = false;
         let autoTimer = 0;
         let ritualNetworkState = RITUAL_API_ENDPOINT ? "connecting" : "unavailable";
@@ -3005,6 +3015,8 @@
           sessionMissCount = 0;
           sessionMissAnchor = 0;
           lastActionWasCountIn = false;
+          observedThemeQuarterBeat = null;
+          themeBeatsUntilRotation = THEME_ROTATION_QUARTER_BEATS;
         }
 
         function registerSessionAction(time = performance.now(), fromAuto = false) {
@@ -3533,8 +3545,12 @@
             && !fortunePending;
         }
 
-        function setWoodfishStyle(nextIndex, shouldAnnounce = true) {
-          if (!canChooseWoodfishStyle()) return false;
+        function setWoodfishStyle(
+          nextIndex,
+          shouldAnnounce = true,
+          allowDuringSession = false
+        ) {
+          if (!allowDuringSession && !canChooseWoodfishStyle()) return false;
           const normalizedIndex = positiveModulo(
             Math.round(nextIndex),
             WOODFISH_STYLES.length
@@ -3568,6 +3584,51 @@
           );
         }
 
+        function maybeRotateWoodfishStyle(time) {
+          if (
+            mode !== "merit"
+            || sessionActionCount < 1
+            || fortuneOpen
+            || fortunePending
+          ) {
+            observedThemeQuarterBeat = null;
+            return;
+          }
+
+          const quarterBeat = getQuarterBeatIndex(time);
+          if (!Number.isFinite(quarterBeat)) return;
+          if (observedThemeQuarterBeat === null || quarterBeat < observedThemeQuarterBeat) {
+            observedThemeQuarterBeat = quarterBeat;
+            return;
+          }
+          const elapsedBeats = quarterBeat - observedThemeQuarterBeat;
+          if (elapsedBeats < 1) return;
+          observedThemeQuarterBeat = quarterBeat;
+          themeBeatsUntilRotation -= elapsedBeats;
+          if (themeBeatsUntilRotation > 0) return;
+
+          const candidates = WOODFISH_STYLES
+            .map((style, index) => ({ style, index }))
+            .filter(
+              ({ style, index }) =>
+                index !== woodfishStyleIndex
+                && (style.id !== "custom-photo" || Boolean(customPhotoImage))
+            );
+          if (candidates.length === 0) {
+            themeBeatsUntilRotation = THEME_ROTATION_QUARTER_BEATS;
+            return;
+          }
+          const nextStyle = candidates[randomIndex(candidates.length)];
+          setWoodfishStyle(nextStyle.index, false, true);
+          automaticThemeSwitchCount += 1;
+          themeBeatsUntilRotation =
+            positiveModulo(
+              themeBeatsUntilRotation - 1,
+              THEME_ROTATION_QUARTER_BEATS
+            ) + 1;
+          announce(`四个八拍，自动切换为${nextStyle.style.name}`);
+        }
+
         function renderUi() {
           const config = MODES[mode];
           const styleSelectable = canChooseWoodfishStyle();
@@ -3590,7 +3651,9 @@
             "aria-label",
             customPhotoImage ? "更换敲击照片" : "上传一张圆形敲击照片"
           );
-          woodfishStyleName.textContent = WOODFISH_STYLES[woodfishStyleIndex].name;
+          woodfishStyleName.textContent =
+            WOODFISH_STYLES[woodfishStyleIndex].displayName
+            || WOODFISH_STYLES[woodfishStyleIndex].name;
           woodfishStylePosition.textContent =
             `${woodfishStyleIndex + 1} / ${WOODFISH_STYLES.length} · 左右滑动`;
           woodfishPicker.setAttribute(
@@ -4053,7 +4116,10 @@
           strikeEmojiParticles = makeStrikeEmojiParticles(fromCyber);
           strikeEmojiAnchor = {
             x: geometry.x + geometry.size * (fromCyber ? -0.17 : 0.17),
-            y: geometry.y + geometry.size * 0.13,
+            y:
+              geometry.y
+              + geometry.size * 0.13
+              - (fromCyber ? CYBER_STRIKE_OFFSET_Y : 0),
             strikeStarted: actionTime,
             fromCyber
           };
@@ -5152,13 +5218,24 @@
             context.stroke();
           }
 
-          context.fillStyle = colors.rustDeep;
+          context.fillStyle = colors.woodDeep;
           context.strokeStyle = colors.ink;
           context.lineWidth = size * 0.012;
           context.fillRect(-size * 0.31, -size * 0.23, size * 0.08, size * 0.55);
           context.strokeRect(-size * 0.31, -size * 0.23, size * 0.08, size * 0.55);
           context.fillRect(size * 0.23, -size * 0.23, size * 0.08, size * 0.55);
           context.strokeRect(size * 0.23, -size * 0.23, size * 0.08, size * 0.55);
+
+          context.fillStyle = colors.ink;
+          context.strokeStyle = colors.sand;
+          context.lineWidth = size * 0.008;
+          context.fillRect(-size * 0.225, -size * 0.295, size * 0.45, size * 0.082);
+          context.strokeRect(-size * 0.225, -size * 0.295, size * 0.45, size * 0.082);
+          context.fillStyle = colors.washiDeep;
+          context.font = `800 ${Math.max(9, size * 0.038)}px ui-sans-serif, system-ui, sans-serif`;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillText("情深深雨蒙蒙", 0, -size * 0.254, size * 0.39);
 
           for (const side of [-1, 1]) {
             const panelX = side * size * 0.115;
@@ -5169,9 +5246,9 @@
               panelX + size * 0.12,
               size * 0.3
             );
-            panelShade.addColorStop(0, colors.rust);
-            panelShade.addColorStop(0.52, colors.rustDeep);
-            panelShade.addColorStop(1, colors.woodDeep);
+            panelShade.addColorStop(0, colors.wood);
+            panelShade.addColorStop(0.46, colors.woodDeep);
+            panelShade.addColorStop(1, colors.ink);
             context.save();
             context.translate(panelX, size * 0.035);
             context.rotate(knock);
@@ -5184,6 +5261,25 @@
             context.globalAlpha = 0.48;
             context.lineWidth = size * 0.006;
             context.strokeRect(-size * 0.08, -size * 0.21, size * 0.16, size * 0.42);
+            context.globalAlpha = 1;
+
+            context.strokeStyle = colors.woodHighlight;
+            context.globalAlpha = 0.28;
+            context.lineWidth = size * 0.004;
+            for (let grain = -2; grain <= 2; grain += 1) {
+              const grainX = grain * size * 0.036;
+              context.beginPath();
+              context.moveTo(grainX - size * 0.012, -size * 0.205);
+              context.bezierCurveTo(
+                grainX + size * 0.018,
+                -size * 0.09,
+                grainX - size * 0.02,
+                size * 0.07,
+                grainX + size * 0.008,
+                size * 0.205
+              );
+              context.stroke();
+            }
             context.globalAlpha = 1;
 
             for (let row = -1; row <= 1; row += 1) {
@@ -5266,14 +5362,50 @@
           context.stroke();
           context.globalAlpha = 1;
 
-          const mochiPulse = reducedMotion
-            ? 1
-            : 1 + beatKick * 0.07 + positiveImpact * 0.1;
+          const squish = Math.min(1, positiveImpact * 1.75 + beatKick * 0.12);
+          const mochiPulse = reducedMotion ? 1 : 1 + beatKick * 0.055;
+          if (squish > 0.04) {
+            const spread = context.createRadialGradient(
+              0,
+              size * 0.02,
+              size * 0.02,
+              0,
+              size * 0.02,
+              size * 0.27
+            );
+            spread.addColorStop(0, colors.washiLight);
+            spread.addColorStop(0.72, colors.washiDeep);
+            spread.addColorStop(1, colors.sand);
+            context.globalAlpha = 0.28 + squish * 0.36;
+            context.fillStyle = spread;
+            context.beginPath();
+            context.ellipse(
+              0,
+              size * 0.025,
+              size * (0.17 + squish * 0.105),
+              size * (0.105 - squish * 0.025),
+              0,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.globalAlpha = 1;
+          }
+
           context.save();
-          context.scale(1 + positiveImpact * 0.07, mochiPulse - positiveImpact * 0.05);
+          context.scale(1 + squish * 0.34, mochiPulse - squish * 0.38);
           context.shadowColor = colors.washiLight;
-          context.shadowBlur = size * (0.025 + positiveImpact * 0.055);
-          context.fillStyle = colors.washiLight;
+          context.shadowBlur = size * (0.025 + squish * 0.065);
+          const dough = context.createLinearGradient(
+            -size * 0.12,
+            -size * 0.14,
+            size * 0.14,
+            size * 0.12
+          );
+          dough.addColorStop(0, colors.washiLight);
+          dough.addColorStop(0.5, colors.washiDeep);
+          dough.addColorStop(1, colors.sand);
+          context.fillStyle = dough;
           context.strokeStyle = colors.ink;
           context.lineWidth = size * 0.01;
           context.beginPath();
@@ -5305,7 +5437,60 @@
           context.closePath();
           context.fill();
           context.stroke();
+
+          context.strokeStyle = colors.washiLight;
+          context.globalAlpha = 0.68;
+          context.lineWidth = size * 0.012;
+          context.lineCap = "round";
+          for (let fold = -1; fold <= 1; fold += 1) {
+            const foldY = fold * size * 0.05 - size * 0.018;
+            context.beginPath();
+            context.moveTo(-size * 0.105, foldY);
+            context.bezierCurveTo(
+              -size * 0.04,
+              foldY - size * 0.035,
+              size * 0.035,
+              foldY + size * 0.03,
+              size * 0.105,
+              foldY - size * 0.008
+            );
+            context.stroke();
+          }
+          context.fillStyle = colors.woodLight;
+          context.globalAlpha = 0.16 + squish * 0.2;
+          context.beginPath();
+          context.ellipse(
+            0,
+            size * 0.012,
+            size * (0.075 + squish * 0.035),
+            size * (0.03 + squish * 0.012),
+            -0.08,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
           context.restore();
+
+          if (squish > 0.16) {
+            context.strokeStyle = colors.washiDeep;
+            context.globalAlpha = Math.min(0.75, squish);
+            context.lineWidth = size * 0.012;
+            context.lineCap = "round";
+            for (const side of [-1, 1]) {
+              context.beginPath();
+              context.moveTo(side * size * 0.105, size * 0.025);
+              context.bezierCurveTo(
+                side * size * 0.16,
+                size * 0.065,
+                side * size * (0.18 + squish * 0.06),
+                size * 0.075,
+                side * size * (0.2 + squish * 0.075),
+                size * 0.04
+              );
+              context.stroke();
+            }
+            context.globalAlpha = 1;
+          }
 
           for (let marker = 0; marker < 4; marker += 1) {
             const angle = -Math.PI / 2 + marker * Math.PI / 2;
@@ -5453,7 +5638,9 @@
           const showCyberMallet = isMeritDuetActive(time)
             || (woodStrikeFromAuto && elapsed <= duration + 0.18);
           const strikePointX = bodyX + size * (woodStrikeFromAuto ? -0.17 : 0.17);
-          const strikePointY = bodyY + size * 0.13;
+          const woodStrikePointY = bodyY + size * 0.13;
+          const cyberStrikePointY = woodStrikePointY - CYBER_STRIKE_OFFSET_Y;
+          const strikePointY = woodStrikeFromAuto ? cyberStrikePointY : woodStrikePointY;
 
           if (!styleOnly) {
             drawEnso(x, y, size, time);
@@ -5738,7 +5925,7 @@
             const cyberBaseX = x + size * 0.22;
             const cyberBaseY = -size * 0.1;
             const cyberContactAngle = Math.atan2(
-              strikePointY - cyberBaseY,
+              cyberStrikePointY - cyberBaseY,
               cyberStrikePointX - cyberBaseX
             );
             const cyberRestAngle = cyberContactAngle + 0.22;
@@ -5746,7 +5933,7 @@
               + (cyberContactAngle - cyberRestAngle) * cyberMalletSwing;
             const cyberHandleLength = Math.hypot(
               cyberStrikePointX - cyberBaseX,
-              strikePointY - cyberBaseY
+              cyberStrikePointY - cyberBaseY
             );
             const cyberHeadX = cyberBaseX + Math.cos(cyberAngle) * cyberHandleLength;
             const cyberHeadY = cyberBaseY + Math.sin(cyberAngle) * cyberHandleLength;
@@ -5766,7 +5953,7 @@
           const woodBaseX = x + size * 0.46;
           const woodBaseY = canvasHeight + size * 0.08;
           const woodContactAngle = Math.atan2(
-            strikePointY - woodBaseY,
+            woodStrikePointY - woodBaseY,
             woodStrikePointX - woodBaseX
           );
           const woodRestAngle = woodContactAngle + 0.38;
@@ -5774,7 +5961,7 @@
             + (woodContactAngle - woodRestAngle) * woodMalletSwing;
           const woodHandleLength = Math.hypot(
             woodStrikePointX - woodBaseX,
-            strikePointY - woodBaseY
+            woodStrikePointY - woodBaseY
           );
           const woodHeadX = woodBaseX + Math.cos(woodAngle) * woodHandleLength;
           const woodHeadY = woodBaseY + Math.sin(woodAngle) * woodHandleLength;
@@ -6719,6 +6906,7 @@
           drawSongHourglass(time, geometry);
           updateSessionMissClock(time, geometry);
           if (mode === "merit") {
+            maybeRotateWoodfishStyle(time);
             drawWoodfish(geometry.x, geometry.y, geometry.size, time);
             drawWoodStrikeEmojis(geometry.x, geometry.y, geometry.size, time);
           } else {
@@ -7186,6 +7374,7 @@
                   && performance.now() - woodStrikeStarted <= WOOD_STRIKE_DURATION * 1000
                 ),
               cyberMalletOrigin: "top-right",
+              cyberStrikeOffsetY: CYBER_STRIKE_OFFSET_Y,
               manualMalletOrigin: "bottom-right",
               malletOrigin: woodStrikeFromAuto
                 ? "top-right"
@@ -7197,6 +7386,9 @@
                 )
                 ? "cyber-stainless"
                 : "wood",
+              automaticThemeSwitchCount,
+              themeBeatsUntilRotation,
+              autoThemeQuarterBeats: THEME_ROTATION_QUARTER_BEATS,
               malletImpactSide: woodStrikeFromAuto
                 && (
                   isMeritDuetActive()
