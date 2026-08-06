@@ -237,12 +237,21 @@
         box-shadow: 0 0 0 calc(var(--focusRingWidth) + var(--focusRingWidth)) var(--colorInk);
       }
 
-      #sceneCanvas {
+      #sceneCanvas,
+      #feedbackCanvas {
         position: fixed;
         inset: 0;
         width: 100%;
         height: var(--appViewportHeight);
         pointer-events: none;
+      }
+
+      #sceneCanvas {
+        z-index: 0;
+      }
+
+      #feedbackCanvas {
+        z-index: 2;
       }
 
       .screen {
@@ -1928,7 +1937,8 @@
           border-color: ButtonText;
         }
 
-        #sceneCanvas {
+        #sceneCanvas,
+        #feedbackCanvas {
           display: none;
         }
 
@@ -2046,6 +2056,7 @@
 
   <body>
     <canvas id="sceneCanvas" aria-hidden="true"></canvas>
+    <canvas id="feedbackCanvas" aria-hidden="true"></canvas>
     <p id="idleHint" class="idle-hint" aria-hidden="true" hidden>轻敲</p>
 
     <main class="screen" data-screen-label="01 佛了 for luck · 功德与放生" data-active="true">
@@ -2288,6 +2299,13 @@
         const AUTO_BEAT_LATE_WINDOW_MS = 80;
         const AUTO_TIMER_SAFETY_MS = 8;
         const START_TIMING = Object.freeze({ label: "START", rank: "start" });
+        const MERIT_BEAT_PLATE_ROTATION = -0.13;
+        const MERIT_BEAT_CORNERS = Object.freeze([
+          { x: 0.33, y: -0.42 },
+          { x: 0.46, y: 0.15 },
+          { x: -0.28, y: 0.41 },
+          { x: -0.43, y: -0.2 }
+        ]);
         const MODES = {
           merit: {
             autoLabel: "赛博代敲",
@@ -2459,7 +2477,10 @@
         ];
 
         const canvas = document.getElementById("sceneCanvas");
-        const context = canvas.getContext("2d", { alpha: true });
+        const sceneContext = canvas.getContext("2d", { alpha: true });
+        const feedbackCanvas = document.getElementById("feedbackCanvas");
+        const feedbackContext = feedbackCanvas.getContext("2d", { alpha: true });
+        let context = sceneContext;
         const screen = document.querySelector(".screen");
         const idleHint = document.getElementById("idleHint");
         const locationName = document.getElementById("locationName");
@@ -2773,6 +2794,7 @@
         function closeFortuneSummary() {
           if (!fortuneOpen || fortuneClosing) return;
           fortuneClosing = true;
+          stopAndRewindBgm();
           fortuneOverlay.dataset.exit = fortuneTone === "inauspicious" ? "burn" : "keep";
           fortuneContinue.setAttribute("aria-disabled", "true");
           window.clearTimeout(fortuneTimer);
@@ -2819,10 +2841,10 @@
           const nextAction = mode === "merit" ? "积攒" : "放生";
           announce(
             completedTone === "inauspicious"
-              ? `凶签已化解，可以继续${nextAction}`
+              ? `凶签已化解，音乐已停止，再次${nextAction}会从头开始`
               : completedTone === "special"
-                ? `神佑签已收好，可以继续${nextAction}`
-                : `签文已收好，可以继续${nextAction}`
+                ? `神佑签已收好，音乐已停止，再次${nextAction}会从头开始`
+                : `签文已收好，音乐已停止，再次${nextAction}会从头开始`
           );
         }
 
@@ -3026,6 +3048,15 @@
 
         function pauseBgm() {
           if (!bgmAudio.paused) bgmAudio.pause();
+        }
+
+        function stopAndRewindBgm() {
+          bgmResumeOnVisible = false;
+          pauseBgm();
+          bgmStarted = false;
+          if (bgmAudio.readyState > 0 && bgmAudio.currentTime !== 0) {
+            bgmAudio.currentTime = 0;
+          }
         }
 
         async function playWoodSound(isPerfect = false) {
@@ -3253,9 +3284,22 @@
               ];
           const slot = slots[Math.floor(Math.random() * slots.length)];
           const horizontalInset = Math.min(canvasWidth * 0.5, Math.max(112, canvasWidth * 0.13));
+          const topbarBottom = document.querySelector(".topbar").getBoundingClientRect().bottom;
+          const statsTop = document.querySelector(".stats").getBoundingClientRect().top;
+          const contentTop = Math.max(96, topbarBottom);
+          const contentBottom = Math.min(canvasHeight - 80, statsTop);
+          const safeMargin = Math.min(
+            58,
+            Math.max(28, (contentBottom - contentTop) * 0.14)
+          );
+          const safeTop = contentTop + safeMargin;
+          const safeBottom = contentBottom - safeMargin;
+          const safeCenter = (contentTop + contentBottom) * 0.5;
           return {
             x: Math.max(horizontalInset, Math.min(canvasWidth - horizontalInset, slot.x)),
-            y: Math.max(120, Math.min(canvasHeight - 108, slot.y))
+            y: safeBottom > safeTop
+              ? Math.max(safeTop, Math.min(safeBottom, slot.y))
+              : safeCenter
           };
         }
 
@@ -3295,7 +3339,7 @@
           const geometry = stageGeometry();
           strikeEmojiParticles = makeStrikeEmojiParticles(fromAuto);
           strikeEmojiAnchor = {
-            x: geometry.x + geometry.size * 0.17,
+            x: geometry.x + geometry.size * (fromAuto ? -0.17 : 0.17),
             y: geometry.y + geometry.size * 0.13,
             strikeStarted: woodStrikeStarted
           };
@@ -3612,7 +3656,11 @@
           canvasHeight = viewportHeight;
           canvas.width = Math.max(1, Math.round(canvasWidth * pixelRatio));
           canvas.height = Math.max(1, Math.round(canvasHeight * pixelRatio));
-          context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+          feedbackCanvas.width = canvas.width;
+          feedbackCanvas.height = canvas.height;
+          sceneContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+          feedbackContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+          context = sceneContext;
           makeTexture();
         }
 
@@ -3622,6 +3670,30 @@
 
         function getQuarterBeatCueLayout(geometry) {
           const cueSize = Math.max(24, Math.min(38, geometry.size * 0.105));
+          if (mode === "merit") {
+            const plateCenter = {
+              x: geometry.x - geometry.size * 0.03,
+              y: geometry.y + geometry.size * 0.01
+            };
+            const cos = Math.cos(MERIT_BEAT_PLATE_ROTATION);
+            const sin = Math.sin(MERIT_BEAT_PLATE_ROTATION);
+            return {
+              center: plateCenter,
+              radiusX: geometry.size * 0.46,
+              radiusY: geometry.size * 0.42,
+              cueSize,
+              integratedWithPlate: true,
+              positions: MERIT_BEAT_CORNERS.map((corner, beat) => {
+                const cornerX = corner.x * geometry.size;
+                const cornerY = corner.y * geometry.size;
+                return {
+                  x: plateCenter.x + cornerX * cos - cornerY * sin,
+                  y: plateCenter.y + cornerX * sin + cornerY * cos,
+                  angle: MERIT_BEAT_PLATE_ROTATION + (beat % 2 === 0 ? -0.04 : 0.04)
+                };
+              })
+            };
+          }
           const releaseEntry = mode === "release"
             ? projectSea(
                 geometry.x,
@@ -3632,18 +3704,12 @@
                 0
               )
             : null;
-          const center = mode === "merit"
-            ? { x: geometry.x, y: geometry.y }
-            : {
-                x: releaseEntry.x,
-                y: releaseEntry.y - geometry.size * 0.08
-              };
-          const radiusX = mode === "merit"
-            ? geometry.size * 0.48
-            : Math.min(geometry.width * 0.3, geometry.size * 0.31);
-          const radiusY = mode === "merit"
-            ? geometry.size * 0.45
-            : geometry.size * 0.18;
+          const center = {
+            x: releaseEntry.x,
+            y: releaseEntry.y - geometry.size * 0.08
+          };
+          const radiusX = Math.min(geometry.width * 0.3, geometry.size * 0.31);
+          const radiusY = geometry.size * 0.18;
           const safeInset = cueSize * 0.9;
           const clampX = (value) => Math.max(safeInset, Math.min(canvasWidth - safeInset, value));
           const clampY = (value) => Math.max(safeInset, Math.min(canvasHeight - safeInset, value));
@@ -3669,12 +3735,19 @@
           const impact = reducedMotion ? 0.35 : Math.max(0, 1 - phase * 4.2);
           const anticipation = reducedMotion ? 0 : Math.max(0, (phase - 0.52) / 0.48);
           const cueLayout = getQuarterBeatCueLayout(geometry);
-          const { center, radiusX, radiusY, cueSize, positions: cuePositions } = cueLayout;
+          const {
+            center,
+            radiusX,
+            radiusY,
+            cueSize,
+            positions: cuePositions,
+            integratedWithPlate
+          } = cueLayout;
           const beatColors = [colors.rust, colors.lakeDeep, colors.sand, colors.purple];
           const currentActionBeat = isActionQuarterBeat(quarterIndex);
 
           context.save();
-          if (currentActionBeat && impact > 0) {
+          if (currentActionBeat && impact > 0 && !integratedWithPlate) {
             context.globalAlpha = 0.1 + impact * 0.24;
             context.strokeStyle = beatColors[currentBeat];
             context.lineWidth = Math.max(3, cueSize * (0.08 + impact * 0.08));
@@ -3700,8 +3773,12 @@
             const scale = 1
               + (active ? impact * (isActiveAction ? 0.34 : 0.18) : 0)
               + (upcoming ? anticipation * 0.12 : 0);
-            const cueWidth = cueSize * (isActiveAction ? 1.42 : actionSlot ? 1.26 : 1.08) * scale;
-            const cueHeight = cueSize * 0.62 * scale;
+            const cueWidth = cueSize * (
+              integratedWithPlate
+                ? isActiveAction ? 1.18 : actionSlot ? 1.08 : 0.88
+                : isActiveAction ? 1.42 : actionSlot ? 1.26 : 1.08
+            ) * scale;
+            const cueHeight = cueSize * (integratedWithPlate ? 0.72 : 0.62) * scale;
 
             context.save();
             context.translate(position.x, position.y);
@@ -3711,15 +3788,25 @@
               : upcoming
                 ? 0.13 + anticipation * 0.28
                 : 0.1;
-            context.fillStyle = actionSlot ? colors.pink : beatColors[beat];
+            context.fillStyle = integratedWithPlate
+              ? active
+                ? colors.washiLight
+                : colors.pink
+              : actionSlot
+                ? colors.pink
+                : beatColors[beat];
             context.strokeStyle = colors.ink;
             context.lineWidth = Math.max(2, cueSize * 0.065);
             context.beginPath();
-            context.moveTo(-cueWidth * 0.5, -cueHeight * 0.42);
-            context.lineTo(cueWidth * 0.38, -cueHeight * 0.5);
-            context.lineTo(cueWidth * 0.5, cueHeight * 0.34);
-            context.lineTo(-cueWidth * 0.32, cueHeight * 0.5);
-            context.closePath();
+            if (integratedWithPlate) {
+              context.arc(0, 0, cueWidth * 0.38, 0, Math.PI * 2);
+            } else {
+              context.moveTo(-cueWidth * 0.5, -cueHeight * 0.42);
+              context.lineTo(cueWidth * 0.38, -cueHeight * 0.5);
+              context.lineTo(cueWidth * 0.5, cueHeight * 0.34);
+              context.lineTo(-cueWidth * 0.32, cueHeight * 0.5);
+              context.closePath();
+            }
             context.fill();
             context.stroke();
 
@@ -3752,7 +3839,9 @@
               context.strokeStyle = colors.ink;
               const label = mode === "merit" ? "敲" : "放";
               context.strokeText(label, 0, 0);
-              context.fillStyle = isActiveAction ? colors.washiLight : colors.ink;
+              context.fillStyle = isActiveAction && !integratedWithPlate
+                ? colors.washiLight
+                : colors.ink;
               context.fillText(label, 0, 0);
             } else {
               context.fillStyle = colors.ink;
@@ -3780,12 +3869,18 @@
           const beatNumber = positiveModulo(Math.floor(getRhythmElapsedMs(time) / period), 4);
           const beatColors = [colors.rust, colors.lakeDeep, colors.washiDeep, colors.purple];
           const beatColor = beatColors[beatNumber];
+          const quarterIndex = getQuarterBeatIndex(time);
+          const plateBeat = positiveModulo(quarterIndex, 4);
+          const quarterPhase = reducedMotion ? 0.65 : getQuarterBeatPhase(time);
+          const plateImpact = reducedMotion ? 0.22 : Math.max(0, 1 - quarterPhase * 4.2);
+          const platePulse = 1 + plateImpact * 0.035;
           context.save();
 
           context.translate(x - size * 0.03, y + size * 0.01);
-          context.rotate(-0.13);
+          context.rotate(MERIT_BEAT_PLATE_ROTATION);
+          context.scale(platePulse, platePulse);
           context.fillStyle = colors.pink;
-          context.globalAlpha = 0.78;
+          context.globalAlpha = 0.78 + plateImpact * 0.12;
           context.beginPath();
           context.moveTo(-size * 0.43, -size * 0.2);
           context.lineTo(size * 0.33, -size * 0.42);
@@ -3796,6 +3891,15 @@
           context.strokeStyle = colors.ink;
           context.globalAlpha = 1;
           context.lineWidth = Math.max(4, size * 0.014);
+          context.stroke();
+          context.globalAlpha = 0.18 + plateImpact * 0.52;
+          context.strokeStyle = beatColors[plateBeat];
+          context.lineWidth = Math.max(6, size * (0.018 + plateImpact * 0.01));
+          context.beginPath();
+          const activeCorner = MERIT_BEAT_CORNERS[plateBeat];
+          const previousCorner = MERIT_BEAT_CORNERS[positiveModulo(plateBeat - 1, 4)];
+          context.moveTo(previousCorner.x * size, previousCorner.y * size);
+          context.lineTo(activeCorner.x * size, activeCorner.y * size);
           context.stroke();
           context.restore();
 
@@ -4177,7 +4281,9 @@
           const tiltY = pointerY * size * 0.009;
           const bodyX = x + tiltX;
           const bodyY = y + idle + tiltY - beatKick * size * 0.006 + positiveImpact * size * 0.008;
-          const strikePointX = bodyX + size * 0.17;
+          const useCyberMallet = woodStrikeFromAuto
+            && (autoActive || elapsed <= duration + 0.18);
+          const strikePointX = bodyX + size * (useCyberMallet ? -0.17 : 0.17);
           const strikePointY = bodyY + size * 0.13;
 
           drawEnso(x, y, size, time);
@@ -4423,8 +4529,6 @@
           }
           context.restore();
 
-          const useCyberMallet = woodStrikeFromAuto
-            && (autoActive || elapsed <= duration + 0.18);
           const baseX = useCyberMallet ? -size * 0.12 : x + size * 0.46;
           const baseY = useCyberMallet ? -size * 0.1 : canvasHeight + size * 0.08;
           const contactAngle = Math.atan2(strikePointY - baseY, strikePointX - baseX);
@@ -5199,7 +5303,9 @@
         function draw(time) {
           const delta = Math.min(0.05, Math.max(0, (time - lastFrame) / 1000));
           lastFrame = time;
+          context = sceneContext;
           context.clearRect(0, 0, canvasWidth, canvasHeight);
+          feedbackContext.clearRect(0, 0, canvasWidth, canvasHeight);
           drawPaperTexture(time);
           drawFeverBackdrop(time);
 
@@ -5221,7 +5327,12 @@
           drawQuarterBeatCues(time, geometry);
           drawRipples(time);
           drawFever(time, geometry);
-          drawBursts(time, geometry.size);
+          context = feedbackContext;
+          try {
+            drawBursts(time, geometry.size);
+          } finally {
+            context = sceneContext;
+          }
         }
 
         function frame(time) {
@@ -5523,6 +5634,7 @@
                 x: Math.round(position.x),
                 y: Math.round(position.y)
               })),
+              beatCueIntegratedWithPlate: Boolean(cueLayout.integratedWithPlate),
               viewport: {
                 width: canvasWidth,
                 height: canvasHeight
@@ -5563,6 +5675,13 @@
                 )
                 ? "cyber-stainless"
                 : "wood",
+              malletImpactSide: woodStrikeFromAuto
+                && (
+                  autoActive
+                  || performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
+                )
+                ? "left"
+                : "right",
               strikeEmojis: strikeEmojiParticles.map((particle) => particle.icon),
               strikeEmojiAnchor: {
                 x: Math.round(strikeEmojiAnchor.x),
@@ -5582,6 +5701,7 @@
                 x: Math.round(burst.x),
                 y: Math.round(burst.y)
               })),
+              feedbackLayer: "foreground",
               idleHintVisible: !idleHint.hidden,
               imprints: meritImprints.length,
               ripples: ripples.length,
