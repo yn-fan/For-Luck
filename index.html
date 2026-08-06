@@ -2012,7 +2012,14 @@
           <button class="tool-button" id="autoToggle" type="button" aria-pressed="false">
             <span class="tool-label" id="autoLabel">赛博代敲</span>
           </button>
-          <button class="tool-button" id="soundToggle" type="button" aria-pressed="true">
+          <button
+            class="tool-button"
+            id="soundToggle"
+            type="button"
+            aria-label="声音与背景音乐"
+            aria-pressed="true"
+            title="声音与背景音乐 · 128 BPM"
+          >
             <span class="tool-label">声音</span>
           </button>
         </div>
@@ -2127,6 +2134,15 @@
       aria-atomic="true"
     ></div>
 
+    <audio
+      id="bgmAudio"
+      src="for-luck.mp3"
+      preload="auto"
+      loop
+      aria-hidden="true"
+      tabindex="-1"
+    ></audio>
+
     <script>
       (() => {
         "use strict";
@@ -2144,26 +2160,35 @@
         const FORTUNE_EXIT_DURATION = 500;
         const FORTUNE_BURN_DURATION = 760;
         const RATING_EFFECT_SCALE = 0.9;
+        const BGM_BPM = 128;
+        const BGM_QUARTER_MS = 60000 / BGM_BPM;
+        const BGM_BEAT_OFFSET_SECONDS = 0.435;
+        const BGM_VOLUME = 0.24;
+        const AUTO_BEAT_LATE_WINDOW_MS = 80;
+        const AUTO_TIMER_SAFETY_MS = 8;
         const MODES = {
           merit: {
             autoLabel: "赛博代敲",
             globalLabel: "全球功德",
             personalLabel: "我已积攒的功德",
             globalBase: 1286420,
-            autoDelay: 960
+            beatStep: 2,
+            autoDelay: BGM_QUARTER_MS * 2
           },
           release: {
             autoLabel: "赛博代放",
             globalLabel: "全球放生",
             personalLabel: "我的放生",
             globalBase: 48216,
-            autoDelay: 1280
+            beatStep: 4,
+            autoDelay: BGM_QUARTER_MS * 4
           }
         };
         const STRINGS = {
           storageUnavailable: "当前浏览器无法保存，关闭页面后记录将清零",
           audioUnavailable: "当前浏览器不支持网页声音，计数仍可正常使用",
           audioBlocked: "浏览器暂时阻止了声音，请再次操作",
+          bgmUnavailable: "背景音乐加载失败，音效与计数仍可正常使用",
           locationUnavailable: "暂时无法获取 IP 所在地，已显示“苏州”",
           autoStoppedOnSwitch: "已切换模式，自动操作已关闭",
           modeMerit: "已切换到木鱼模式",
@@ -2321,6 +2346,7 @@
         const autoToggle = document.getElementById("autoToggle");
         const autoLabel = document.getElementById("autoLabel");
         const soundToggle = document.getElementById("soundToggle");
+        const bgmAudio = document.getElementById("bgmAudio");
         const globalLabel = document.getElementById("globalLabel");
         const globalCount = document.getElementById("globalCount");
         const personalLabel = document.getElementById("personalLabel");
@@ -2411,6 +2437,8 @@
         let reducedMotion = reducedMotionQuery.matches;
         let audioContext = null;
         let noiseBuffer = null;
+        let bgmStarted = false;
+        let bgmResumeOnVisible = false;
         let animationFrame = 0;
         let lastFrame = performance.now();
         let announcementTimer = 0;
@@ -2843,6 +2871,36 @@
           return audioContext;
         }
 
+        function isBgmPlaying() {
+          return soundEnabled
+            && bgmStarted
+            && !bgmAudio.paused
+            && !bgmAudio.ended;
+        }
+
+        async function startBgm() {
+          if (!soundEnabled) return false;
+          bgmAudio.volume = BGM_VOLUME;
+          if (isBgmPlaying()) return true;
+          bgmStarted = true;
+          try {
+            await bgmAudio.play();
+            return true;
+          } catch (error) {
+            bgmStarted = false;
+            const message = error?.name === "NotAllowedError"
+              ? STRINGS.audioBlocked
+              : STRINGS.bgmUnavailable;
+            setSystemMessage(message);
+            announce(message);
+            return false;
+          }
+        }
+
+        function pauseBgm() {
+          if (!bgmAudio.paused) bgmAudio.pause();
+        }
+
         async function playWoodSound(isPerfect = false) {
           const audio = await ensureAudio();
           if (!audio || !soundEnabled) return;
@@ -2935,9 +2993,31 @@
           return mode === "merit" ? meritAction : releaseAction;
         }
 
+        function positiveModulo(value, divisor) {
+          return ((value % divisor) + divisor) % divisor;
+        }
+
+        function getRhythmElapsedMs(time = performance.now()) {
+          if (isBgmPlaying()) {
+            return (bgmAudio.currentTime - BGM_BEAT_OFFSET_SECONDS) * 1000;
+          }
+          return time - rhythmEpoch;
+        }
+
         function getRhythmPhase(time = performance.now()) {
           const period = MODES[mode].autoDelay;
-          return ((((time - rhythmEpoch) % period) + period) % period) / period;
+          return positiveModulo(getRhythmElapsedMs(time), period) / period;
+        }
+
+        function getRhythmBeatNumber(time = performance.now()) {
+          const beatIndex = Math.floor(getRhythmElapsedMs(time) / MODES[mode].autoDelay);
+          return positiveModulo(beatIndex + rhythmBeatIndex, 4) + 1;
+        }
+
+        function getMsUntilNextRhythmBeat(time = performance.now()) {
+          const period = MODES[mode].autoDelay;
+          const remainder = positiveModulo(getRhythmElapsedMs(time), period);
+          return period - remainder;
         }
 
         function getTimingGrade(time = performance.now(), fromAuto = false) {
@@ -3144,12 +3224,17 @@
 
         function performCurrentAction(fromAuto = false) {
           if (fortuneOpen || fortunePending) return;
-          if (fromAuto) {
+          if (fromAuto && !isBgmPlaying()) {
             rhythmBeatIndex = (rhythmBeatIndex + 1) % 4;
             rhythmEpoch = performance.now();
           }
           if (mode === "merit") strikeMerit(fromAuto);
           else releaseFish(fromAuto);
+        }
+
+        function performUserAction() {
+          void startBgm();
+          performCurrentAction(false);
         }
 
         function stopAuto(shouldAnnounce = false) {
@@ -3166,13 +3251,24 @@
         function scheduleAuto() {
           window.clearTimeout(autoTimer);
           if (!autoActive) return;
+          const delay = isBgmPlaying()
+            ? getMsUntilNextRhythmBeat() + AUTO_TIMER_SAFETY_MS
+            : MODES[mode].autoDelay;
           autoTimer = window.setTimeout(() => {
+            if (isBgmPlaying()) {
+              const period = MODES[mode].autoDelay;
+              const phaseMs = positiveModulo(getRhythmElapsedMs(), period);
+              if (phaseMs > AUTO_BEAT_LATE_WINDOW_MS) {
+                scheduleAuto();
+                return;
+              }
+            }
             performCurrentAction(true);
             scheduleAuto();
-          }, MODES[mode].autoDelay);
+          }, delay);
         }
 
-        function toggleAuto() {
+        async function toggleAuto() {
           if (fortuneOpen || fortunePending) return;
           if (autoActive) {
             stopAuto(true);
@@ -3183,20 +3279,35 @@
           window.clearTimeout(autoTimer);
           resetIdleHint();
           rhythmEpoch = performance.now();
-          performCurrentAction(true);
+          const bgmReady = await startBgm();
+          if (!autoActive) return;
+          if (!bgmReady) performCurrentAction(true);
           scheduleAuto();
-          announce(`${MODES[mode].autoLabel}已开启`);
+          announce(`${MODES[mode].autoLabel}已开启，跟随背景音乐节拍`);
         }
 
         function toggleSound() {
           if (fortuneOpen || fortunePending) return;
           resetIdleHint();
           soundEnabled = !soundEnabled;
+          if (!soundEnabled) {
+            bgmResumeOnVisible = false;
+            pauseBgm();
+          }
           renderUi();
           saveState();
           setSystemMessage("");
-          announce(soundEnabled ? "声音已开启" : "声音已关闭");
-          if (soundEnabled) ensureAudio();
+          announce(
+            soundEnabled
+              ? "声音与背景音乐已开启"
+              : "声音与背景音乐已关闭"
+          );
+          if (soundEnabled) {
+            void ensureAudio();
+            void startBgm().then(() => {
+              if (autoActive) scheduleAuto();
+            });
+          }
         }
 
         function setMode(nextMode, focusTab = false) {
@@ -4829,8 +4940,8 @@
         releaseTab.addEventListener("click", () => setMode("release"));
         meritTab.addEventListener("keydown", handleTabKeydown);
         releaseTab.addEventListener("keydown", handleTabKeydown);
-        meritAction.addEventListener("click", () => strikeMerit(false));
-        releaseAction.addEventListener("click", () => releaseFish(false));
+        meritAction.addEventListener("click", performUserAction);
+        releaseAction.addEventListener("click", performUserAction);
         autoToggle.addEventListener("click", toggleAuto);
         soundToggle.addEventListener("click", toggleSound);
         fortuneContinue.addEventListener("click", () => closeFortuneSummary());
@@ -4881,7 +4992,7 @@
             && !event.shiftKey;
           if (isUnmodifiedSpace && !isTyping && !isInteractive) {
             event.preventDefault();
-            performCurrentAction(false);
+            performUserAction();
           }
         });
 
@@ -4893,6 +5004,8 @@
             idleHint.hidden = true;
             stopAnimation();
             stopAuto(false);
+            bgmResumeOnVisible = isBgmPlaying();
+            pauseBgm();
             if (audioContext && audioContext.state === "running") {
               audioContext.suspend().catch(() => {
                 setSystemMessage(STRINGS.audioBlocked);
@@ -4902,7 +5015,22 @@
             if (sessionActionCount > 0) sessionMissAnchor = performance.now();
             startAnimation();
             resetIdleHint();
+            if (soundEnabled && bgmResumeOnVisible) {
+              bgmResumeOnVisible = false;
+              void startBgm();
+            }
           }
+        });
+
+        bgmAudio.addEventListener("error", () => {
+          bgmStarted = false;
+          if (soundEnabled) {
+            setSystemMessage(STRINGS.bgmUnavailable);
+            announce(STRINGS.bgmUnavailable);
+          }
+        });
+        bgmAudio.addEventListener("seeked", () => {
+          if (autoActive) scheduleAuto();
         });
 
         const handleReducedMotion = (event) => {
@@ -4960,6 +5088,7 @@
           },
           setMode,
           toggleAuto,
+          startBgm,
           draw: () => draw(performance.now()),
           get state() {
             return {
@@ -4968,6 +5097,17 @@
               release: releaseTotal,
               global: getDemoGlobal(),
               sound: soundEnabled,
+              bgm: {
+                bpm: BGM_BPM,
+                beatOffsetSeconds: BGM_BEAT_OFFSET_SECONDS,
+                playing: isBgmPlaying(),
+                currentTime: Number(bgmAudio.currentTime.toFixed(3)),
+                duration: Number.isFinite(bgmAudio.duration)
+                  ? Number(bgmAudio.duration.toFixed(3))
+                  : null,
+                modeBeatStep: MODES[mode].beatStep,
+                modePeriodMs: MODES[mode].autoDelay
+              },
               auto: autoActive,
               fish: fishSchool.length,
               fishDirections: fishSchool.slice(-8).map((fish) => ({
@@ -4976,7 +5116,7 @@
                 targetLane: Number(fish.targetLane.toFixed(3))
               })),
               rhythmPhase: Number(getRhythmPhase().toFixed(3)),
-              rhythmBeat: ((rhythmBeatIndex + Math.floor((performance.now() - rhythmEpoch) / MODES[mode].autoDelay)) % 4 + 4) % 4 + 1,
+              rhythmBeat: getRhythmBeatNumber(),
               timingGrade: lastTimingGrade,
               combo: comboCount,
               perfectStreak,

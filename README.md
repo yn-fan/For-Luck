@@ -6,6 +6,8 @@
 
 - 木鱼与放生双模式
 - 手动操作与“赛博代敲 / 赛博代放”
+- 内置 `For Luck` 背景音乐，视觉节拍、手动判定和自动操作共用 128 BPM 音乐时间轴
+- 木鱼每 2 拍落点一次（937.5ms），放生每 4 拍落点一次（1875ms）
 - `PERFECT / GOOD / COOL` 节拍判定与连击
 - 连续 3 次 `PERFECT` 触发 10 秒特殊时刻
 - 大号 `MISS` 反馈后延迟 500ms 揭签
@@ -33,13 +35,24 @@ python3 -m http.server 4173
 - `Space`：执行当前模式的操作
 - `←` / `→`：切换木鱼与放生
 - 赛博代敲 / 赛博代放：开启当前模式的自动操作
-- 声音：开启或关闭合成音效
+- 声音：同时开启或关闭背景音乐与合成音效
+
+浏览器会在第一次敲击、放生、开启自动操作或重新开启声音时开始播放背景音乐。
+
+## 音乐与节拍
+
+- 曲目：`For Luck`
+- 艺术家：`imfandesign`
+- 速度：128 BPM
+- 强拍偏移：约 435ms
+- 自动操作在每次动作前重新核对音乐相位，避免浏览器定时器和音频启动延迟造成漂拍
 
 ## 技术
 
 - Vanilla HTML、CSS、JavaScript
 - Canvas 2D
 - Web Audio API
+- HTML Audio
 - Local Storage
 - 无第三方运行时依赖
 
@@ -55,6 +68,7 @@ python3 -m http.server 4173
 .
 ├── index.html
 ├── dogman.png
+├── for-luck.mp3
 ├── luanjiang-lab.png
 └── README.md
 ```
