@@ -2273,7 +2273,7 @@
         const PERFECT_FEVER_THRESHOLD = 3;
         const PERFECT_FEVER_DURATION = 10000;
         const FEVER_RING_CHIP_COUNT = 20;
-        const MISS_FORTUNE_THRESHOLD = 1;
+        const MISS_FORTUNE_THRESHOLD = 2;
         const MISS_GRACE_RATIO = 1.15;
         const FORTUNE_AFTER_MISS_DELAY = 500;
         const WOOD_STRIKE_DURATION = 0.32;
@@ -2707,7 +2707,6 @@
           fortuneTimer = 0;
           fortunePending = false;
           sessionActionCount += 1;
-          sessionMissCount = 0;
           sessionMissAnchor = time;
         }
 
@@ -5171,15 +5170,20 @@
             comboCount = 0;
             perfectStreak = 0;
             lastTimingGrade = "MISS";
+            const shouldDrawFortune = sessionMissCount >= MISS_FORTUNE_THRESHOLD;
             addBurst(
               { label: "MISS", rank: "miss" },
-              `${sessionMissCount} / ${MISS_FORTUNE_THRESHOLD} · 抽签`,
+              `${sessionMissCount} / ${MISS_FORTUNE_THRESHOLD} · ${shouldDrawFortune ? "抽签" : "还有一次"}`,
               "",
               geometry,
               mode
             );
             renderUi();
 
+            if (!shouldDrawFortune) {
+              announce(`MISS，${sessionMissCount} / ${MISS_FORTUNE_THRESHOLD}，还有一次机会`);
+              continue;
+            }
             fortunePending = true;
             window.clearTimeout(idleHintTimer);
             idleHint.hidden = true;
@@ -5440,10 +5444,14 @@
           meritPerfect: () => strikeMerit(true),
           release: () => releaseFish(false),
           releasePerfect: () => releaseFish(true),
-          previewMiss: () => {
+          previewMiss: (count = MISS_FORTUNE_THRESHOLD) => {
+            const previewCount = Math.max(
+              1,
+              Math.min(MISS_FORTUNE_THRESHOLD, Math.round(count))
+            );
             addBurst(
               { label: "MISS", rank: "miss" },
-              "1 / 1 · 抽签",
+              `${previewCount} / ${MISS_FORTUNE_THRESHOLD} · ${previewCount >= MISS_FORTUNE_THRESHOLD ? "抽签" : "还有一次"}`,
               "",
               stageGeometry(),
               mode
@@ -5500,6 +5508,7 @@
               quarterBeat: getQuarterBeatNumber(),
               quarterBeatIsAction: isActionQuarterBeat(getQuarterBeatIndex()),
               missGraceRatio: MISS_GRACE_RATIO,
+              missFortuneThreshold: MISS_FORTUNE_THRESHOLD,
               missWindowMs: Math.round(missWindowMs),
               nextMissInMs: sessionMissAnchor
                 ? Math.round(sessionMissAnchor + missWindowMs - performance.now())
