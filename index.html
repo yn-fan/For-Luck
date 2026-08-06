@@ -5903,14 +5903,19 @@
 
           const markerColor =
             woodStrikeFromAuto && impactPulse > 0.02 ? colors.cyberCyan : colors.pink;
+          const sceneRotation = -Math.PI / 2 - 0.06;
+          const beadLightingCompensation = -sceneRotation;
           const drawBead = (bead) => {
             const isMarker = bead.index === 0;
+            context.save();
+            context.translate(bead.x, bead.y);
+            context.rotate(beadLightingCompensation);
             const beadShade = context.createRadialGradient(
-              bead.x - bead.radius * 0.34,
-              bead.y - bead.radius * 0.38,
+              -bead.radius * 0.34,
+              -bead.radius * 0.38,
               bead.radius * 0.08,
-              bead.x,
-              bead.y,
+              0,
+              0,
               bead.radius
             );
             beadShade.addColorStop(0, colors.woodHighlight);
@@ -5930,7 +5935,7 @@
             context.lineWidth = size * (isMarker ? 0.013 : 0.008);
             context.globalAlpha = 0.74 + bead.depth * 0.26;
             context.beginPath();
-            context.arc(bead.x, bead.y, bead.radius, 0, Math.PI * 2);
+            context.arc(0, 0, bead.radius, 0, Math.PI * 2);
             context.fill();
             context.shadowColor = "transparent";
 
@@ -5940,8 +5945,8 @@
             context.globalAlpha = 0.08 + bead.depth * 0.12;
             context.beginPath();
             context.ellipse(
-              bead.x + bead.radius * 0.08,
-              bead.y + bead.radius * 0.48,
+              bead.radius * 0.08,
+              bead.radius * 0.48,
               bead.radius * 0.94,
               bead.radius * 0.54,
               -0.08,
@@ -5954,10 +5959,8 @@
             context.globalAlpha = 0.82 + bead.depth * 0.18;
             context.stroke();
             context.globalAlpha = 1;
-
             context.save();
-            context.translate(bead.x, bead.y);
-            context.rotate(bead.angle + bead.index * 0.37);
+            context.rotate(bead.angle + bead.index * 0.37 + sceneRotation);
             context.strokeStyle = colors.woodHighlight;
             context.globalAlpha = 0.54;
             context.lineWidth = size * (0.0045 + bead.depth * 0.0015);
@@ -5991,8 +5994,8 @@
               context.lineWidth = size * 0.006;
               context.beginPath();
               context.arc(
-                bead.x,
-                bead.y,
+                0,
+                0,
                 bead.radius * (1.18 + impactPulse * 0.14),
                 0,
                 Math.PI * 2
@@ -6000,11 +6003,12 @@
               context.stroke();
               context.globalAlpha = 1;
             }
+            context.restore();
           };
 
           context.save();
           context.translate(x, y + size * 0.005);
-          context.rotate(-Math.PI / 2 - 0.06);
+          context.rotate(sceneRotation);
 
           context.fillStyle = colors.shadow;
           context.globalAlpha = 0.28;
@@ -8045,6 +8049,7 @@
                 depthScale: { back: 0.55, front: 1 },
                 orientation: "counterclockwise-quarter-turn",
                 orientationDegrees: -90,
+                lighting: "top-left-fixed",
                 continuous: true,
                 loopDurationMs: PRAYER_BEAD_LOOP_DURATION_MS,
                 reducedMotionStatic: reducedMotion,
