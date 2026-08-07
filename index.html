@@ -5899,47 +5899,128 @@
               context.stroke();
             }
           } else if (styleId === "eastern-gate-whack") {
-            context.globalAlpha = alpha * 0.84;
-            context.fillStyle = colors.lakeLight;
-            context.fillRect(0, 0, canvasWidth, canvasHeight);
-            context.globalAlpha = alpha * 0.2;
-            context.fillStyle = colors.steelLight;
-            context.fillRect(0, canvasHeight * 0.55, canvasWidth, canvasHeight * 0.45);
+            const horizonY = Math.min(
+              canvasHeight * 0.68,
+              Math.max(canvasHeight * 0.46, geometry.y + geometry.size * 0.22)
+            );
+            const sunRadius = Math.min(minSide * 0.23, canvasHeight * 0.13);
+            const sunX = canvasWidth * 0.72;
+            const sunY = horizonY - sunRadius * 0.9;
 
-            context.globalAlpha = alpha * 0.16;
+            context.globalAlpha = alpha;
             context.fillStyle = colors.ink;
-            for (let index = 0; index < 11; index += 1) {
-              const buildingWidth = minSide * (0.035 + (index % 3) * 0.011);
-              const buildingHeight = minSide * (0.07 + (index % 4) * 0.025);
-              const buildingX = canvasWidth * (index / 10) - buildingWidth * 0.5;
-              context.fillRect(
-                buildingX,
-                canvasHeight * 0.56 - buildingHeight,
-                buildingWidth,
-                buildingHeight
-              );
+            context.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            context.globalAlpha = alpha * 0.46;
+            context.fillStyle = colors.purple;
+            context.fillRect(0, horizonY, canvasWidth, canvasHeight - horizonY);
+
+            for (let index = 0; index < 18; index += 1) {
+              const starX = canvasWidth * (((index * 47 + 13) % 101) / 100);
+              const starY = horizonY * (0.13 + (((index * 31 + 7) % 71) / 100) * 0.66);
+              const twinkle = reducedMotion
+                ? 0.72
+                : 0.58 + Math.sin(time * 0.0024 + index * 1.7) * 0.2;
+              const starSize = minSide * (index % 5 === 0 ? 0.009 : 0.005);
+              context.globalAlpha = alpha * twinkle;
+              context.strokeStyle = index % 3 === 0 ? colors.pink : colors.cyberCyan;
+              context.lineWidth = Math.max(1.2, minSide * 0.003);
+              context.beginPath();
+              context.moveTo(starX - starSize, starY);
+              context.lineTo(starX + starSize, starY);
+              context.moveTo(starX, starY - starSize);
+              context.lineTo(starX, starY + starSize);
+              context.stroke();
             }
 
-            context.globalAlpha = alpha * 0.2;
-            context.strokeStyle = colors.ink;
+            context.save();
+            context.beginPath();
+            context.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+            context.clip();
+            context.globalAlpha = alpha * 0.94;
+            context.fillStyle = colors.pink;
+            context.fillRect(
+              sunX - sunRadius,
+              sunY - sunRadius,
+              sunRadius * 2,
+              sunRadius * 2
+            );
+            for (let band = 0; band < 9; band += 1) {
+              const bandProgress = band / 8;
+              const bandY = sunY - sunRadius + bandProgress * sunRadius * 2;
+              const bandHeight = sunRadius * (0.035 + bandProgress * 0.055);
+              context.globalAlpha = alpha * (0.72 + bandProgress * 0.2);
+              context.fillStyle = band % 2 === 0 ? colors.orange : colors.purple;
+              context.fillRect(
+                sunX - sunRadius,
+                bandY,
+                sunRadius * 2,
+                bandHeight
+              );
+            }
+            context.restore();
+
+            context.globalAlpha = alpha * 0.88;
+            for (let index = 0; index < 17; index += 1) {
+              const buildingWidth = minSide * (0.038 + (index % 4) * 0.012);
+              const buildingHeight = minSide * (0.08 + ((index * 3) % 7) * 0.018);
+              const buildingX = canvasWidth * (index / 16) - buildingWidth * 0.5;
+              const buildingY = horizonY - buildingHeight;
+              context.fillStyle = index % 3 === 0 ? colors.ink : colors.inkSoft;
+              context.fillRect(buildingX, buildingY, buildingWidth, buildingHeight);
+              context.globalAlpha = alpha * 0.72;
+              context.strokeStyle = index % 2 === 0 ? colors.cyberCyan : colors.pink;
+              context.lineWidth = Math.max(1, minSide * 0.0025);
+              context.strokeRect(buildingX, buildingY, buildingWidth, buildingHeight);
+              context.globalAlpha = alpha * 0.88;
+              if (index % 4 === 1) {
+                context.fillStyle = colors.washiDeep;
+                for (let windowRow = 0; windowRow < 3; windowRow += 1) {
+                  context.globalAlpha = alpha * (0.35 + windowRow * 0.08);
+                  context.fillRect(
+                    buildingX + buildingWidth * 0.26,
+                    buildingY + buildingHeight * (0.24 + windowRow * 0.2),
+                    Math.max(1.5, buildingWidth * 0.12),
+                    Math.max(1.5, minSide * 0.004)
+                  );
+                }
+                context.globalAlpha = alpha * 0.88;
+              }
+            }
+
+            context.fillStyle = colors.inkSoft;
+            context.globalAlpha = alpha * 0.94;
+            context.fillRect(0, horizonY, canvasWidth, canvasHeight - horizonY);
+            context.strokeStyle = colors.cyberCyan;
             context.lineWidth = Math.max(1, minSide * 0.003);
-            for (let index = -4; index <= 4; index += 1) {
+            context.globalAlpha = alpha * 0.4;
+            for (let index = -7; index <= 7; index += 1) {
               context.beginPath();
-              context.moveTo(canvasWidth * 0.5, canvasHeight * 0.58);
+              context.moveTo(canvasWidth * 0.5, horizonY);
               context.lineTo(
-                canvasWidth * (0.5 + index * 0.16),
+                canvasWidth * (0.5 + index * 0.15),
                 canvasHeight
               );
               context.stroke();
             }
-            for (let row = 0; row < 5; row += 1) {
-              const progress = row / 5;
-              const lineY = canvasHeight * (0.64 + progress * progress * 0.31);
+            for (let row = 0; row < 9; row += 1) {
+              const progress = row / 8;
+              const lineY = horizonY + (canvasHeight - horizonY) * progress * progress;
+              context.globalAlpha = alpha * (0.25 + progress * 0.24);
+              context.strokeStyle = row % 2 === 0 ? colors.cyberCyan : colors.pink;
               context.beginPath();
               context.moveTo(0, lineY);
               context.lineTo(canvasWidth, lineY);
               context.stroke();
             }
+
+            context.globalAlpha = alpha * 0.9;
+            context.strokeStyle = colors.pink;
+            context.lineWidth = Math.max(2, minSide * 0.006);
+            context.beginPath();
+            context.moveTo(0, horizonY);
+            context.lineTo(canvasWidth, horizonY);
+            context.stroke();
           } else {
             context.globalAlpha = alpha * 0.86;
             context.fillStyle = colors.lakeLight;
@@ -8260,154 +8341,210 @@
             ? Math.min(1, laserElapsed / EASTERN_GATE_LASER_DURATION_MS)
             : 1;
           const targetAvailable = easternGateNextTargetAt === 0;
-          const buildingTop = y - size * 0.43;
-          const buildingBottom = y + size * 0.12;
+          const buildingTop = y - size * 0.5;
+          const buildingBottom = y + size * 0.145;
+          const buildingHeight = buildingBottom - buildingTop;
+          const outerTopHalf = size * 0.415;
+          const outerBottomHalf = size * 0.365;
+          const innerBottomHalf = size * 0.17;
+          const archApexY = buildingTop + size * 0.16;
           const groundY = y + size * 0.39;
 
           context.save();
           context.lineJoin = "round";
           context.lineCap = "round";
 
-          context.fillStyle = colors.steelMid;
-          context.globalAlpha = 0.24;
+          context.fillStyle = colors.cyberCyan;
+          context.globalAlpha = 0.2;
           context.beginPath();
-          context.ellipse(x, groundY, size * 0.46, size * 0.055, 0, 0, Math.PI * 2);
+          context.ellipse(
+            x - size * 0.035,
+            groundY,
+            size * 0.48,
+            size * 0.058,
+            0,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+          context.fillStyle = colors.pink;
+          context.globalAlpha = 0.16;
+          context.beginPath();
+          context.ellipse(
+            x + size * 0.045,
+            groundY + size * 0.012,
+            size * 0.42,
+            size * 0.046,
+            0,
+            0,
+            Math.PI * 2
+          );
           context.fill();
           context.globalAlpha = 1;
 
-          const drawTower = (side) => {
-            const outerTopX = x + side * size * 0.31;
-            const innerTopX = x + side * size * 0.075;
-            const innerBottomX = x + side * size * 0.12;
-            const outerBottomX = x + side * size * 0.36;
-            const towerGradient = context.createLinearGradient(
-              x + side * size * 0.36,
+          const traceGateBody = () => {
+            const corner = size * 0.022;
+            context.beginPath();
+            context.moveTo(x - outerTopHalf + corner, buildingTop);
+            context.lineTo(x + outerTopHalf - corner, buildingTop);
+            context.quadraticCurveTo(
+              x + outerTopHalf,
               buildingTop,
-              x + side * size * 0.06,
-              buildingBottom
+              x + outerTopHalf,
+              buildingTop + corner
             );
-            towerGradient.addColorStop(0, colors.steelDark);
-            towerGradient.addColorStop(0.42, colors.steelLight);
-            towerGradient.addColorStop(0.72, colors.lakeLight);
-            towerGradient.addColorStop(1, colors.steelMid);
-
-            context.beginPath();
-            context.moveTo(outerTopX, buildingTop + size * 0.018);
-            context.lineTo(innerTopX, buildingTop);
-            context.bezierCurveTo(
-              x + side * size * 0.058,
-              y - size * 0.27,
-              x + side * size * 0.072,
-              y - size * 0.04,
-              innerBottomX,
-              buildingBottom
+            context.lineTo(x + outerBottomHalf, buildingBottom);
+            context.lineTo(x - outerBottomHalf, buildingBottom);
+            context.lineTo(x - outerTopHalf, buildingTop + corner);
+            context.quadraticCurveTo(
+              x - outerTopHalf,
+              buildingTop,
+              x - outerTopHalf + corner,
+              buildingTop
             );
-            context.lineTo(outerBottomX, buildingBottom);
             context.closePath();
-            context.fillStyle = towerGradient;
-            context.strokeStyle = colors.ink;
-            context.lineWidth = Math.max(3, size * 0.011);
-            context.fill();
-            context.stroke();
 
-            context.save();
-            context.clip();
-            context.strokeStyle = colors.inkSoft;
-            context.globalAlpha = 0.42;
-            context.lineWidth = Math.max(1, size * 0.0032);
-            for (let row = 0; row < 18; row += 1) {
-              const rowProgress = row / 17;
-              const rowY = buildingTop + size * (0.035 + rowProgress * 0.515);
-              context.beginPath();
-              context.moveTo(
-                x + side * size * (0.305 + rowProgress * 0.045),
-                rowY
-              );
-              context.lineTo(
-                x + side * size * (0.075 + rowProgress * 0.045),
-                rowY
-              );
-              context.stroke();
-            }
-            for (let column = 1; column < 5; column += 1) {
-              const columnProgress = column / 5;
-              context.beginPath();
-              context.moveTo(
-                outerTopX + (innerTopX - outerTopX) * columnProgress,
-                buildingTop + size * 0.014
-              );
-              context.lineTo(
-                outerBottomX + (innerBottomX - outerBottomX) * columnProgress,
-                buildingBottom
-              );
-              context.stroke();
-            }
-            context.restore();
-
-            context.strokeStyle = colors.washiLight;
-            context.globalAlpha = 0.66;
-            context.lineWidth = Math.max(2, size * 0.006);
-            context.beginPath();
-            context.moveTo(x + side * size * 0.285, buildingTop + size * 0.035);
-            context.lineTo(x + side * size * 0.327, buildingBottom - size * 0.025);
-            context.stroke();
-            context.globalAlpha = 1;
-
-            context.strokeStyle = colors.ink;
-            context.lineWidth = Math.max(4, size * 0.014);
-            context.beginPath();
-            context.moveTo(innerTopX, buildingTop);
+            context.moveTo(x, archApexY);
             context.bezierCurveTo(
-              x + side * size * 0.058,
-              y - size * 0.27,
-              x + side * size * 0.072,
-              y - size * 0.04,
-              innerBottomX,
+              x + size * 0.07,
+              archApexY + size * 0.045,
+              x + size * 0.135,
+              y - size * 0.075,
+              x + innerBottomHalf,
               buildingBottom
             );
-            context.stroke();
+            context.lineTo(x - innerBottomHalf, buildingBottom);
+            context.bezierCurveTo(
+              x - size * 0.135,
+              y - size * 0.075,
+              x - size * 0.07,
+              archApexY + size * 0.045,
+              x,
+              archApexY
+            );
+            context.closePath();
           };
 
-          drawTower(-1);
-          drawTower(1);
+          const traceInnerArch = (side) => {
+            context.beginPath();
+            context.moveTo(x, archApexY);
+            context.bezierCurveTo(
+              x + side * size * 0.07,
+              archApexY + size * 0.045,
+              x + side * size * 0.135,
+              y - size * 0.075,
+              x + side * innerBottomHalf,
+              buildingBottom
+            );
+          };
 
-          const bridgeGradient = context.createLinearGradient(
-            x,
+          const facadeGradient = context.createLinearGradient(
+            x - outerTopHalf,
             buildingTop,
-            x,
-            buildingTop + size * 0.12
+            x + outerBottomHalf,
+            buildingBottom
           );
-          bridgeGradient.addColorStop(0, colors.steelLight);
-          bridgeGradient.addColorStop(1, colors.steelDark);
-          context.fillStyle = bridgeGradient;
+          facadeGradient.addColorStop(0, colors.purple);
+          facadeGradient.addColorStop(0.28, colors.lakeDeep);
+          facadeGradient.addColorStop(0.58, colors.steelMid);
+          facadeGradient.addColorStop(0.78, colors.purple);
+          facadeGradient.addColorStop(1, colors.pink);
+          traceGateBody();
+          context.fillStyle = facadeGradient;
           context.strokeStyle = colors.ink;
-          context.lineWidth = Math.max(3, size * 0.011);
+          context.lineWidth = Math.max(4, size * 0.016);
+          context.fill("evenodd");
+          context.stroke();
+
+          context.save();
+          traceGateBody();
+          context.clip("evenodd");
+
+          context.globalAlpha = 0.15;
+          context.fillStyle = colors.cyberCyan;
+          context.fillRect(
+            x - outerTopHalf,
+            buildingTop,
+            outerTopHalf,
+            buildingHeight
+          );
+          context.fillStyle = colors.pink;
+          context.fillRect(x, buildingTop, outerTopHalf, buildingHeight);
+
+          for (let floor = 1; floor < 30; floor += 1) {
+            const floorProgress = floor / 30;
+            const floorY = buildingTop + buildingHeight * floorProgress;
+            context.globalAlpha = floor % 8 === 0 ? 0.9 : 0.62;
+            context.strokeStyle = floor % 8 === 0 ? colors.washiDeep : colors.steelLight;
+            context.lineWidth = floor % 8 === 0
+              ? Math.max(2.5, size * 0.009)
+              : Math.max(1, size * 0.0034);
+            context.beginPath();
+            context.moveTo(x - outerTopHalf, floorY);
+            context.lineTo(x + outerTopHalf, floorY);
+            context.stroke();
+          }
+
+          context.globalAlpha = 0.23;
+          context.fillStyle = colors.washiLight;
           context.beginPath();
           context.moveTo(x - size * 0.31, buildingTop + size * 0.018);
-          context.lineTo(x + size * 0.31, buildingTop + size * 0.018);
-          context.lineTo(x + size * 0.29, buildingTop + size * 0.102);
-          context.lineTo(x - size * 0.29, buildingTop + size * 0.102);
+          context.lineTo(x - size * 0.265, buildingTop + size * 0.018);
+          context.lineTo(x - size * 0.24, buildingBottom);
+          context.lineTo(x - size * 0.278, buildingBottom);
           context.closePath();
           context.fill();
-          context.stroke();
-
-          context.fillStyle = colors.ink;
-          context.textAlign = "center";
-          context.textBaseline = "middle";
-          context.font = `900 ${Math.max(10, size * 0.036)}px ${cssValue("--fontFamilyBase")}`;
-          context.fillText("东方之门", x, buildingTop + size * 0.06);
-
-          context.fillStyle = colors.steelDark;
-          context.strokeStyle = colors.ink;
-          context.lineWidth = Math.max(3, size * 0.01);
           context.beginPath();
-          context.moveTo(x - size * 0.39, buildingBottom);
-          context.lineTo(x + size * 0.39, buildingBottom);
-          context.lineTo(x + size * 0.35, buildingBottom + size * 0.055);
-          context.lineTo(x - size * 0.35, buildingBottom + size * 0.055);
+          context.moveTo(x + size * 0.28, buildingTop + size * 0.018);
+          context.lineTo(x + size * 0.32, buildingTop + size * 0.018);
+          context.lineTo(x + size * 0.285, buildingBottom);
+          context.lineTo(x + size * 0.25, buildingBottom);
           context.closePath();
           context.fill();
+          context.restore();
+
+          context.globalAlpha = 0.95;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(7, size * 0.026);
+          context.beginPath();
+          context.moveTo(x - outerTopHalf + size * 0.02, buildingTop);
+          context.lineTo(x + outerTopHalf - size * 0.02, buildingTop);
           context.stroke();
+          context.strokeStyle = colors.washiDeep;
+          context.lineWidth = Math.max(3, size * 0.011);
+          context.beginPath();
+          context.moveTo(x - outerTopHalf + size * 0.02, buildingTop + size * 0.004);
+          context.lineTo(x + outerTopHalf - size * 0.02, buildingTop + size * 0.004);
+          context.stroke();
+
+          for (const side of [-1, 1]) {
+            traceInnerArch(side);
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(8, size * 0.03);
+            context.stroke();
+            traceInnerArch(side);
+            context.strokeStyle = colors.washiDeep;
+            context.lineWidth = Math.max(5, size * 0.018);
+            context.stroke();
+            traceInnerArch(side);
+            context.strokeStyle = side < 0 ? colors.cyberCyan : colors.pink;
+            context.shadowColor = side < 0 ? colors.cyberCyan : colors.pink;
+            context.shadowBlur = reducedMotion ? 0 : size * 0.025;
+            context.lineWidth = Math.max(2, size * 0.0065);
+            context.stroke();
+            context.shadowBlur = 0;
+          }
+
+          context.strokeStyle = colors.purple;
+          context.lineWidth = Math.max(2, size * 0.007);
+          context.beginPath();
+          context.moveTo(x, archApexY - size * 0.018);
+          context.lineTo(x + size * 0.038, archApexY + size * 0.035);
+          context.lineTo(x, archApexY + size * 0.07);
+          context.lineTo(x - size * 0.038, archApexY + size * 0.035);
+          context.closePath();
+          context.stroke();
+          context.globalAlpha = 1;
 
           const pairColors = [
             [colors.rust, colors.washiDeep],
@@ -8607,15 +8744,15 @@
             };
 
             drawBeam(
-              x - size * 0.075,
-              y - size * 0.19,
+              x - size * 0.11,
+              y - size * 0.205,
               targetX - size * 0.018,
               targetY,
               0.4
             );
             drawBeam(
-              x + size * 0.075,
-              y - size * 0.19,
+              x + size * 0.11,
+              y - size * 0.205,
               targetX + size * 0.018,
               targetY,
               2.1
@@ -10951,7 +11088,10 @@
                 },
                 easternGate: {
                   selected: isEasternGateStyle(),
-                  architecture: "original-twin-tower-arch",
+                  architecture: "monolithic-pointed-arch-gate",
+                  cityStyle: "vaporwave-night-grid",
+                  facadeLabel: "none",
+                  facadeBands: 29,
                   couples: EASTERN_GATE_PAIR_LABELS.length,
                   targetIndex: easternGateTargetIndex,
                   targetLabel: EASTERN_GATE_PAIR_LABELS[easternGateTargetIndex],
