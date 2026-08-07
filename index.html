@@ -2599,6 +2599,7 @@
         const BGM_VOLUME = 0.24;
         const RITUAL_API_ENDPOINT =
           document.documentElement.dataset.ritualApi?.trim() || "";
+        const RITUAL_SYNC_INTERVAL_MS = 3000;
         const MAX_PHOTO_BYTES = 12 * 1024 * 1024;
         const PHOTO_OUTPUT_SIZE = 512;
         const CYBER_STRIKE_OFFSET_Y = 20;
@@ -3757,12 +3758,17 @@
           }
         }
 
-        async function connectRitualStats(shouldAnnounce = false) {
+        async function connectRitualStats(
+          shouldAnnounce = false,
+          showConnecting = true
+        ) {
           if (!RITUAL_API_ENDPOINT || ritualConnectBusy || ritualSyncBusy) return;
           const previousNetworkState = ritualNetworkState;
           ritualConnectBusy = true;
-          ritualNetworkState = "connecting";
-          renderUi();
+          if (showConnecting) {
+            ritualNetworkState = "connecting";
+            renderUi();
+          }
           try {
             const endpoint = getRitualApiUrl();
             const response = await window.fetch(endpoint, {
@@ -9679,6 +9685,7 @@
             if (sessionManualActionCount > 0) sessionMissAnchor = performance.now();
             startAnimation();
             resetIdleHint();
+            void connectRitualStats(false, false);
             if (soundEnabled && bgmResumeOnVisible) {
               bgmResumeOnVisible = false;
               void startBgm().then((started) => {
@@ -9720,11 +9727,17 @@
         window.addEventListener("online", () => {
           void connectRitualStats(true);
         });
+        window.addEventListener("focus", () => {
+          if (!document.hidden) void connectRitualStats(false, false);
+        });
+        window.addEventListener("pageshow", () => {
+          if (!document.hidden) void connectRitualStats(false, false);
+        });
         window.setInterval(() => {
           if (!document.hidden && RITUAL_API_ENDPOINT) {
-            void connectRitualStats(false);
+            void connectRitualStats(false, false);
           }
-        }, 30000);
+        }, RITUAL_SYNC_INTERVAL_MS);
 
         loadState();
         renderUi();
@@ -9854,6 +9867,7 @@
               ritualNetwork: {
                 endpoint: RITUAL_API_ENDPOINT,
                 state: ritualNetworkState,
+                syncIntervalMs: RITUAL_SYNC_INTERVAL_MS,
                 identity: "hmac-sha256-ip-v1",
                 rawIpStored: false,
                 pendingEvents: pendingRitualEvents.length,
