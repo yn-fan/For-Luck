@@ -11,7 +11,7 @@
     <meta name="color-scheme" content="light" />
     <meta
       name="description"
-      content="佛了 for luck：在八款原创复古漫画仪式主题间切换，跟随节拍敲木鱼、拍古门、捣青团、盘珠、按灯具开关、上香、敲照片或放生。"
+      content="佛了 for luck：在九款原创复古漫画仪式主题间切换，跟随节拍敲木鱼、拍古门、捣青团、盘珠、按灯具开关、上香、敲照片、在东方之门抓亲吻情侣或放生。"
     />
     <title>佛了 for luck · 苏州</title>
     <link rel="icon" href="data:," />
@@ -732,6 +732,10 @@
 
       .stage-action:active {
         transform: scale(var(--pressScale));
+      }
+
+      body[data-woodfish-style="eastern-gate-whack"] .stage-action {
+        cursor: crosshair;
       }
 
       .mode-copy {
@@ -2286,7 +2290,7 @@
     <canvas id="feedbackCanvas" aria-hidden="true"></canvas>
     <p id="idleHint" class="idle-hint" aria-hidden="true" hidden>轻敲</p>
 
-    <main class="screen" data-screen-label="01 佛了 for luck · 八主题仪式" data-active="true">
+    <main class="screen" data-screen-label="01 佛了 for luck · 九主题仪式" data-active="true">
       <header class="topbar">
         <div class="brand">
           <h1>
@@ -2606,11 +2610,15 @@
         const CYBER_MALLET_SHIFT_X = -10;
         const CYBER_MALLET_SHIFT_Y = -10;
         const THEME_ROTATION_QUARTER_BEATS = 16;
-        const THEME_SCHEMA_VERSION = 5;
+        const THEME_SCHEMA_VERSION = 6;
         const INCENSE_STICK_LIMIT = 18;
         const LAKE_INK_REVEAL_DURATION = 1800;
         const LAKE_TITLE_SCALE = 0.25;
         const SPICY_CRAB_SHELL_SCALE = 0.086;
+        const EASTERN_GATE_TARGET_INTERVAL_MS = 2800;
+        const EASTERN_GATE_LASER_DURATION_MS = 620;
+        const EASTERN_GATE_LASER_HOLD_MS = 720;
+        const EASTERN_GATE_PAIR_LABELS = Object.freeze(["左侧", "中间", "右侧"]);
         const PRAYER_BEAD_COUNT = 14;
         const PRAYER_BEAD_LOOP_DURATION_MS = 8000;
         const PRAYER_BEAD_IMPULSE_BY_RANK = Object.freeze({
@@ -2642,6 +2650,7 @@
         const CYBER_BEAD_TIMING = Object.freeze({ label: "助盘", rank: "duet" });
         const CYBER_LIGHT_TIMING = Object.freeze({ label: "稳光", rank: "duet" });
         const CYBER_INCENSE_TIMING = Object.freeze({ label: "添香", rank: "duet" });
+        const CYBER_GATE_TIMING = Object.freeze({ label: "巡逻", rank: "duet" });
         const MERIT_BEAT_PLATE_ROTATION = -0.13;
         const MERIT_BEAT_CORNERS = Object.freeze([
           { x: 0.33, y: -0.42 },
@@ -2657,6 +2666,12 @@
             id: "ancient-door",
             name: "开门啊我知道你在家！",
             nameLines: ["开门啊", "我知道你在家！"],
+            mode: "merit"
+          },
+          {
+            id: "eastern-gate-whack",
+            name: "东方之门打啵",
+            nameLines: ["东方之门", "打啵"],
             mode: "merit"
           },
           { id: "custom-photo", name: "敲张照片", mode: "merit" },
@@ -2687,6 +2702,16 @@
           "ancient-door",
           "custom-photo",
           "light-switch",
+          "release"
+        ]);
+        const THEME_SCHEMA_V5_IDS = Object.freeze([
+          "resonance",
+          "qingtuan-pounding",
+          "prayer-beads",
+          "ancient-door",
+          "custom-photo",
+          "light-switch",
+          "incense-offering",
           "release"
         ]);
         const LEGACY_THEME_IDS = Object.freeze([
@@ -2725,6 +2750,8 @@
           photoTypeUnavailable: "请选择浏览器支持的图片格式",
           photoTooLarge: "照片不能超过 12 MB",
           photoReadFailed: "照片读取失败，请换一张再试",
+          easternGateActionLabel:
+            "发射东方之门电光，击中当前正在亲吻的情侣，积攒一份功德",
           autoStoppedOnSwitch: "已切换模式，协作或自动操作已关闭",
           modeMerit: "已切换到木鱼模式",
           modeRelease: "已切换到放生模式",
@@ -2889,6 +2916,7 @@
         const meritPanel = document.getElementById("meritPanel");
         const releasePanel = document.getElementById("releasePanel");
         const meritAction = document.getElementById("meritAction");
+        const meritSrLabel = meritAction.querySelector(".visually-hidden");
         const meritHcLabel = meritAction.querySelector(".hc-label");
         const releaseAction = document.getElementById("releaseAction");
         const woodfishPicker = document.getElementById("woodfishPicker");
@@ -3009,6 +3037,16 @@
         let lightSwitchOn = true;
         let incenseSticks = [];
         let incenseStickSerial = 0;
+        let easternGateTargetIndex = 1;
+        let easternGateTargetSince = performance.now();
+        let easternGateNextTargetAt = 0;
+        let easternGateLaserStarted = Number.NEGATIVE_INFINITY;
+        let easternGateLaserIndex = -1;
+        let easternGateLaserFromCyber = false;
+        let easternGatePairHitRegions = [];
+        let easternGateHitCount = 0;
+        let easternGateMissCount = 0;
+        let easternGateExpiredTargetCount = 0;
         let autoActive = false;
         let autoTimer = 0;
         let ritualNetworkState = RITUAL_API_ENDPOINT ? "connecting" : "unavailable";
@@ -3024,6 +3062,7 @@
           bead: 0,
           lightSwitch: 0,
           incense: 0,
+          gateLaser: 0,
           water: 0,
           fortuneAuspicious: 0,
           fortuneInauspicious: 0,
@@ -3182,6 +3221,10 @@
           lightSwitchOn = true;
           incenseSticks = [];
           incenseStickSerial = 0;
+          chooseEasternGateTarget(performance.now());
+          easternGateHitCount = 0;
+          easternGateMissCount = 0;
+          easternGateExpiredTargetCount = 0;
           qingtuanSplashes = [];
         }
 
@@ -3316,7 +3359,9 @@
           focusBeforeFortune = null;
           focusTarget.focus();
           const nextAction = mode === "merit"
-            ? isPrayerBeadsStyle()
+            ? isEasternGateStyle()
+              ? "抓亲吻情侣"
+              : isPrayerBeadsStyle()
               ? "转珠"
               : isLightSwitchStyle()
                 ? "按开关"
@@ -3344,7 +3389,12 @@
             return;
           }
           const hint = mode === "merit"
-            ? isPrayerBeadsStyle()
+            ? isEasternGateStyle()
+              ? {
+                  visual: "抓啵",
+                  announcement: "点中三对情侣里正在亲吻的一对；按空格可自动锁定当前目标"
+                }
+              : isPrayerBeadsStyle()
               ? {
                   visual: "轻转",
                   announcement: "轻触或上下滑动，跟随收拢节拍让佛珠循环转动"
@@ -3452,7 +3502,12 @@
           return WOODFISH_STYLES[index]?.id === "qingtuan-pounding";
         }
 
+        function isEasternGateStyle(index = woodfishStyleIndex) {
+          return WOODFISH_STYLES[index]?.id === "eastern-gate-whack";
+        }
+
         function meritActionCueLabel() {
+          if (isEasternGateStyle()) return "抓";
           if (isPrayerBeadsStyle()) return "转";
           if (isLightSwitchStyle()) return "按";
           if (isIncenseOfferingStyle()) return "香";
@@ -3460,6 +3515,7 @@
         }
 
         function meritCyberCueLabel() {
+          if (isEasternGateStyle()) return "巡";
           if (isPrayerBeadsStyle()) return "助";
           if (isLightSwitchStyle()) return "稳";
           if (isIncenseOfferingStyle()) return "添";
@@ -3491,6 +3547,11 @@
           if (saved.themeSchemaVersion === 4) {
             return THEME_SCHEMA_V4_IDS[
               positiveModulo(savedStyleIndex, THEME_SCHEMA_V4_IDS.length)
+            ];
+          }
+          if (saved.themeSchemaVersion === 5) {
+            return THEME_SCHEMA_V5_IDS[
+              positiveModulo(savedStyleIndex, THEME_SCHEMA_V5_IDS.length)
             ];
           }
           if (saved.themeSchemaVersion === THEME_SCHEMA_VERSION) {
@@ -3848,6 +3909,12 @@
               : -1;
           woodfishStyleIndex = normalizedIndex;
           if (isLightSwitchStyle()) lightSwitchOn = true;
+          if (isEasternGateStyle()) {
+            easternGatePairHitRegions = [];
+            chooseEasternGateTarget(performance.now());
+          } else {
+            easternGatePairHitRegions = [];
+          }
           if (isIncenseOfferingStyle() && sessionActionCount === 0) {
             incenseSticks = [];
             incenseStickSerial = 0;
@@ -3954,6 +4021,7 @@
           const prayerBeadsSelected = isPrayerBeadsStyle();
           const lightSwitchSelected = isLightSwitchStyle();
           const incenseOfferingSelected = isIncenseOfferingStyle();
+          const easternGateSelected = isEasternGateStyle();
           if (selectedWoodfishStyle.nameLines) {
             woodfishStyleName.replaceChildren(
               ...selectedWoodfishStyle.nameLines.map((line) => {
@@ -3972,15 +4040,19 @@
           woodfishStyleHelp.textContent =
             `当前主题：${WOODFISH_STYLES[woodfishStyleIndex].name}。游戏开始前可左右滑动屏幕，或使用主题左右按钮切换`;
 
-          const autoLabelText = prayerBeadsSelected
-            ? "赛博助盘"
+          const autoLabelText = easternGateSelected
+            ? "赛博巡逻"
+            : prayerBeadsSelected
+              ? "赛博助盘"
             : lightSwitchSelected
               ? "赛博稳光"
               : incenseOfferingSelected
                 ? "赛博添香"
                 : config.autoLabel;
-          const autoDescriptionText = prayerBeadsSelected
-            ? "开启后你在正拍转珠，赛博助力在反拍加速"
+          const autoDescriptionText = easternGateSelected
+            ? "开启后赛博巡逻在反拍自动锁定正在亲吻的一对"
+            : prayerBeadsSelected
+              ? "开启后你在正拍转珠，赛博助力在反拍加速"
             : lightSwitchSelected
               ? "开启后你在正拍切换明暗，赛博助力在反拍稳光"
               : incenseOfferingSelected
@@ -3991,23 +4063,26 @@
           autoToggle.title = autoDescriptionText;
           autoToggle.setAttribute("aria-pressed", String(autoActive));
           soundToggle.setAttribute("aria-pressed", String(soundEnabled));
-          meritAction.setAttribute(
-            "aria-label",
-            prayerBeadsSelected
+          const meritActionLabel = easternGateSelected
+            ? STRINGS.easternGateActionLabel
+            : prayerBeadsSelected
               ? "转动佛珠，积攒一份功德"
               : lightSwitchSelected
                 ? `按动灯具开关，切换为${lightSwitchOn ? "暗" : "亮"}并积攒一份功德`
                 : incenseOfferingSelected
                   ? `敬上一柱香，香炉中已有 ${incenseSticks.length} 柱香`
-                  : "敲击木鱼，积攒一份功德"
-          );
+                  : "敲击木鱼，积攒一份功德";
+          meritAction.setAttribute("aria-label", meritActionLabel);
+          meritSrLabel.textContent = meritActionLabel;
           if (lightSwitchSelected) {
             meritAction.setAttribute("aria-pressed", String(lightSwitchOn));
           } else {
             meritAction.removeAttribute("aria-pressed");
           }
-          meritHcLabel.textContent = prayerBeadsSelected
-            ? "转动佛珠"
+          meritHcLabel.textContent = easternGateSelected
+            ? "点中亲吻情侣"
+            : prayerBeadsSelected
+              ? "转动佛珠"
             : lightSwitchSelected
               ? `按动开关 · 当前灯${lightSwitchOn ? "亮" : "暗"}`
               : incenseOfferingSelected
@@ -4293,6 +4368,62 @@
             chime.start(now + index * 0.018);
             chime.stop(now + 0.3);
           }
+        }
+
+        async function playEasternGateLaserSound(timing, fromCyber = false) {
+          const audio = await ensureAudio();
+          if (!audio) return;
+          audioEventCounts.gateLaser += 1;
+          const now = audio.currentTime;
+          const output = audio.createGain();
+          const rankBoost = timing?.rank === "perfect" ? 1.08 : timing?.rank === "cool" ? 1.03 : 1;
+          output.gain.setValueAtTime(0.0001, now);
+          output.gain.exponentialRampToValueAtTime(fromCyber ? 0.26 : 0.32, now + 0.008);
+          output.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+          output.connect(audio.destination);
+
+          [0, 0.045].forEach((offset, index) => {
+            const oscillator = audio.createOscillator();
+            const filter = audio.createBiquadFilter();
+            const gain = audio.createGain();
+            oscillator.type = index === 0 ? "sawtooth" : "square";
+            oscillator.frequency.setValueAtTime(
+              (fromCyber ? 1280 : 1160) * rankBoost,
+              now + offset
+            );
+            oscillator.frequency.exponentialRampToValueAtTime(
+              index === 0 ? 170 : 230,
+              now + offset + 0.16
+            );
+            filter.type = "bandpass";
+            filter.frequency.setValueAtTime(index === 0 ? 1380 : 1860, now + offset);
+            filter.Q.value = 2.2;
+            gain.gain.setValueAtTime(0.0001, now + offset);
+            gain.gain.exponentialRampToValueAtTime(
+              index === 0 ? 0.72 : 0.46,
+              now + offset + 0.009
+            );
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.18);
+            oscillator.connect(filter);
+            filter.connect(gain);
+            gain.connect(output);
+            oscillator.start(now + offset);
+            oscillator.stop(now + offset + 0.2);
+          });
+
+          const crackle = audio.createBufferSource();
+          const crackleFilter = audio.createBiquadFilter();
+          const crackleGain = audio.createGain();
+          crackle.buffer = noiseBuffer;
+          crackleFilter.type = "highpass";
+          crackleFilter.frequency.value = 2100;
+          crackleGain.gain.setValueAtTime(0.48, now);
+          crackleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+          crackle.connect(crackleFilter);
+          crackleFilter.connect(crackleGain);
+          crackleGain.connect(output);
+          crackle.start(now);
+          crackle.stop(now + 0.13);
         }
 
         async function playWaterSound() {
@@ -4741,7 +4872,205 @@
           );
         }
 
-        function strikeMerit(fromAuto = false, countIn = false, timingOverride = null) {
+        function chooseEasternGateTarget(time = performance.now(), preferredIndex = null) {
+          const previousIndex = easternGateTargetIndex;
+          if (
+            Number.isInteger(preferredIndex) &&
+            preferredIndex >= 0 &&
+            preferredIndex < EASTERN_GATE_PAIR_LABELS.length
+          ) {
+            easternGateTargetIndex = preferredIndex;
+          } else {
+            const step = Math.random() < 0.5 ? 1 : 2;
+            easternGateTargetIndex = positiveModulo(
+              previousIndex + step,
+              EASTERN_GATE_PAIR_LABELS.length
+            );
+          }
+          easternGateTargetSince = time;
+          easternGateNextTargetAt = 0;
+          easternGateLaserStarted = Number.NEGATIVE_INFINITY;
+          easternGateLaserIndex = -1;
+          easternGateLaserFromCyber = false;
+        }
+
+        function updateEasternGateTarget(time = performance.now()) {
+          if (!isEasternGateStyle()) return;
+          if (easternGateNextTargetAt > 0) {
+            if (time >= easternGateNextTargetAt) chooseEasternGateTarget(time);
+            return;
+          }
+          if (time - easternGateTargetSince >= EASTERN_GATE_TARGET_INTERVAL_MS) {
+            easternGateExpiredTargetCount += 1;
+            chooseEasternGateTarget(time);
+          }
+        }
+
+        function easternGatePairRegionsForGeometry(geometry) {
+          const { x, y, size } = geometry;
+          return [-0.25, 0, 0.25].map((offset, index) => ({
+            index,
+            x: x + size * (offset - 0.105),
+            y: y + size * 0.12,
+            width: size * 0.21,
+            height: size * 0.3
+          }));
+        }
+
+        function easternGatePairIndexAtPoint(actionPoint) {
+          if (!actionPoint) return easternGateTargetIndex;
+          const regions = easternGatePairHitRegions.length
+            ? easternGatePairHitRegions
+            : easternGatePairRegionsForGeometry(stageGeometry());
+          const hit = regions.find(
+            (region) =>
+              actionPoint.x >= region.x &&
+              actionPoint.x <= region.x + region.width &&
+              actionPoint.y >= region.y &&
+              actionPoint.y <= region.y + region.height
+          );
+          return hit?.index ?? -1;
+        }
+
+        function easternGateReactionTiming(actionTime) {
+          const elapsed = Math.max(0, actionTime - easternGateTargetSince);
+          if (elapsed <= 720) return { label: "PERFECT", rank: "perfect" };
+          if (elapsed <= 1480) return { label: "COOL", rank: "cool" };
+          return { label: "GOOD", rank: "good" };
+        }
+
+        function strikeEasternGate(
+          actionPoint = null,
+          fromCyber = false,
+          countIn = false,
+          timingOverride = null
+        ) {
+          if (fortuneOpen || fortunePending) return false;
+          const actionTime = performance.now();
+          updateEasternGateTarget(actionTime);
+          if (easternGateNextTargetAt > 0 && actionTime < easternGateNextTargetAt) {
+            return false;
+          }
+          const hitIndex = fromCyber
+            ? easternGateTargetIndex
+            : easternGatePairIndexAtPoint(actionPoint);
+
+          if (hitIndex !== easternGateTargetIndex) {
+            easternGateMissCount += 1;
+            comboCount = 0;
+            perfectStreak = 0;
+            lastTimingGrade = "MISS";
+            lastActionWasCountIn = false;
+            resetIdleHint();
+            const geometry = stageGeometry();
+            const missPoint = actionPoint || {
+              x: geometry.x,
+              y: geometry.y + geometry.size * 0.28
+            };
+            addRipple(
+              missPoint.x,
+              missPoint.y,
+              geometry.size * 0.02,
+              geometry.size * 0.12,
+              colors.ink,
+              460,
+              0.7
+            );
+            addBurst(
+              { label: "MISS", rank: "miss" },
+              "点错了",
+              "找到正在亲吻的一对",
+              geometry,
+              "merit"
+            );
+            renderUi();
+            announce("点错了。找到三对情侣里正在亲吻的一对。");
+            if (navigator.vibrate) navigator.vibrate(18);
+            return false;
+          }
+
+          const timing = fromCyber
+            ? CYBER_GATE_TIMING
+            : countIn
+              ? START_TIMING
+              : timingOverride || easternGateReactionTiming(actionTime);
+          registerSessionAction(actionTime, fromCyber);
+          resetIdleHint();
+          triggerUiHit(timing);
+          const feverTriggered = !fromCyber && !countIn ? updateCombo(timing) : false;
+          lastTimingGrade = timing.label;
+          lastActionWasCountIn = countIn;
+          meritTotal += 1;
+          sessionMeritCount += 1;
+          if (fromCyber) sessionCyberCount += 1;
+          enqueueRitualAction("merit");
+
+          easternGateHitCount += 1;
+          easternGateLaserStarted = actionTime;
+          easternGateLaserIndex = easternGateTargetIndex;
+          easternGateLaserFromCyber = fromCyber;
+          easternGateNextTargetAt = actionTime + EASTERN_GATE_LASER_HOLD_MS;
+          woodStrikeStarted = actionTime;
+          woodStrikeFromAuto = fromCyber;
+          strikeEmojiParticles = [];
+
+          const geometry = stageGeometry();
+          const regions = easternGatePairHitRegions.length
+            ? easternGatePairHitRegions
+            : easternGatePairRegionsForGeometry(geometry);
+          const hitRegion = regions[easternGateTargetIndex];
+          const impactX = hitRegion.x + hitRegion.width * 0.5;
+          const impactY = hitRegion.y + hitRegion.height * 0.42;
+          strikeEmojiAnchor = {
+            x: impactX,
+            y: impactY,
+            strikeStarted: actionTime,
+            fromCyber
+          };
+          addRipple(
+            impactX,
+            impactY,
+            geometry.size * 0.04,
+            geometry.size * 0.32,
+            fromCyber ? colors.cyberCyan : colors.purple,
+            640,
+            0.78
+          );
+          addBurst(
+            timing,
+            "功德 +1",
+            fromCyber ? "赛博巡逻锁定" : `${EASTERN_GATE_PAIR_LABELS[hitIndex]}命中`,
+            geometry,
+            "merit"
+          );
+          renderUi();
+          saveState();
+          playEasternGateLaserSound(timing, fromCyber);
+
+          if (!fromCyber) {
+            announce(
+              countIn
+                ? `START，锁定亲吻情侣，功德加一，我已积攒的功德 ${formatter.format(meritTotal)}`
+                : feverTriggered
+                  ? "连续 3 次 PERFECT，赛博巡逻开始，东方之门将在反拍自动锁定目标，持续 10 秒"
+                  : `${timing.label}，锁定亲吻情侣，功德加一${comboCount > 1 ? `，连续 ${comboCount} 次` : ""}，我已积攒的功德 ${formatter.format(meritTotal)}`
+            );
+            if (navigator.vibrate) {
+              navigator.vibrate(timing.rank === "perfect" ? [12, 18, 22] : [12, 22]);
+            }
+          }
+          return true;
+        }
+
+        function strikeMerit(
+          fromAuto = false,
+          countIn = false,
+          timingOverride = null,
+          actionPoint = null
+        ) {
+          if (isEasternGateStyle()) {
+            return strikeEasternGate(actionPoint, fromAuto, countIn, timingOverride);
+          }
           if (fortuneOpen || fortunePending) return;
           const actionTime = performance.now();
           const timing = timingOverride
@@ -4835,6 +5164,10 @@
 
         function strikeCyberDuet() {
           if (mode !== "merit" || fortuneOpen || fortunePending) return;
+          if (isEasternGateStyle()) {
+            strikeEasternGate(null, true, false, CYBER_GATE_TIMING);
+            return;
+          }
           const actionTime = performance.now();
           const geometry = stageGeometry();
           window.clearTimeout(fortuneTimer);
@@ -4953,31 +5286,32 @@
           }
         }
 
-        function performCurrentAction(fromAuto = false, countIn = false) {
+        function performCurrentAction(fromAuto = false, countIn = false, actionPoint = null) {
           if (fortuneOpen || fortunePending) return;
           if (fromAuto && !isBgmPlaying()) {
             rhythmBeatIndex = (rhythmBeatIndex + 1) % 4;
             rhythmEpoch = performance.now();
           }
-          if (mode === "merit") strikeMerit(fromAuto, countIn);
+          if (mode === "merit") strikeMerit(fromAuto, countIn, null, actionPoint);
           else releaseFish(fromAuto, countIn);
         }
 
-        function performUserAction() {
+        function performUserAction(actionPoint = null) {
           if (mode === "merit" && isCustomPhotoStyle() && !customPhotoImage) {
             woodfishPhotoInput.click();
             announce("请先上传一张照片，再开始敲击");
             return;
           }
           const actionTime = performance.now();
-          const countIn = sessionManualActionCount === 0 && !isBgmPlaying();
+          const countIn = sessionManualActionCount === 0
+            && (!isBgmPlaying() || isEasternGateStyle());
           const expectedManualActions = sessionManualActionCount + 1;
           if (countIn) {
             rhythmBeatIndex = 0;
             rhythmEpoch = actionTime;
           }
           const bgmReady = startBgm();
-          performCurrentAction(false, countIn);
+          performCurrentAction(false, countIn, actionPoint);
           if (!countIn) {
             if (isMeritDuetActive() && !autoTimer) scheduleAuto();
             return;
@@ -5004,7 +5338,9 @@
           if (shouldAnnounce) {
             announce(
               mode === "merit"
-                ? isPrayerBeadsStyle()
+                ? isEasternGateStyle()
+                  ? "赛博巡逻已关闭"
+                  : isPrayerBeadsStyle()
                   ? "赛博助盘已关闭"
                   : isLightSwitchStyle()
                     ? "赛博稳光已关闭"
@@ -5065,8 +5401,10 @@
           if (mode === "merit") {
             if (sessionManualActionCount > 0 || isBgmPlaying()) scheduleAuto();
             announce(
-              isPrayerBeadsStyle()
-                ? "赛博助盘已就位：你在正拍转珠，赛博助力在反拍加速"
+              isEasternGateStyle()
+                ? "赛博巡逻已就位：你点中正在亲吻的一对，赛博巡逻在反拍自动锁定目标"
+                : isPrayerBeadsStyle()
+                  ? "赛博助盘已就位：你在正拍转珠，赛博助力在反拍加速"
                 : isLightSwitchStyle()
                   ? "赛博稳光已就位：你在正拍切换明暗，赛博助力在反拍稳光"
                   : isIncenseOfferingStyle()
@@ -5560,6 +5898,48 @@
               );
               context.stroke();
             }
+          } else if (styleId === "eastern-gate-whack") {
+            context.globalAlpha = alpha * 0.84;
+            context.fillStyle = colors.lakeLight;
+            context.fillRect(0, 0, canvasWidth, canvasHeight);
+            context.globalAlpha = alpha * 0.2;
+            context.fillStyle = colors.steelLight;
+            context.fillRect(0, canvasHeight * 0.55, canvasWidth, canvasHeight * 0.45);
+
+            context.globalAlpha = alpha * 0.16;
+            context.fillStyle = colors.ink;
+            for (let index = 0; index < 11; index += 1) {
+              const buildingWidth = minSide * (0.035 + (index % 3) * 0.011);
+              const buildingHeight = minSide * (0.07 + (index % 4) * 0.025);
+              const buildingX = canvasWidth * (index / 10) - buildingWidth * 0.5;
+              context.fillRect(
+                buildingX,
+                canvasHeight * 0.56 - buildingHeight,
+                buildingWidth,
+                buildingHeight
+              );
+            }
+
+            context.globalAlpha = alpha * 0.2;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(1, minSide * 0.003);
+            for (let index = -4; index <= 4; index += 1) {
+              context.beginPath();
+              context.moveTo(canvasWidth * 0.5, canvasHeight * 0.58);
+              context.lineTo(
+                canvasWidth * (0.5 + index * 0.16),
+                canvasHeight
+              );
+              context.stroke();
+            }
+            for (let row = 0; row < 5; row += 1) {
+              const progress = row / 5;
+              const lineY = canvasHeight * (0.64 + progress * progress * 0.31);
+              context.beginPath();
+              context.moveTo(0, lineY);
+              context.lineTo(canvasWidth, lineY);
+              context.stroke();
+            }
           } else {
             context.globalAlpha = alpha * 0.86;
             context.fillStyle = colors.lakeLight;
@@ -5694,6 +6074,7 @@
         }
 
         function drawQuarterBeatCues(time, geometry) {
+          if (isEasternGateStyle()) return;
           const quarterIndex = getQuarterBeatIndex(time);
           const currentBeat = positiveModulo(quarterIndex, 4);
           const nextBeat = (currentBeat + 1) % 4;
@@ -7842,6 +8223,424 @@
           context.restore();
         }
 
+        function drawEasternGateHeart(centerX, centerY, size, alpha = 1) {
+          context.save();
+          context.translate(centerX, centerY);
+          context.scale(size, size);
+          context.globalAlpha = alpha;
+          context.fillStyle = colors.pink;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = 0.12;
+          context.beginPath();
+          context.moveTo(0, 0.42);
+          context.bezierCurveTo(-0.92, -0.08, -0.52, -0.88, 0, -0.38);
+          context.bezierCurveTo(0.52, -0.88, 0.92, -0.08, 0, 0.42);
+          context.closePath();
+          context.fill();
+          context.stroke();
+          context.restore();
+        }
+
+        function drawEasternGateWhack(
+          x,
+          y,
+          size,
+          time,
+          beatKick,
+          styleOnly = false
+        ) {
+          if (!styleOnly) updateEasternGateTarget(time);
+          const regions = easternGatePairRegionsForGeometry({ x, y, size });
+          if (!styleOnly) easternGatePairHitRegions = regions;
+          const laserElapsed = time - easternGateLaserStarted;
+          const laserActive = easternGateLaserIndex >= 0
+            && laserElapsed >= 0
+            && laserElapsed <= EASTERN_GATE_LASER_DURATION_MS;
+          const laserProgress = laserActive
+            ? Math.min(1, laserElapsed / EASTERN_GATE_LASER_DURATION_MS)
+            : 1;
+          const targetAvailable = easternGateNextTargetAt === 0;
+          const buildingTop = y - size * 0.43;
+          const buildingBottom = y + size * 0.12;
+          const groundY = y + size * 0.39;
+
+          context.save();
+          context.lineJoin = "round";
+          context.lineCap = "round";
+
+          context.fillStyle = colors.steelMid;
+          context.globalAlpha = 0.24;
+          context.beginPath();
+          context.ellipse(x, groundY, size * 0.46, size * 0.055, 0, 0, Math.PI * 2);
+          context.fill();
+          context.globalAlpha = 1;
+
+          const drawTower = (side) => {
+            const outerTopX = x + side * size * 0.31;
+            const innerTopX = x + side * size * 0.075;
+            const innerBottomX = x + side * size * 0.12;
+            const outerBottomX = x + side * size * 0.36;
+            const towerGradient = context.createLinearGradient(
+              x + side * size * 0.36,
+              buildingTop,
+              x + side * size * 0.06,
+              buildingBottom
+            );
+            towerGradient.addColorStop(0, colors.steelDark);
+            towerGradient.addColorStop(0.42, colors.steelLight);
+            towerGradient.addColorStop(0.72, colors.lakeLight);
+            towerGradient.addColorStop(1, colors.steelMid);
+
+            context.beginPath();
+            context.moveTo(outerTopX, buildingTop + size * 0.018);
+            context.lineTo(innerTopX, buildingTop);
+            context.bezierCurveTo(
+              x + side * size * 0.058,
+              y - size * 0.27,
+              x + side * size * 0.072,
+              y - size * 0.04,
+              innerBottomX,
+              buildingBottom
+            );
+            context.lineTo(outerBottomX, buildingBottom);
+            context.closePath();
+            context.fillStyle = towerGradient;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(3, size * 0.011);
+            context.fill();
+            context.stroke();
+
+            context.save();
+            context.clip();
+            context.strokeStyle = colors.inkSoft;
+            context.globalAlpha = 0.42;
+            context.lineWidth = Math.max(1, size * 0.0032);
+            for (let row = 0; row < 18; row += 1) {
+              const rowProgress = row / 17;
+              const rowY = buildingTop + size * (0.035 + rowProgress * 0.515);
+              context.beginPath();
+              context.moveTo(
+                x + side * size * (0.305 + rowProgress * 0.045),
+                rowY
+              );
+              context.lineTo(
+                x + side * size * (0.075 + rowProgress * 0.045),
+                rowY
+              );
+              context.stroke();
+            }
+            for (let column = 1; column < 5; column += 1) {
+              const columnProgress = column / 5;
+              context.beginPath();
+              context.moveTo(
+                outerTopX + (innerTopX - outerTopX) * columnProgress,
+                buildingTop + size * 0.014
+              );
+              context.lineTo(
+                outerBottomX + (innerBottomX - outerBottomX) * columnProgress,
+                buildingBottom
+              );
+              context.stroke();
+            }
+            context.restore();
+
+            context.strokeStyle = colors.washiLight;
+            context.globalAlpha = 0.66;
+            context.lineWidth = Math.max(2, size * 0.006);
+            context.beginPath();
+            context.moveTo(x + side * size * 0.285, buildingTop + size * 0.035);
+            context.lineTo(x + side * size * 0.327, buildingBottom - size * 0.025);
+            context.stroke();
+            context.globalAlpha = 1;
+
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(4, size * 0.014);
+            context.beginPath();
+            context.moveTo(innerTopX, buildingTop);
+            context.bezierCurveTo(
+              x + side * size * 0.058,
+              y - size * 0.27,
+              x + side * size * 0.072,
+              y - size * 0.04,
+              innerBottomX,
+              buildingBottom
+            );
+            context.stroke();
+          };
+
+          drawTower(-1);
+          drawTower(1);
+
+          const bridgeGradient = context.createLinearGradient(
+            x,
+            buildingTop,
+            x,
+            buildingTop + size * 0.12
+          );
+          bridgeGradient.addColorStop(0, colors.steelLight);
+          bridgeGradient.addColorStop(1, colors.steelDark);
+          context.fillStyle = bridgeGradient;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(3, size * 0.011);
+          context.beginPath();
+          context.moveTo(x - size * 0.31, buildingTop + size * 0.018);
+          context.lineTo(x + size * 0.31, buildingTop + size * 0.018);
+          context.lineTo(x + size * 0.29, buildingTop + size * 0.102);
+          context.lineTo(x - size * 0.29, buildingTop + size * 0.102);
+          context.closePath();
+          context.fill();
+          context.stroke();
+
+          context.fillStyle = colors.ink;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.font = `900 ${Math.max(10, size * 0.036)}px ${cssValue("--fontFamilyBase")}`;
+          context.fillText("东方之门", x, buildingTop + size * 0.06);
+
+          context.fillStyle = colors.steelDark;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(3, size * 0.01);
+          context.beginPath();
+          context.moveTo(x - size * 0.39, buildingBottom);
+          context.lineTo(x + size * 0.39, buildingBottom);
+          context.lineTo(x + size * 0.35, buildingBottom + size * 0.055);
+          context.lineTo(x - size * 0.35, buildingBottom + size * 0.055);
+          context.closePath();
+          context.fill();
+          context.stroke();
+
+          const pairColors = [
+            [colors.rust, colors.washiDeep],
+            [colors.purple, colors.lakeLight],
+            [colors.moss, colors.orange]
+          ];
+
+          const drawPerson = ({
+            personX,
+            baseY,
+            side,
+            kissing,
+            shocked,
+            coatColor,
+            partnerColor,
+            pairIndex
+          }) => {
+            const shake = shocked && !reducedMotion
+              ? Math.sin(time * 0.085 + pairIndex * 2.2 + side) * size * 0.006 * (1 - laserProgress)
+              : 0;
+            const bounce = shocked && !reducedMotion
+              ? Math.sin(Math.min(1, laserProgress) * Math.PI) * size * 0.055
+              : 0;
+            const lean = kissing ? -side * 0.17 : shocked ? side * 0.14 : 0;
+            const headRadius = size * 0.023;
+            context.save();
+            context.translate(personX + shake, baseY - bounce);
+            context.rotate(lean);
+
+            context.fillStyle = coatColor;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(2, size * 0.006);
+            context.beginPath();
+            context.moveTo(-size * 0.034, -size * 0.092);
+            context.quadraticCurveTo(0, -size * 0.118, size * 0.034, -size * 0.092);
+            context.lineTo(size * 0.048, 0);
+            context.lineTo(-size * 0.048, 0);
+            context.closePath();
+            context.fill();
+            context.stroke();
+
+            context.strokeStyle = partnerColor;
+            context.lineWidth = Math.max(2, size * 0.009);
+            context.beginPath();
+            context.moveTo(side * -size * 0.012, -size * 0.074);
+            context.lineTo(side * -size * 0.052, -size * (kissing ? 0.098 : 0.064));
+            context.stroke();
+
+            context.fillStyle = colors.washiDeep;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(2, size * 0.0055);
+            context.beginPath();
+            context.arc(0, -size * 0.125, headRadius, 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
+
+            context.fillStyle = colors.ink;
+            context.beginPath();
+            context.arc(
+              -side * headRadius * 0.14,
+              -size * 0.132,
+              headRadius * 0.92,
+              Math.PI,
+              Math.PI * 2
+            );
+            context.fill();
+
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(1.2, size * 0.0032);
+            context.beginPath();
+            context.moveTo(-size * 0.018, 0);
+            context.lineTo(-size * 0.025, size * 0.038);
+            context.moveTo(size * 0.018, 0);
+            context.lineTo(size * 0.025, size * 0.038);
+            context.stroke();
+            context.restore();
+          };
+
+          regions.forEach((region, pairIndex) => {
+            const pairCenterX = region.x + region.width * 0.5;
+            const pairBaseY = y + size * 0.36;
+            const shocked = laserActive && easternGateLaserIndex === pairIndex;
+            const kissing = targetAvailable
+              && easternGateTargetIndex === pairIndex
+              && !shocked;
+            const shockSpread = shocked && !reducedMotion
+              ? Math.sin(Math.min(1, laserProgress) * Math.PI * 0.92) * size * 0.07
+              : shocked
+                ? size * 0.055
+                : 0;
+            const separation = size * (kissing ? 0.024 : 0.053) + shockSpread;
+
+            context.fillStyle = kissing ? colors.pink : colors.washiLight;
+            context.strokeStyle = colors.ink;
+            context.globalAlpha = kissing ? 0.28 + beatKick * 0.18 : 0.16;
+            context.lineWidth = Math.max(1.5, size * 0.004);
+            context.beginPath();
+            context.ellipse(
+              pairCenterX,
+              pairBaseY + size * 0.035,
+              size * 0.095,
+              size * 0.026,
+              0,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.stroke();
+            context.globalAlpha = 1;
+
+            drawPerson({
+              personX: pairCenterX - separation,
+              baseY: pairBaseY,
+              side: -1,
+              kissing,
+              shocked,
+              coatColor: pairColors[pairIndex][0],
+              partnerColor: pairColors[pairIndex][1],
+              pairIndex
+            });
+            drawPerson({
+              personX: pairCenterX + separation,
+              baseY: pairBaseY,
+              side: 1,
+              kissing,
+              shocked,
+              coatColor: pairColors[pairIndex][1],
+              partnerColor: pairColors[pairIndex][0],
+              pairIndex
+            });
+
+            if (kissing) {
+              const pulse = reducedMotion
+                ? 1
+                : 1 + Math.sin(time * 0.009) * 0.1 + beatKick * 0.08;
+              context.save();
+              context.strokeStyle = colors.pink;
+              context.globalAlpha = 0.52;
+              context.lineWidth = Math.max(2, size * 0.006);
+              context.setLineDash([size * 0.012, size * 0.012]);
+              context.beginPath();
+              context.arc(
+                pairCenterX,
+                y + size * 0.235,
+                size * (0.078 + beatKick * 0.015),
+                0,
+                Math.PI * 2
+              );
+              context.stroke();
+              context.setLineDash([]);
+              drawEasternGateHeart(
+                pairCenterX,
+                y + size * 0.172,
+                size * 0.034 * pulse,
+                0.94
+              );
+              context.restore();
+            }
+          });
+
+          if (laserActive) {
+            const targetRegion = regions[easternGateLaserIndex];
+            const targetX = targetRegion.x + targetRegion.width * 0.5;
+            const targetY = y + size * 0.225;
+            const beamAlpha = reducedMotion
+              ? 0.82
+              : Math.max(0.18, 1 - laserProgress * 0.72);
+            const drawBeam = (startX, startY, endX, endY, phase) => {
+              const points = [];
+              for (let segment = 0; segment <= 8; segment += 1) {
+                const progress = segment / 8;
+                const jitter = reducedMotion || segment === 0 || segment === 8
+                  ? 0
+                  : Math.sin(segment * 2.7 + phase + time * 0.055) * size * 0.018;
+                points.push({
+                  x: startX + (endX - startX) * progress + jitter,
+                  y: startY + (endY - startY) * progress
+                });
+              }
+              context.globalAlpha = beamAlpha * 0.36;
+              context.strokeStyle = easternGateLaserFromCyber ? colors.cyberCyan : colors.purple;
+              context.lineWidth = Math.max(9, size * 0.026);
+              context.shadowColor = easternGateLaserFromCyber ? colors.cyberCyan : colors.pink;
+              context.shadowBlur = reducedMotion ? 0 : size * 0.045;
+              context.beginPath();
+              context.moveTo(points[0].x, points[0].y);
+              points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
+              context.stroke();
+              context.globalAlpha = beamAlpha;
+              context.strokeStyle = colors.washiLight;
+              context.lineWidth = Math.max(2.5, size * 0.008);
+              context.beginPath();
+              context.moveTo(points[0].x, points[0].y);
+              points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
+              context.stroke();
+              context.shadowBlur = 0;
+            };
+
+            drawBeam(
+              x - size * 0.075,
+              y - size * 0.19,
+              targetX - size * 0.018,
+              targetY,
+              0.4
+            );
+            drawBeam(
+              x + size * 0.075,
+              y - size * 0.19,
+              targetX + size * 0.018,
+              targetY,
+              2.1
+            );
+
+            context.globalAlpha = beamAlpha;
+            context.strokeStyle = easternGateLaserFromCyber ? colors.cyberCyan : colors.purple;
+            context.lineWidth = Math.max(2, size * 0.006);
+            for (let ring = 0; ring < 3; ring += 1) {
+              context.beginPath();
+              context.arc(
+                targetX,
+                targetY,
+                size * (0.045 + ring * 0.025 + laserProgress * 0.025),
+                0,
+                Math.PI * 2
+              );
+              context.stroke();
+            }
+            context.globalAlpha = 1;
+          }
+
+          context.restore();
+        }
+
         function drawWoodfish(
           x,
           y,
@@ -7854,6 +8653,7 @@
           const prayerBeadsStyle = forcedStyleId === "prayer-beads";
           const lightSwitchStyle = forcedStyleId === "light-switch";
           const incenseOfferingStyle = forcedStyleId === "incense-offering";
+          const easternGateStyle = forcedStyleId === "eastern-gate-whack";
           const elapsed = (time - woodStrikeStarted) / 1000;
           const duration = reducedMotion ? 0.001 : WOOD_STRIKE_DURATION;
           const progress = Math.min(1, Math.max(0, elapsed / duration));
@@ -7883,6 +8683,7 @@
           const showCyberMallet = !prayerBeadsStyle
             && !lightSwitchStyle
             && !incenseOfferingStyle
+            && !easternGateStyle
             && (
             isMeritDuetActive(time)
             || (woodStrikeFromAuto && elapsed <= duration + 0.18)
@@ -7897,7 +8698,7 @@
           const strikePointY = woodStrikeFromAuto ? cyberStrikePointY : woodStrikePointY;
 
           if (!styleOnly) {
-            if (!lightSwitchStyle) {
+            if (!lightSwitchStyle && !easternGateStyle) {
               drawEnso(x, y, size, time);
               if (!incenseOfferingStyle) {
                 drawMeritImprints(time, size);
@@ -8117,6 +8918,8 @@
 
           } else if (forcedStyleId === "ancient-door") {
             drawAncientDoorWoodfish(bodyX, bodyY, size, time, beatKick);
+          } else if (forcedStyleId === "eastern-gate-whack") {
+            drawEasternGateWhack(bodyX, bodyY, size, time, beatKick, styleOnly);
           } else if (forcedStyleId === "qingtuan-pounding") {
             drawQingtuanPoundingWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
           } else if (forcedStyleId === "prayer-beads") {
@@ -8147,6 +8950,7 @@
             !prayerBeadsStyle
             && !lightSwitchStyle
             && !incenseOfferingStyle
+            && !easternGateStyle
             && positiveImpact > 0.05
           ) {
             context.save();
@@ -8204,6 +9008,7 @@
             || prayerBeadsStyle
             || lightSwitchStyle
             || incenseOfferingStyle
+            || easternGateStyle
           ) {
             return;
           }
@@ -9532,7 +10337,9 @@
           context.fillStyle = mode === "merit" ? colors.cyberCyan : colors.washiDeep;
           context.fillText(
             mode === "merit"
-              ? isPrayerBeadsStyle()
+            ? isEasternGateStyle()
+              ? "赛博巡逻 · 反拍锁定 +1"
+              : isPrayerBeadsStyle()
                 ? "赛博助盘 · 反拍加速 +1"
                 : isLightSwitchStyle()
                   ? "赛博稳光 · 反拍助力 +1"
@@ -9552,6 +10359,7 @@
             || fortunePending
             || sessionManualActionCount < 1
             || document.hidden
+            || isEasternGateStyle()
           ) {
             return;
           }
@@ -9683,7 +10491,7 @@
           if (!releaseTransitionActive) {
             drawThemeScene(woodfishStyleIndex, geometry, time, delta);
           }
-          if (mode === "merit" && !isPrayerBeadsStyle()) {
+          if (mode === "merit" && !isPrayerBeadsStyle() && !isEasternGateStyle()) {
             drawWoodStrikeEmojis(geometry.x, geometry.y, geometry.size, time);
           }
           drawQuarterBeatCues(time, geometry);
@@ -9734,7 +10542,10 @@
             event.preventDefault();
             return;
           }
-          performUserAction();
+          const actionPoint = event.detail === 0
+            ? null
+            : { x: event.clientX, y: event.clientY };
+          performUserAction(actionPoint);
         }
 
         meritTab.addEventListener("click", () => setMode("merit"));
@@ -9892,7 +10703,7 @@
           ) {
             return;
           }
-          performUserAction();
+          performUserAction({ x: event.clientX, y: event.clientY });
         }
 
         window.addEventListener("resize", syncViewportMetrics, { passive: true });
@@ -10041,6 +10852,21 @@
           },
           setMode,
           setWoodfishStyle: (index) => setWoodfishStyle(index, false),
+          setEasternGateTarget: (index) => {
+            chooseEasternGateTarget(performance.now(), Number(index));
+            return easternGateTargetIndex;
+          },
+          hitEasternGatePair: (index = easternGateTargetIndex) => {
+            const regions = easternGatePairHitRegions.length
+              ? easternGatePairHitRegions
+              : easternGatePairRegionsForGeometry(stageGeometry());
+            const region = regions[Number(index)];
+            if (!region) return false;
+            return strikeEasternGate({
+              x: region.x + region.width * 0.5,
+              y: region.y + region.height * 0.5
+            });
+          },
           previousWoodfishStyle: () => cycleWoodfishStyle(-1, false),
           nextWoodfishStyle: () => cycleWoodfishStyle(1, false),
           toggleAuto,
@@ -10055,7 +10881,8 @@
             const incenseOfferingSelected = isIncenseOfferingStyle();
             const standardMalletHidden = isPrayerBeadsStyle()
               || isLightSwitchStyle()
-              || incenseOfferingSelected;
+              || incenseOfferingSelected
+              || isEasternGateStyle();
             const latestIncenseStick =
               incenseSticks[incenseSticks.length - 1] || null;
             return {
@@ -10122,6 +10949,31 @@
                   mugwortLeaves: 6,
                   splashes: qingtuanSplashes.length
                 },
+                easternGate: {
+                  selected: isEasternGateStyle(),
+                  architecture: "original-twin-tower-arch",
+                  couples: EASTERN_GATE_PAIR_LABELS.length,
+                  targetIndex: easternGateTargetIndex,
+                  targetLabel: EASTERN_GATE_PAIR_LABELS[easternGateTargetIndex],
+                  targetAgeMs: Math.round(performance.now() - easternGateTargetSince),
+                  targetIntervalMs: EASTERN_GATE_TARGET_INTERVAL_MS,
+                  hitRegions: easternGatePairHitRegions.map((region) => ({
+                    index: region.index,
+                    x: Math.round(region.x),
+                    y: Math.round(region.y),
+                    width: Math.round(region.width),
+                    height: Math.round(region.height)
+                  })),
+                  laserActive: performance.now() - easternGateLaserStarted
+                    <= EASTERN_GATE_LASER_DURATION_MS,
+                  laserIndex: easternGateLaserIndex,
+                  laserFromCyber: easternGateLaserFromCyber,
+                  hits: easternGateHitCount,
+                  wrongTaps: easternGateMissCount,
+                  expiredTargets: easternGateExpiredTargetCount,
+                  pointerRequired: true,
+                  keyboardAutoLocksTarget: true
+                },
                 background: WOODFISH_STYLES[woodfishStyleIndex].id
               },
               ritualNetwork: {
@@ -10151,7 +11003,9 @@
               },
               auto: autoActive,
               autoBehavior: mode === "merit"
-                ? isPrayerBeadsStyle()
+                ? isEasternGateStyle()
+                  ? "cyber-offbeat-target-lock"
+                  : isPrayerBeadsStyle()
                   ? "cyber-offbeat-bead-assist"
                   : isLightSwitchStyle()
                     ? "cyber-offbeat-light-stabilizer"
@@ -10196,26 +11050,32 @@
               missGraceRatio: MISS_GRACE_RATIO,
               missFortuneThreshold: MISS_FORTUNE_THRESHOLD,
               missWindowMs: Math.round(missWindowMs),
-              nextMissInMs: sessionMissAnchor
+              nextMissInMs: !isEasternGateStyle() && sessionMissAnchor
                 ? Math.round(sessionMissAnchor + missWindowMs - performance.now())
                 : null,
               lastActionWasCountIn,
-              beatCueLabels: Array.from({ length: 4 }, (_, beat) =>
-                positiveModulo(beat, MODES[mode].beatStep) === 0
-                  ? (
-                    mode === "merit"
-                      ? meritActionCueLabel()
-                      : "放"
-                    )
-                  : mode === "merit" && isMeritDuetActive()
-                    ? meritCyberCueLabel()
-                    : "dot"
-              ),
-              beatCueLayout: cueLayout.positions.map((position) => ({
-                x: Math.round(position.x),
-                y: Math.round(position.y)
-              })),
-              beatCueIntegratedWithPlate: Boolean(cueLayout.integratedWithPlate),
+              beatCueLabels: isEasternGateStyle()
+                ? []
+                : Array.from({ length: 4 }, (_, beat) =>
+                    positiveModulo(beat, MODES[mode].beatStep) === 0
+                      ? (
+                        mode === "merit"
+                          ? meritActionCueLabel()
+                          : "放"
+                        )
+                      : mode === "merit" && isMeritDuetActive()
+                        ? meritCyberCueLabel()
+                        : "dot"
+                  ),
+              beatCueLayout: isEasternGateStyle()
+                ? []
+                : cueLayout.positions.map((position) => ({
+                    x: Math.round(position.x),
+                    y: Math.round(position.y)
+                  })),
+              beatCueIntegratedWithPlate: isEasternGateStyle()
+                ? false
+                : Boolean(cueLayout.integratedWithPlate),
               viewport: {
                 width: canvasWidth,
                 height: canvasHeight
