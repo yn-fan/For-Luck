@@ -2603,6 +2603,8 @@
         const MAX_PHOTO_BYTES = 12 * 1024 * 1024;
         const PHOTO_OUTPUT_SIZE = 512;
         const CYBER_STRIKE_OFFSET_Y = 20;
+        const CYBER_MALLET_SHIFT_X = -10;
+        const CYBER_MALLET_SHIFT_Y = -10;
         const THEME_ROTATION_QUARTER_BEATS = 16;
         const THEME_SCHEMA_VERSION = 5;
         const INCENSE_STICK_LIMIT = 18;
@@ -2610,11 +2612,16 @@
         const LAKE_TITLE_SCALE = 0.25;
         const SPICY_CRAB_SHELL_SCALE = 0.086;
         const PRAYER_BEAD_COUNT = 14;
-        const PRAYER_BEAD_LOOP_DURATION_MS = 12000;
-        const PRAYER_BEAD_MANUAL_IMPULSE = 0.00105;
-        const PRAYER_BEAD_CYBER_IMPULSE = 0.00068;
-        const PRAYER_BEAD_MAX_SPIN_VELOCITY = 0.0024;
-        const PRAYER_BEAD_IMPULSE_DECAY = 0.96;
+        const PRAYER_BEAD_LOOP_DURATION_MS = 8000;
+        const PRAYER_BEAD_IMPULSE_BY_RANK = Object.freeze({
+          start: 0.00082,
+          good: 0.00108,
+          cool: 0.00152,
+          perfect: 0.00205
+        });
+        const PRAYER_BEAD_CYBER_IMPULSE = 0.00118;
+        const PRAYER_BEAD_MAX_SPIN_VELOCITY = 0.0042;
+        const PRAYER_BEAD_IMPULSE_DECAY = 0.962;
         const WOOD_SOUND_PEAK = Object.freeze({
           normal: 0.54,
           perfect: 0.62
@@ -2996,6 +3003,8 @@
         let automaticThemeSwitchCount = 0;
         let prayerBeadTurns = 0;
         let prayerBeadSpinVelocity = 0;
+        let prayerBeadLastImpulse = 0;
+        let prayerBeadLastTimingRank = "ready";
         let prayerBeadLastFrame = performance.now();
         let lightSwitchOn = true;
         let incenseSticks = [];
@@ -4457,6 +4466,21 @@
           return { label: "GOOD", rank: "good" };
         }
 
+        function applyPrayerBeadSpinImpulse(timing, fromCyber = false) {
+          const timingRank = fromCyber ? "cyber" : timing?.rank || "good";
+          const impulse = fromCyber
+            ? PRAYER_BEAD_CYBER_IMPULSE
+            : PRAYER_BEAD_IMPULSE_BY_RANK[timingRank]
+              || PRAYER_BEAD_IMPULSE_BY_RANK.good;
+          prayerBeadSpinVelocity = Math.min(
+            PRAYER_BEAD_MAX_SPIN_VELOCITY,
+            prayerBeadSpinVelocity + impulse
+          );
+          prayerBeadLastImpulse = impulse;
+          prayerBeadLastTimingRank = timingRank;
+          return impulse;
+        }
+
         function stageGeometry() {
           const bounds = activeAction().getBoundingClientRect();
           return {
@@ -4591,10 +4615,12 @@
             y:
               geometry.y
               + geometry.size * 0.13
-              - (fromCyber ? CYBER_STRIKE_OFFSET_Y : 0),
+              - (fromCyber ? CYBER_STRIKE_OFFSET_Y : 0)
+              + (fromCyber ? CYBER_MALLET_SHIFT_Y : 0),
             strikeStarted: actionTime,
             fromCyber
           };
+          if (fromCyber) strikeEmojiAnchor.x += CYBER_MALLET_SHIFT_X;
           const imprintAngle = Math.random() * Math.PI * 2;
           const imprintRadiusX = geometry.size * (0.42 + Math.random() * 0.28);
           const imprintRadiusY = geometry.size * (0.26 + Math.random() * 0.2);
@@ -4715,10 +4741,11 @@
           );
         }
 
-        function strikeMerit(fromAuto = false, countIn = false) {
+        function strikeMerit(fromAuto = false, countIn = false, timingOverride = null) {
           if (fortuneOpen || fortunePending) return;
           const actionTime = performance.now();
-          const timing = countIn ? START_TIMING : getTimingGrade(actionTime, fromAuto);
+          const timing = timingOverride
+            || (countIn ? START_TIMING : getTimingGrade(actionTime, fromAuto));
           registerSessionAction(actionTime, fromAuto);
           resetIdleHint();
           triggerUiHit(timing);
@@ -4730,11 +4757,7 @@
           const incenseOfferingSelected = isIncenseOfferingStyle();
           const qingtuanSelected = isQingtuanStyle();
           if (prayerBeadsSelected) {
-            prayerBeadSpinVelocity = Math.min(
-              PRAYER_BEAD_MAX_SPIN_VELOCITY,
-              prayerBeadSpinVelocity
-                + (fromAuto ? PRAYER_BEAD_CYBER_IMPULSE : PRAYER_BEAD_MANUAL_IMPULSE)
-            );
+            applyPrayerBeadSpinImpulse(timing, fromAuto);
           }
           if (lightSwitchSelected && !fromAuto) {
             lightSwitchOn = !lightSwitchOn;
@@ -4834,10 +4857,7 @@
                 ? CYBER_INCENSE_TIMING
                 : CYBER_DUET_TIMING;
           if (prayerBeadsSelected) {
-            prayerBeadSpinVelocity = Math.min(
-              PRAYER_BEAD_MAX_SPIN_VELOCITY,
-              prayerBeadSpinVelocity + PRAYER_BEAD_CYBER_IMPULSE
-            );
+            applyPrayerBeadSpinImpulse(timing, true);
             addPrayerBeadTurnVisual(actionTime, true, geometry);
           } else if (lightSwitchSelected) {
             addLightSwitchVisual(actionTime, true, geometry);
@@ -5310,6 +5330,34 @@
               );
               context.stroke();
             }
+            const inkTitleSize = Math.max(48, Math.min(108, minSide * 0.19));
+            const topbarBottom =
+              document.querySelector(".topbar")?.getBoundingClientRect().bottom
+              || geometry.y - geometry.height * 0.5;
+            const inkTitleY = Math.min(
+              geometry.y - geometry.height * 0.36,
+              topbarBottom + inkTitleSize * 0.68
+            );
+            context.save();
+            context.translate(geometry.x, inkTitleY);
+            context.rotate(-0.025);
+            context.font = `${cssValue("--fontWeightBold")} ${inkTitleSize}px ${cssValue("--fontFamilyInk")}`;
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillStyle = colors.ink;
+            context.shadowColor = colors.inkSoft;
+            context.shadowBlur = inkTitleSize * 0.025;
+            context.globalAlpha = alpha * 0.28;
+            context.fillText("爱在西园寺", 0, 0, canvasWidth * 0.84);
+            context.shadowColor = "transparent";
+            context.globalAlpha = alpha * 0.055;
+            context.fillText(
+              "爱在西园寺",
+              inkTitleSize * 0.018,
+              inkTitleSize * 0.012,
+              canvasWidth * 0.84
+            );
+            context.restore();
           } else if (styleId === "qingtuan-pounding") {
             paintWash(colors.washiLight, colors.lime, 0.25);
             context.strokeStyle = colors.mossDeep;
@@ -6316,7 +6364,7 @@
           context.font = `800 ${Math.max(9, size * 0.038)}px ui-sans-serif, system-ui, sans-serif`;
           context.textAlign = "center";
           context.textBaseline = "middle";
-          context.fillText("傅家", 0, 0, size * 0.39);
+          context.fillText("天香里45号", 0, 0, size * 0.39);
           context.fillStyle = colors.washiDeep;
           context.globalAlpha = 0.78;
           context.fillRect(-size * 0.205, -size * 0.052, size * 0.055, size * 0.022);
@@ -6434,6 +6482,100 @@
             context.lineTo(joint * size * 0.15, size * 0.43);
             context.stroke();
           }
+
+          context.save();
+          const rickshawBounce = reducedMotion ? 0 : beatKick * size * 0.006;
+          context.translate(size * 0.16, size * 0.345 - rickshawBounce);
+          context.rotate(-0.055);
+          const wheelRadius = size * 0.055;
+          const wheelY = size * 0.035;
+          context.lineCap = "round";
+          for (const wheelX of [-size * 0.092, size * 0.092]) {
+            context.fillStyle = colors.washiLight;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(3, size * 0.009);
+            context.beginPath();
+            context.arc(wheelX, wheelY, wheelRadius, 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
+            context.lineWidth = Math.max(1.2, size * 0.0035);
+            for (let spoke = 0; spoke < 8; spoke += 1) {
+              const angle = spoke / 8 * Math.PI * 2;
+              context.beginPath();
+              context.moveTo(wheelX, wheelY);
+              context.lineTo(
+                wheelX + Math.cos(angle) * wheelRadius * 0.8,
+                wheelY + Math.sin(angle) * wheelRadius * 0.8
+              );
+              context.stroke();
+            }
+          }
+
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(3, size * 0.008);
+          context.beginPath();
+          context.moveTo(-size * 0.105, -size * 0.004);
+          context.lineTo(size * 0.1, -size * 0.004);
+          context.lineTo(size * 0.125, wheelY);
+          context.lineTo(-size * 0.11, wheelY);
+          context.closePath();
+          context.stroke();
+          context.beginPath();
+          context.moveTo(-size * 0.105, size * 0.008);
+          context.lineTo(-size * 0.285, -size * 0.012);
+          context.moveTo(-size * 0.09, size * 0.027);
+          context.lineTo(-size * 0.275, size * 0.012);
+          context.stroke();
+
+          context.fillStyle = colors.rustDeep;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(2, size * 0.006);
+          context.fillRect(
+            -size * 0.085,
+            -size * 0.045,
+            size * 0.17,
+            size * 0.06
+          );
+          context.strokeRect(
+            -size * 0.085,
+            -size * 0.045,
+            size * 0.17,
+            size * 0.06
+          );
+
+          context.fillStyle = colors.sand;
+          context.beginPath();
+          context.moveTo(-size * 0.115, -size * 0.05);
+          context.quadraticCurveTo(
+            -size * 0.08,
+            -size * 0.145,
+            0,
+            -size * 0.155
+          );
+          context.quadraticCurveTo(
+            size * 0.085,
+            -size * 0.145,
+            size * 0.115,
+            -size * 0.05
+          );
+          context.lineTo(size * 0.085, -size * 0.035);
+          context.lineTo(-size * 0.085, -size * 0.035);
+          context.closePath();
+          context.fill();
+          context.stroke();
+          context.strokeStyle = colors.sandDeep;
+          context.globalAlpha = 0.72;
+          context.lineWidth = Math.max(1.5, size * 0.004);
+          context.beginPath();
+          context.moveTo(-size * 0.082, -size * 0.064);
+          context.quadraticCurveTo(
+            0,
+            -size * 0.126,
+            size * 0.082,
+            -size * 0.064
+          );
+          context.stroke();
+          context.restore();
           context.restore();
         }
 
@@ -7662,11 +7804,19 @@
           context.arc(x, y + size * 0.205, size * 0.072, 0, Math.PI * 2);
           context.fill();
           context.stroke();
-          context.fillStyle = colors.mossDeep;
-          context.font = `${cssValue("--fontWeightBold")} ${Math.max(18, size * 0.068)}px ${cssValue("--fontFamilyInk")}`;
-          context.textAlign = "center";
-          context.textBaseline = "middle";
-          context.fillText("香", x, y + size * 0.21);
+          context.strokeStyle = colors.orange;
+          context.globalAlpha = 0.28;
+          context.lineWidth = Math.max(1.5, size * 0.004);
+          context.beginPath();
+          context.arc(
+            x - size * 0.008,
+            y + size * 0.195,
+            size * 0.045,
+            Math.PI * 1.08,
+            Math.PI * 1.78
+          );
+          context.stroke();
+          context.globalAlpha = 1;
 
           enteringSticks.forEach((stick) => drawIncenseStick(stick, true));
 
@@ -7737,9 +7887,13 @@
             isMeritDuetActive(time)
             || (woodStrikeFromAuto && elapsed <= duration + 0.18)
           );
-          const strikePointX = bodyX + size * (woodStrikeFromAuto ? -0.17 : 0.17);
+          const strikePointX = bodyX
+            + size * (woodStrikeFromAuto ? -0.17 : 0.17)
+            + (woodStrikeFromAuto ? CYBER_MALLET_SHIFT_X : 0);
           const woodStrikePointY = bodyY + size * 0.13;
-          const cyberStrikePointY = woodStrikePointY - CYBER_STRIKE_OFFSET_Y;
+          const cyberStrikePointY = woodStrikePointY
+            - CYBER_STRIKE_OFFSET_Y
+            + CYBER_MALLET_SHIFT_Y;
           const strikePointY = woodStrikeFromAuto ? cyberStrikePointY : woodStrikePointY;
 
           if (!styleOnly) {
@@ -8055,13 +8209,13 @@
           }
 
           const woodStrikePointX = bodyX + size * 0.17;
-          const cyberStrikePointX = bodyX - size * 0.17;
+          const cyberStrikePointX = bodyX - size * 0.17 + CYBER_MALLET_SHIFT_X;
           const woodMalletSwing = woodStrikeFromAuto ? 0 : malletSwing;
           const cyberMalletSwing = woodStrikeFromAuto ? malletSwing : 0;
 
           if (showCyberMallet) {
-            const cyberBaseX = x + size * 0.22;
-            const cyberBaseY = -size * 0.1;
+            const cyberBaseX = x + size * 0.22 + CYBER_MALLET_SHIFT_X;
+            const cyberBaseY = -size * 0.1 + CYBER_MALLET_SHIFT_Y;
             const cyberContactAngle = Math.atan2(
               cyberStrikePointY - cyberBaseY,
               cyberStrikePointX - cyberBaseX
@@ -8704,7 +8858,14 @@
           context.fill();
 
           const lakeTitleSize = Math.max(56, Math.min(148, scale * LAKE_TITLE_SCALE));
-          drawLakeInkTitle(x, y - height * 0.29, lakeTitleSize, time);
+          const topbarBottom =
+            document.querySelector(".topbar")?.getBoundingClientRect().bottom
+            || y - height * 0.5;
+          const lakeTitleY = Math.min(
+            y - height * 0.36,
+            topbarBottom + lakeTitleSize * 0.64
+          );
+          drawLakeInkTitle(x, lakeTitleY, lakeTitleSize, time);
 
           context.globalAlpha = 0.22;
           context.fillStyle = colors.ink;
@@ -9825,7 +9986,21 @@
 
         window.__ritualPrototype = {
           merit: () => strikeMerit(false),
-          meritPerfect: () => strikeMerit(true),
+          meritPerfect: () => strikeMerit(
+            false,
+            false,
+            { label: "PERFECT", rank: "perfect" }
+          ),
+          meritCool: () => strikeMerit(
+            false,
+            false,
+            { label: "COOL", rank: "cool" }
+          ),
+          meritGood: () => strikeMerit(
+            false,
+            false,
+            { label: "GOOD", rank: "good" }
+          ),
           cyberDuet: strikeCyberDuet,
           release: () => releaseFish(false),
           releasePerfect: () => releaseFish(
@@ -9928,10 +10103,19 @@
                   selected: incenseOfferingSelected,
                   sticks: incenseSticks.length,
                   limit: INCENSE_STICK_LIMIT,
+                  inscription: "none",
                   latestFromCyber: latestIncenseStick?.fromCyber ?? null,
                   actionTool: "incense-stick",
                   baseAlignment: "ash-surface",
                   entryDurationMs: reducedMotion ? 0 : 520
+                },
+                resonance: {
+                  backdropText: "爱在西园寺",
+                  treatment: "large-ink"
+                },
+                ancientDoor: {
+                  plaque: "天香里45号",
+                  foregroundProp: "yellow-rickshaw"
                 },
                 qingtuan: {
                   selected: isQingtuanStyle(),
@@ -10074,6 +10258,10 @@
                 ),
               cyberMalletOrigin: standardMalletHidden ? "none" : "top-right",
               cyberStrikeOffsetY: CYBER_STRIKE_OFFSET_Y,
+              cyberMalletShiftPx: {
+                x: CYBER_MALLET_SHIFT_X,
+                y: CYBER_MALLET_SHIFT_Y
+              },
               manualMalletOrigin: incenseOfferingSelected
                 ? "bottom-right"
                 : standardMalletHidden
@@ -10111,6 +10299,11 @@
                 lighting: "top-left-fixed",
                 continuous: true,
                 loopDurationMs: PRAYER_BEAD_LOOP_DURATION_MS,
+                baseRpm: Number((60000 / PRAYER_BEAD_LOOP_DURATION_MS).toFixed(2)),
+                impulseByTiming: { ...PRAYER_BEAD_IMPULSE_BY_RANK },
+                cyberImpulse: PRAYER_BEAD_CYBER_IMPULSE,
+                lastImpulse: prayerBeadLastImpulse,
+                lastTimingRank: prayerBeadLastTimingRank,
                 reducedMotionStatic: reducedMotion,
                 loopPhase: reducedMotion
                   ? 0
