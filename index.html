@@ -2607,6 +2607,8 @@
         const THEME_SCHEMA_VERSION = 5;
         const INCENSE_STICK_LIMIT = 18;
         const LAKE_INK_REVEAL_DURATION = 1800;
+        const LAKE_TITLE_SCALE = 0.25;
+        const SPICY_CRAB_SHELL_SCALE = 0.086;
         const PRAYER_BEAD_COUNT = 14;
         const PRAYER_BEAD_LOOP_DURATION_MS = 12000;
         const PRAYER_BEAD_MANUAL_IMPULSE = 0.00105;
@@ -5511,10 +5513,33 @@
               context.stroke();
             }
           } else {
-            paintWash(colors.lakeLight, colors.washiLight, 0.28);
-            context.globalAlpha = alpha * 0.2;
-            context.fillStyle = colors.sand;
-            context.fillRect(0, 0, canvasWidth, canvasHeight * 0.24);
+            context.globalAlpha = alpha * 0.86;
+            context.fillStyle = colors.lakeLight;
+            context.fillRect(0, 0, canvasWidth, canvasHeight);
+            context.globalAlpha = alpha * 0.28;
+            context.fillStyle = colors.lake;
+            context.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            context.strokeStyle = colors.washiLight;
+            context.lineCap = "round";
+            context.lineWidth = Math.max(2, minSide * 0.006);
+            for (let band = 0; band < 9; band += 1) {
+              const bandY = canvasHeight * (0.1 + band * 0.105);
+              const wave = reducedMotion ? 0 : Math.sin(time * 0.0007 + band) * minSide * 0.012;
+              context.globalAlpha = alpha * (0.09 + (band % 3) * 0.025);
+              context.beginPath();
+              context.moveTo(-minSide * 0.08, bandY + wave);
+              context.bezierCurveTo(
+                canvasWidth * 0.24,
+                bandY - minSide * 0.025 + wave,
+                canvasWidth * 0.7,
+                bandY + minSide * 0.024 - wave,
+                canvasWidth + minSide * 0.08,
+                bandY - wave
+              );
+              context.stroke();
+            }
+
             context.strokeStyle = colors.mossDeep;
             context.lineWidth = Math.max(2, minSide * 0.006);
             for (const side of [-1, 1]) {
@@ -8317,90 +8342,105 @@
         }
 
         function drawSpicyCrab(crab, projection, scale, angle, depthScale) {
-          const shellWidth = scale * 0.14 * crab.size * depthScale;
-          const shellHeight = shellWidth * 0.68;
-          const clawPulse = reducedMotion ? 0 : Math.sin(crab.phase * 2.4) * 0.08;
+          const shellWidth = scale * SPICY_CRAB_SHELL_SCALE * crab.size * depthScale;
+          const shellHeight = shellWidth * 0.64;
+          const clawPulse = reducedMotion ? 0 : Math.sin(crab.phase * 2.4) * 0.045;
 
           context.save();
           context.translate(projection.x, projection.y);
           context.rotate(angle + Math.PI / 2);
-          context.globalAlpha = 0.94;
+          context.globalAlpha = 0.92;
 
           context.fillStyle = colors.lakeDeep;
-          context.globalAlpha = 0.2;
+          context.globalAlpha = 0.16;
           context.beginPath();
           context.ellipse(
             0,
-            shellHeight * 0.55,
-            shellWidth * 0.78,
-            shellHeight * 0.25,
+            shellHeight * 0.58,
+            shellWidth * 0.68,
+            shellHeight * 0.2,
             0,
             0,
             Math.PI * 2
           );
           context.fill();
-          context.globalAlpha = 0.94;
+          context.globalAlpha = 0.92;
 
           context.strokeStyle = colors.ink;
           context.lineCap = "round";
           context.lineJoin = "round";
-          context.lineWidth = Math.max(2.5, shellWidth * 0.075);
+          context.lineWidth = Math.max(1.8, shellWidth * 0.065);
           for (const side of [-1, 1]) {
             for (let leg = 0; leg < 3; leg += 1) {
-              const legY = shellHeight * (-0.18 + leg * 0.24);
+              const legY = shellHeight * (-0.1 + leg * 0.25);
               context.beginPath();
-              context.moveTo(side * shellWidth * 0.34, legY);
-              context.lineTo(
-                side * shellWidth * (0.64 + leg * 0.06),
-                legY + shellHeight * (leg - 1) * 0.16
+              context.moveTo(side * shellWidth * 0.4, legY);
+              context.quadraticCurveTo(
+                side * shellWidth * 0.58,
+                legY + shellHeight * (leg - 1) * 0.1,
+                side * shellWidth * (0.68 + leg * 0.045),
+                legY + shellHeight * (leg - 1) * 0.14
               );
               context.lineTo(
-                side * shellWidth * (0.83 + leg * 0.05),
-                legY + shellHeight * (leg - 1) * 0.24
+                side * shellWidth * (0.82 + leg * 0.04),
+                legY + shellHeight * (leg - 1) * 0.2
               );
               context.stroke();
-              context.strokeStyle = leg % 2 === 0 ? colors.rust : colors.orange;
-              context.lineWidth = Math.max(1.5, shellWidth * 0.035);
+              context.strokeStyle = colors.rustDeep;
+              context.lineWidth = Math.max(1, shellWidth * 0.026);
               context.stroke();
               context.strokeStyle = colors.ink;
-              context.lineWidth = Math.max(2.5, shellWidth * 0.075);
+              context.lineWidth = Math.max(1.8, shellWidth * 0.065);
             }
 
-            const clawY = -shellHeight * 0.42;
+            const clawY = -shellHeight * 0.34;
             context.beginPath();
-            context.moveTo(side * shellWidth * 0.3, clawY);
-            context.lineTo(
-              side * shellWidth * 0.68,
+            context.moveTo(side * shellWidth * 0.36, clawY);
+            context.quadraticCurveTo(
+              side * shellWidth * 0.52,
+              clawY - shellHeight * 0.1,
+              side * shellWidth * 0.67,
+              clawY - shellHeight * (0.16 + clawPulse)
+            );
+            context.stroke();
+
+            context.save();
+            context.translate(
+              side * shellWidth * 0.76,
               clawY - shellHeight * (0.2 + clawPulse)
             );
-            context.stroke();
+            context.scale(side, 1);
             context.fillStyle = colors.rust;
             context.beginPath();
-            context.arc(
-              side * shellWidth * 0.78,
-              clawY - shellHeight * (0.24 + clawPulse),
+            context.moveTo(-shellWidth * 0.14, shellHeight * 0.03);
+            context.bezierCurveTo(
+              -shellWidth * 0.08,
+              -shellHeight * 0.18,
+              shellWidth * 0.14,
+              -shellHeight * 0.2,
               shellWidth * 0.18,
-              0,
-              Math.PI * 2
+              -shellHeight * 0.03
             );
-            context.fill();
-            context.stroke();
-            context.fillStyle = colors.lake;
-            context.beginPath();
-            context.moveTo(
-              side * shellWidth * 0.75,
-              clawY - shellHeight * (0.29 + clawPulse)
+            context.bezierCurveTo(
+              shellWidth * 0.1,
+              -shellHeight * 0.04,
+              shellWidth * 0.04,
+              shellHeight * 0.02,
+              shellWidth * 0.02,
+              shellHeight * 0.11
             );
-            context.lineTo(
-              side * shellWidth * 0.91,
-              clawY - shellHeight * (0.39 + clawPulse)
-            );
-            context.lineTo(
-              side * shellWidth * 0.84,
-              clawY - shellHeight * (0.21 + clawPulse)
+            context.bezierCurveTo(
+              -shellWidth * 0.03,
+              shellHeight * 0.02,
+              -shellWidth * 0.09,
+              -shellHeight * 0.01,
+              -shellWidth * 0.14,
+              shellHeight * 0.03
             );
             context.closePath();
             context.fill();
+            context.stroke();
+            context.restore();
           }
 
           const shellShade = context.createRadialGradient(
@@ -8417,23 +8457,56 @@
           shellShade.addColorStop(1, colors.rustDeep);
           context.fillStyle = shellShade;
           context.strokeStyle = colors.ink;
-          context.lineWidth = Math.max(3, shellWidth * 0.08);
+          context.lineWidth = Math.max(2, shellWidth * 0.075);
           context.beginPath();
-          context.ellipse(0, 0, shellWidth * 0.56, shellHeight * 0.53, 0, 0, Math.PI * 2);
+          context.moveTo(-shellWidth * 0.5, -shellHeight * 0.12);
+          context.bezierCurveTo(
+            -shellWidth * 0.47,
+            -shellHeight * 0.42,
+            -shellWidth * 0.24,
+            -shellHeight * 0.56,
+            0,
+            -shellHeight * 0.53
+          );
+          context.bezierCurveTo(
+            shellWidth * 0.24,
+            -shellHeight * 0.56,
+            shellWidth * 0.47,
+            -shellHeight * 0.42,
+            shellWidth * 0.5,
+            -shellHeight * 0.12
+          );
+          context.bezierCurveTo(
+            shellWidth * 0.54,
+            shellHeight * 0.22,
+            shellWidth * 0.3,
+            shellHeight * 0.46,
+            0,
+            shellHeight * 0.5
+          );
+          context.bezierCurveTo(
+            -shellWidth * 0.3,
+            shellHeight * 0.46,
+            -shellWidth * 0.54,
+            shellHeight * 0.22,
+            -shellWidth * 0.5,
+            -shellHeight * 0.12
+          );
+          context.closePath();
           context.fill();
           context.stroke();
 
           context.strokeStyle = colors.washiDeep;
-          context.globalAlpha = 0.52;
-          context.lineWidth = Math.max(1.2, shellWidth * 0.025);
-          for (let ridge = -2; ridge <= 2; ridge += 1) {
+          context.globalAlpha = 0.42;
+          context.lineWidth = Math.max(1, shellWidth * 0.022);
+          for (let ridge = -1; ridge <= 1; ridge += 1) {
             context.beginPath();
             context.arc(
-              ridge * shellWidth * 0.11,
-              shellHeight * 0.04,
-              shellWidth * 0.19,
-              Math.PI * 1.12,
-              Math.PI * 1.88
+              ridge * shellWidth * 0.13,
+              shellHeight * 0.02,
+              shellWidth * 0.22,
+              Math.PI * 1.15,
+              Math.PI * 1.85
             );
             context.stroke();
           }
@@ -8441,17 +8514,17 @@
 
           for (const side of [-1, 1]) {
             context.strokeStyle = colors.ink;
-            context.lineWidth = Math.max(2, shellWidth * 0.045);
+            context.lineWidth = Math.max(1.5, shellWidth * 0.04);
             context.beginPath();
-            context.moveTo(side * shellWidth * 0.2, -shellHeight * 0.39);
-            context.lineTo(side * shellWidth * 0.24, -shellHeight * 0.62);
+            context.moveTo(side * shellWidth * 0.18, -shellHeight * 0.38);
+            context.lineTo(side * shellWidth * 0.22, -shellHeight * 0.57);
             context.stroke();
             context.fillStyle = colors.washiLight;
             context.beginPath();
             context.arc(
-              side * shellWidth * 0.24,
-              -shellHeight * 0.67,
-              shellWidth * 0.075,
+              side * shellWidth * 0.22,
+              -shellHeight * 0.62,
+              shellWidth * 0.064,
               0,
               Math.PI * 2
             );
@@ -8460,40 +8533,48 @@
             context.fillStyle = colors.ink;
             context.beginPath();
             context.arc(
-              side * shellWidth * 0.25,
-              -shellHeight * 0.68,
-              shellWidth * 0.028,
+              side * shellWidth * 0.23,
+              -shellHeight * 0.63,
+              shellWidth * 0.022,
               0,
               Math.PI * 2
             );
             context.fill();
           }
 
-          const decorations = [
-            { icon: "🌶️", x: -0.26, y: -0.12, rotate: -0.35 },
-            { icon: "🔥", x: 0, y: -0.05, rotate: 0 },
-            { icon: "🌶️", x: 0.27, y: 0.1, rotate: 0.42 },
-            { icon: "🔥", x: -0.2, y: 0.23, rotate: -0.12 },
-            { icon: "🌶️", x: 0.08, y: 0.28, rotate: 0.24 }
-          ];
-          context.font = `${Math.max(12, shellWidth * 0.25)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
-          context.textAlign = "center";
-          context.textBaseline = "middle";
-          for (const decoration of decorations) {
-            context.save();
-            context.translate(
-              decoration.x * shellWidth,
-              decoration.y * shellHeight
+          context.globalAlpha = 0.7;
+          context.fillStyle = colors.washiDeep;
+          context.beginPath();
+          context.moveTo(0, -shellHeight * 0.26);
+          context.bezierCurveTo(
+            -shellWidth * 0.1,
+            -shellHeight * 0.08,
+            -shellWidth * 0.04,
+            shellHeight * 0.1,
+            0,
+            shellHeight * 0.2
+          );
+          context.bezierCurveTo(
+            shellWidth * 0.06,
+            shellHeight * 0.06,
+            shellWidth * 0.12,
+            -shellHeight * 0.08,
+            0,
+            -shellHeight * 0.26
+          );
+          context.fill();
+          context.strokeStyle = colors.orange;
+          context.lineWidth = Math.max(1, shellWidth * 0.026);
+          for (const side of [-1, 1]) {
+            context.beginPath();
+            context.moveTo(side * shellWidth * 0.1, shellHeight * 0.04);
+            context.quadraticCurveTo(
+              side * shellWidth * 0.27,
+              shellHeight * 0.15,
+              side * shellWidth * 0.32,
+              shellHeight * 0.3
             );
-            context.rotate(decoration.rotate);
-            context.fillText(decoration.icon, 0, 0);
-            context.restore();
-          }
-
-          if (!reducedMotion) {
-            context.font = `${Math.max(11, shellWidth * 0.22)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
-            context.globalAlpha = 0.72 + Math.sin(crab.phase * 4) * 0.18;
-            context.fillText("🔥", 0, -shellHeight * 0.9);
+            context.stroke();
           }
           context.restore();
         }
@@ -8572,12 +8653,12 @@
             );
             context.clip();
             context.shadowColor = colors.inkSoft;
-            context.shadowBlur = titleSize * 0.045;
+            context.shadowBlur = titleSize * 0.025;
             context.fillStyle = colors.ink;
-            context.globalAlpha = 0.8;
+            context.globalAlpha = 0.3;
             context.fillText(character, 0, 0);
             context.shadowColor = "transparent";
-            context.globalAlpha = 0.12;
+            context.globalAlpha = 0.055;
             context.fillText(character, titleSize * 0.012, titleSize * 0.008);
             context.restore();
           });
@@ -8588,8 +8669,8 @@
             const lineEnd = lineStart + totalWidth * 1.06 * lineProgress;
             context.strokeStyle = colors.ink;
             context.lineCap = "round";
-            context.globalAlpha = 0.34;
-            context.lineWidth = Math.max(2, titleSize * 0.035);
+            context.globalAlpha = 0.14;
+            context.lineWidth = Math.max(1.5, titleSize * 0.024);
             context.beginPath();
             context.moveTo(lineStart, titleSize * 0.53);
             context.bezierCurveTo(
@@ -8609,16 +8690,11 @@
           const scale = Math.min(width, height);
           const phase = reducedMotion ? 0.72 : getRhythmPhase(time);
           const left = x - width * 0.62;
-          const top = y - height * 0.58;
           const seaWidth = width * 1.24;
-          const seaHeight = height * 1.16;
 
           context.save();
-          context.fillStyle = colors.lake;
-          context.fillRect(left, top, seaWidth, seaHeight);
-
-          context.fillStyle = colors.washiLight;
-          context.globalAlpha = 0.62;
+          context.fillStyle = colors.lakeLight;
+          context.globalAlpha = 0.34;
           context.beginPath();
           context.moveTo(left, y - height * 0.48);
           context.lineTo(left + seaWidth, y - height * 0.53);
@@ -8627,7 +8703,7 @@
           context.closePath();
           context.fill();
 
-          const lakeTitleSize = Math.max(42, Math.min(112, scale * 0.19));
+          const lakeTitleSize = Math.max(56, Math.min(148, scale * LAKE_TITLE_SCALE));
           drawLakeInkTitle(x, y - height * 0.29, lakeTitleSize, time);
 
           context.globalAlpha = 0.22;
@@ -9910,7 +9986,14 @@
               lakeInk: {
                 progress: Number(getLakeInkProgress().toFixed(3)),
                 durationMs: reducedMotion ? 0 : LAKE_INK_REVEAL_DURATION,
-                style: "staggered-ink-bloom"
+                style: "staggered-ink-bloom",
+                titleScale: LAKE_TITLE_SCALE,
+                finalOpacity: 0.3
+              },
+              releaseVisuals: {
+                background: "full-viewport-water",
+                crabShellScale: SPICY_CRAB_SHELL_SCALE,
+                shellDecoration: "vector-fire-mark"
               },
               fishDirections: fishSchool.slice(-8).map((fish) => ({
                 kind: fish.kind,
