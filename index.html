@@ -11,7 +11,7 @@
     <meta name="color-scheme" content="light" />
     <meta
       name="description"
-      content="佛了 for luck：在六款原创复古漫画仪式主题间切换，跟随节拍敲木鱼、拍古门、捣青团、盘珠、敲照片或放生。"
+      content="佛了 for luck：在八款原创复古漫画仪式主题间切换，跟随节拍敲木鱼、拍古门、捣青团、盘珠、按灯具开关、上香、敲照片或放生。"
     />
     <title>佛了 for luck · 苏州</title>
     <link rel="icon" href="data:," />
@@ -232,6 +232,21 @@
         -webkit-font-smoothing: antialiased;
       }
 
+      body::after {
+        content: "";
+        position: fixed;
+        z-index: 4;
+        inset: 0;
+        pointer-events: none;
+        background: rgba(15, 17, 38, 0.58);
+        opacity: 0;
+        transition: opacity var(--durationNormal) var(--curveEasyEase);
+      }
+
+      body[data-woodfish-style="light-switch"][data-light-switch="off"]::after {
+        opacity: 1;
+      }
+
       button {
         font: inherit;
       }
@@ -266,6 +281,8 @@
         min-height: 0;
         display: grid;
         grid-template-rows: auto 1fr auto auto;
+        overscroll-behavior: none;
+        touch-action: pan-x pinch-zoom;
         gap: var(--spacingVerticalM);
         width: 100%;
         max-width: var(--contentMaxWidth);
@@ -512,7 +529,7 @@
       }
 
       body[data-woodfish-selectable="true"] .screen {
-        touch-action: pan-y;
+        touch-action: pinch-zoom;
       }
 
       .woodfish-picker {
@@ -683,7 +700,7 @@
         border: 0;
         border-radius: var(--borderRadiusNone);
         cursor: pointer;
-        touch-action: pan-y;
+        touch-action: pan-x pinch-zoom;
         -webkit-tap-highlight-color: transparent;
         transition: transform var(--durationFast) var(--curveEasyEase);
       }
@@ -2117,6 +2134,10 @@
           background: Canvas;
         }
 
+        body::after {
+          display: none;
+        }
+
         .fortune-overlay[data-fortune-tone] {
           color: CanvasText;
           background: Canvas !important;
@@ -2265,7 +2286,7 @@
     <canvas id="feedbackCanvas" aria-hidden="true"></canvas>
     <p id="idleHint" class="idle-hint" aria-hidden="true" hidden>轻敲</p>
 
-    <main class="screen" data-screen-label="01 佛了 for luck · 六主题仪式" data-active="true">
+    <main class="screen" data-screen-label="01 佛了 for luck · 八主题仪式" data-active="true">
       <header class="topbar">
         <div class="brand">
           <h1>
@@ -2340,7 +2361,7 @@
             class="stage-action"
             id="meritAction"
             type="button"
-            aria-describedby="woodfishStyleHelp storagePolicy"
+            aria-describedby="woodfishStyleHelp gestureHelp storagePolicy"
           >
             <span class="visually-hidden">敲击木鱼，积攒一份功德</span>
             <span class="hc-label" aria-hidden="true">敲击木鱼</span>
@@ -2358,13 +2379,13 @@
             class="stage-action"
             id="releaseAction"
             type="button"
-            aria-describedby="releaseDetail storagePolicy"
+            aria-describedby="releaseDetail gestureHelp storagePolicy"
           >
-            <span class="visually-hidden">向海中放生一尾鱼</span>
+            <span class="visually-hidden">向阳澄湖放生；PERFECT 会放生火辣蟹</span>
             <span class="hc-label" aria-hidden="true">放生一尾鱼</span>
           </button>
           <div class="mode-copy">
-            <p class="mode-detail" id="releaseDetail">鱼儿会从近岸游向远海</p>
+            <p class="mode-detail" id="releaseDetail">PERFECT 放火辣蟹，其余判定放鱼</p>
           </div>
         </section>
         <button
@@ -2415,6 +2436,9 @@
         </span>
         <span class="visually-hidden" id="woodfishStyleHelp">
           游戏开始前可左右滑动屏幕，或使用主题左右按钮切换
+        </span>
+        <span class="visually-hidden" id="gestureHelp">
+          轻触页面，或向上、向下滑动屏幕，执行当前主题动作
         </span>
         <span class="visually-hidden" id="woodfishPhotoHelp">
           照片仅存于本地使用，永不上传
@@ -2554,6 +2578,10 @@
         const STORAGE_KEY = "yinian-ritual-state-v2";
         const LEGACY_STORAGE_KEY = "yinian-gongde-state-v1";
         const IDLE_HINT_DELAY = 7000;
+        const SCREEN_SWIPE_MIN_DISTANCE = 48;
+        const SCREEN_SWIPE_AXIS_RATIO = 1.25;
+        const SCREEN_TAP_MAX_DISTANCE = 18;
+        const SWIPE_CLICK_SUPPRESSION_MS = 450;
         const PERFECT_FEVER_THRESHOLD = 3;
         const PERFECT_FEVER_DURATION = 10000;
         const FEVER_RING_CHIP_COUNT = 20;
@@ -2575,7 +2603,9 @@
         const PHOTO_OUTPUT_SIZE = 512;
         const CYBER_STRIKE_OFFSET_Y = 20;
         const THEME_ROTATION_QUARTER_BEATS = 16;
-        const THEME_SCHEMA_VERSION = 3;
+        const THEME_SCHEMA_VERSION = 5;
+        const INCENSE_STICK_LIMIT = 18;
+        const LAKE_INK_REVEAL_DURATION = 1800;
         const PRAYER_BEAD_COUNT = 14;
         const PRAYER_BEAD_LOOP_DURATION_MS = 12000;
         const PRAYER_BEAD_MANUAL_IMPULSE = 0.00105;
@@ -2585,6 +2615,10 @@
         const WOOD_SOUND_PEAK = Object.freeze({
           normal: 0.54,
           perfect: 0.62
+        });
+        const LIGHT_SWITCH_SOUND_PEAK = Object.freeze({
+          normal: 0.48,
+          perfect: 0.58
         });
         const FORTUNE_SOUND_PROFILES = Object.freeze({
           auspicious: Object.freeze([392, 523.25, 659.25]),
@@ -2596,6 +2630,8 @@
         const START_TIMING = Object.freeze({ label: "START", rank: "start" });
         const CYBER_DUET_TIMING = Object.freeze({ label: "对敲", rank: "duet" });
         const CYBER_BEAD_TIMING = Object.freeze({ label: "助盘", rank: "duet" });
+        const CYBER_LIGHT_TIMING = Object.freeze({ label: "稳光", rank: "duet" });
+        const CYBER_INCENSE_TIMING = Object.freeze({ label: "添香", rank: "duet" });
         const MERIT_BEAT_PLATE_ROTATION = -0.13;
         const MERIT_BEAT_CORNERS = Object.freeze([
           { x: 0.33, y: -0.42 },
@@ -2614,6 +2650,8 @@
             mode: "merit"
           },
           { id: "custom-photo", name: "敲张照片", mode: "merit" },
+          { id: "light-switch", name: "灯具开关", mode: "merit" },
+          { id: "incense-offering", name: "上柱香", mode: "merit" },
           { id: "release", name: "放生", mode: "release" }
         ]);
         const THEME_SCHEMA_V2_IDS = Object.freeze([
@@ -2622,6 +2660,23 @@
           "qingtuan-pounding",
           "prayer-beads",
           "custom-photo",
+          "release"
+        ]);
+        const THEME_SCHEMA_V3_IDS = Object.freeze([
+          "resonance",
+          "qingtuan-pounding",
+          "prayer-beads",
+          "ancient-door",
+          "custom-photo",
+          "release"
+        ]);
+        const THEME_SCHEMA_V4_IDS = Object.freeze([
+          "resonance",
+          "qingtuan-pounding",
+          "prayer-beads",
+          "ancient-door",
+          "custom-photo",
+          "light-switch",
           "release"
         ]);
         const LEGACY_THEME_IDS = Object.freeze([
@@ -2685,6 +2740,11 @@
           "☯️"
         ]);
         const AUTO_STRIKE_EMOJIS = Object.freeze(["💵", "💰"]);
+        const LIGHT_SWITCH_ON_EMOJIS = Object.freeze(["💡", "✨", "🌟"]);
+        const LIGHT_SWITCH_OFF_EMOJIS = Object.freeze(["🌙", "✨", "💤"]);
+        const LIGHT_SWITCH_CYBER_EMOJIS = Object.freeze(["⚡", "🤖"]);
+        const INCENSE_MANUAL_EMOJIS = Object.freeze(["🙏", "🪷", "✨"]);
+        const INCENSE_CYBER_EMOJIS = Object.freeze(["🤖", "🙏", "✨"]);
         const FORTUNE_OUTCOMES = Object.freeze([
           { level: "大吉", weight: 15, tone: "auspicious" },
           { level: "中吉", weight: 28, tone: "auspicious" },
@@ -2910,6 +2970,12 @@
           { name: "鳑鲏", color: colors.fishBitterling, accent: colors.washiLight, pattern: "stripe" },
           { name: "银鱼", color: colors.fishSilver, accent: colors.inkSoft, pattern: "plain" }
         ];
+        const SPICY_CRAB_SPECIES = Object.freeze({
+          name: "阳澄湖火辣蟹",
+          color: colors.rust,
+          accent: colors.orange,
+          pattern: "chili-fire"
+        });
 
         let mode = "merit";
         let meritTotal = 0;
@@ -2928,6 +2994,9 @@
         let prayerBeadTurns = 0;
         let prayerBeadSpinVelocity = 0;
         let prayerBeadLastFrame = performance.now();
+        let lightSwitchOn = true;
+        let incenseSticks = [];
+        let incenseStickSerial = 0;
         let autoActive = false;
         let autoTimer = 0;
         let ritualNetworkState = RITUAL_API_ENDPOINT ? "connecting" : "unavailable";
@@ -2941,6 +3010,8 @@
         const audioEventCounts = {
           wood: 0,
           bead: 0,
+          lightSwitch: 0,
+          incense: 0,
           water: 0,
           fortuneAuspicious: 0,
           fortuneInauspicious: 0,
@@ -2979,6 +3050,7 @@
         let ripples = [];
         let bursts = [];
         let meritImprints = [];
+        let qingtuanSplashes = [];
         let fishSchool = [];
         let woodStrikeStarted = Number.NEGATIVE_INFINITY;
         let woodStrikeFromAuto = false;
@@ -3062,9 +3134,10 @@
           return fortuneForRoll(randomUnit() * FORTUNE_TOTAL_WEIGHT);
         }
 
-        function makeStrikeEmojiParticles(fromAuto) {
+        function makeStrikeEmojiParticles(fromAuto, customPool = null) {
           const count = reducedMotion ? 2 : 7;
-          const pool = fromAuto ? AUTO_STRIKE_EMOJIS : MANUAL_STRIKE_EMOJIS;
+          const pool = customPool
+            || (fromAuto ? AUTO_STRIKE_EMOJIS : MANUAL_STRIKE_EMOJIS);
           const extras = fromAuto ? pool : pool.slice(1);
           return Array.from({ length: count }, (_, index) => ({
             icon: index === 0
@@ -3094,6 +3167,10 @@
           lastActionWasCountIn = false;
           observedThemeQuarterBeat = null;
           themeBeatsUntilRotation = THEME_ROTATION_QUARTER_BEATS;
+          lightSwitchOn = true;
+          incenseSticks = [];
+          incenseStickSerial = 0;
+          qingtuanSplashes = [];
         }
 
         function registerSessionAction(time = performance.now(), fromAuto = false) {
@@ -3229,7 +3306,11 @@
           const nextAction = mode === "merit"
             ? isPrayerBeadsStyle()
               ? "转珠"
-              : "积攒"
+              : isLightSwitchStyle()
+                ? "按开关"
+                : isIncenseOfferingStyle()
+                  ? "上香"
+                  : "积攒"
             : "放生";
           announce(
             completedTone === "inauspicious"
@@ -3254,15 +3335,25 @@
             ? isPrayerBeadsStyle()
               ? {
                   visual: "轻转",
-                  announcement: "跟随收拢节拍，让佛珠循环转动"
+                  announcement: "轻触或上下滑动，跟随收拢节拍让佛珠循环转动"
                 }
-              : {
-                  visual: "轻敲",
-                  announcement: "跟随收拢节拍敲击木鱼"
-                }
+              : isLightSwitchStyle()
+                ? {
+                    visual: "轻按",
+                    announcement: "轻触或上下滑动，跟随收拢节拍切换灯光明暗"
+                  }
+                : isIncenseOfferingStyle()
+                  ? {
+                      visual: "轻奉",
+                      announcement: "轻触或上下滑动，跟随收拢节拍敬上一柱香"
+                    }
+                  : {
+                      visual: "轻敲",
+                      announcement: "轻触或上下滑动，跟随收拢节拍敲击木鱼"
+                    }
             : {
                 visual: "轻放",
-                announcement: "跟随浪线抵达入水点放生"
+                announcement: "轻触或上下滑动，跟随浪线抵达入水点放生"
               };
           idleHint.textContent = hint.visual;
           idleHint.hidden = false;
@@ -3337,6 +3428,32 @@
           return WOODFISH_STYLES[index]?.id === "prayer-beads";
         }
 
+        function isLightSwitchStyle(index = woodfishStyleIndex) {
+          return WOODFISH_STYLES[index]?.id === "light-switch";
+        }
+
+        function isIncenseOfferingStyle(index = woodfishStyleIndex) {
+          return WOODFISH_STYLES[index]?.id === "incense-offering";
+        }
+
+        function isQingtuanStyle(index = woodfishStyleIndex) {
+          return WOODFISH_STYLES[index]?.id === "qingtuan-pounding";
+        }
+
+        function meritActionCueLabel() {
+          if (isPrayerBeadsStyle()) return "转";
+          if (isLightSwitchStyle()) return "按";
+          if (isIncenseOfferingStyle()) return "香";
+          return "敲";
+        }
+
+        function meritCyberCueLabel() {
+          if (isPrayerBeadsStyle()) return "助";
+          if (isLightSwitchStyle()) return "稳";
+          if (isIncenseOfferingStyle()) return "添";
+          return "对";
+        }
+
         function themeIndexById(themeId) {
           const index = WOODFISH_STYLES.findIndex((style) => style.id === themeId);
           return index < 0 ? 0 : index;
@@ -3352,6 +3469,16 @@
           if (saved.themeSchemaVersion === 2) {
             return THEME_SCHEMA_V2_IDS[
               positiveModulo(savedStyleIndex, THEME_SCHEMA_V2_IDS.length)
+            ];
+          }
+          if (saved.themeSchemaVersion === 3) {
+            return THEME_SCHEMA_V3_IDS[
+              positiveModulo(savedStyleIndex, THEME_SCHEMA_V3_IDS.length)
+            ];
+          }
+          if (saved.themeSchemaVersion === 4) {
+            return THEME_SCHEMA_V4_IDS[
+              positiveModulo(savedStyleIndex, THEME_SCHEMA_V4_IDS.length)
             ];
           }
           if (saved.themeSchemaVersion === THEME_SCHEMA_VERSION) {
@@ -3703,6 +3830,12 @@
               ? 1
               : -1;
           woodfishStyleIndex = normalizedIndex;
+          if (isLightSwitchStyle()) lightSwitchOn = true;
+          if (isIncenseOfferingStyle() && sessionActionCount === 0) {
+            incenseSticks = [];
+            incenseStickSerial = 0;
+          }
+          if (!isQingtuanStyle()) qingtuanSplashes = [];
           const nextMode = WOODFISH_STYLES[woodfishStyleIndex].mode;
           const modeChanged = nextMode !== mode;
           if (modeChanged) {
@@ -3778,8 +3911,11 @@
         function renderUi() {
           const config = MODES[mode];
           const styleSelectable = canChooseWoodfishStyle();
+          const selectedWoodfishStyle = WOODFISH_STYLES[woodfishStyleIndex];
           document.body.dataset.mode = mode;
           document.body.dataset.woodfishSelectable = String(styleSelectable);
+          document.body.dataset.woodfishStyle = selectedWoodfishStyle.id;
+          document.body.dataset.lightSwitch = lightSwitchOn ? "on" : "off";
           document.body.style.setProperty("--rhythmPeriod", `${config.autoDelay}ms`);
           meritTab.setAttribute("aria-selected", String(mode === "merit"));
           meritTab.tabIndex = mode === "merit" ? 0 : -1;
@@ -3798,8 +3934,9 @@
             "aria-label",
             customPhotoImage ? "更换敲击照片" : "上传一张圆形敲击照片"
           );
-          const selectedWoodfishStyle = WOODFISH_STYLES[woodfishStyleIndex];
           const prayerBeadsSelected = isPrayerBeadsStyle();
+          const lightSwitchSelected = isLightSwitchStyle();
+          const incenseOfferingSelected = isIncenseOfferingStyle();
           if (selectedWoodfishStyle.nameLines) {
             woodfishStyleName.replaceChildren(
               ...selectedWoodfishStyle.nameLines.map((line) => {
@@ -3818,10 +3955,20 @@
           woodfishStyleHelp.textContent =
             `当前主题：${WOODFISH_STYLES[woodfishStyleIndex].name}。游戏开始前可左右滑动屏幕，或使用主题左右按钮切换`;
 
-          const autoLabelText = prayerBeadsSelected ? "赛博助盘" : config.autoLabel;
+          const autoLabelText = prayerBeadsSelected
+            ? "赛博助盘"
+            : lightSwitchSelected
+              ? "赛博稳光"
+              : incenseOfferingSelected
+                ? "赛博添香"
+                : config.autoLabel;
           const autoDescriptionText = prayerBeadsSelected
             ? "开启后你在正拍转珠，赛博助力在反拍加速"
-            : config.autoDescription;
+            : lightSwitchSelected
+              ? "开启后你在正拍切换明暗，赛博助力在反拍稳光"
+              : incenseOfferingSelected
+                ? "开启后你在正拍上香，赛博助力在反拍添香"
+                : config.autoDescription;
           autoLabel.textContent = autoLabelText;
           autoDescription.textContent = autoDescriptionText;
           autoToggle.title = autoDescriptionText;
@@ -3831,9 +3978,24 @@
             "aria-label",
             prayerBeadsSelected
               ? "转动佛珠，积攒一份功德"
-              : "敲击木鱼，积攒一份功德"
+              : lightSwitchSelected
+                ? `按动灯具开关，切换为${lightSwitchOn ? "暗" : "亮"}并积攒一份功德`
+                : incenseOfferingSelected
+                  ? `敬上一柱香，香炉中已有 ${incenseSticks.length} 柱香`
+                  : "敲击木鱼，积攒一份功德"
           );
-          meritHcLabel.textContent = prayerBeadsSelected ? "转动佛珠" : "敲击木鱼";
+          if (lightSwitchSelected) {
+            meritAction.setAttribute("aria-pressed", String(lightSwitchOn));
+          } else {
+            meritAction.removeAttribute("aria-pressed");
+          }
+          meritHcLabel.textContent = prayerBeadsSelected
+            ? "转动佛珠"
+            : lightSwitchSelected
+              ? `按动开关 · 当前灯${lightSwitchOn ? "亮" : "暗"}`
+              : incenseOfferingSelected
+                ? "敬上一柱香"
+                : "敲击木鱼";
 
           globalLabel.textContent = config.globalLabel;
           const globalTotal = getGlobalTotal();
@@ -4019,6 +4181,101 @@
           clickGain.connect(output);
           click.start(now);
           click.stop(now + 0.05);
+        }
+
+        async function playLightSwitchSound(isOn, isPerfect = false) {
+          const audio = await ensureAudio();
+          if (!audio) return;
+          audioEventCounts.lightSwitch += 1;
+          const now = audio.currentTime;
+          const output = audio.createGain();
+          output.gain.setValueAtTime(0.0001, now);
+          output.gain.exponentialRampToValueAtTime(
+            isPerfect
+              ? LIGHT_SWITCH_SOUND_PEAK.perfect
+              : LIGHT_SWITCH_SOUND_PEAK.normal,
+            now + 0.003
+          );
+          output.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+          output.connect(audio.destination);
+
+          const click = audio.createBufferSource();
+          const clickFilter = audio.createBiquadFilter();
+          const clickGain = audio.createGain();
+          click.buffer = noiseBuffer;
+          clickFilter.type = "bandpass";
+          clickFilter.frequency.value = isOn ? 2600 : 1900;
+          clickFilter.Q.value = 4.2;
+          clickGain.gain.setValueAtTime(0.96, now);
+          clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+          click.connect(clickFilter);
+          clickFilter.connect(clickGain);
+          clickGain.connect(output);
+          click.start(now);
+          click.stop(now + 0.05);
+
+          const tone = audio.createOscillator();
+          const toneGain = audio.createGain();
+          tone.type = isOn ? "triangle" : "sine";
+          tone.frequency.setValueAtTime(isOn ? 280 : 480, now + 0.012);
+          tone.frequency.exponentialRampToValueAtTime(
+            isOn ? (isPerfect ? 720 : 560) : 210,
+            now + 0.16
+          );
+          toneGain.gain.setValueAtTime(0.0001, now);
+          toneGain.gain.exponentialRampToValueAtTime(0.48, now + 0.018);
+          toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+          tone.connect(toneGain);
+          toneGain.connect(output);
+          tone.start(now + 0.012);
+          tone.stop(now + 0.22);
+        }
+
+        async function playIncenseSound(fromCyber = false, isPerfect = false) {
+          const audio = await ensureAudio();
+          if (!audio) return;
+          audioEventCounts.incense += 1;
+          const now = audio.currentTime;
+          const output = audio.createGain();
+          output.gain.setValueAtTime(0.0001, now);
+          output.gain.exponentialRampToValueAtTime(
+            isPerfect ? 0.36 : 0.3,
+            now + 0.004
+          );
+          output.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+          output.connect(audio.destination);
+
+          const tap = audio.createBufferSource();
+          const tapFilter = audio.createBiquadFilter();
+          const tapGain = audio.createGain();
+          tap.buffer = noiseBuffer;
+          tapFilter.type = "bandpass";
+          tapFilter.frequency.value = fromCyber ? 2300 : 1650;
+          tapFilter.Q.value = 3.8;
+          tapGain.gain.setValueAtTime(fromCyber ? 0.46 : 0.58, now);
+          tapGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
+          tap.connect(tapFilter);
+          tapFilter.connect(tapGain);
+          tapGain.connect(output);
+          tap.start(now);
+          tap.stop(now + 0.06);
+
+          for (const [index, frequency] of (fromCyber ? [660, 990] : [520, 780]).entries()) {
+            const chime = audio.createOscillator();
+            const chimeGain = audio.createGain();
+            chime.type = index === 0 ? "sine" : "triangle";
+            chime.frequency.setValueAtTime(frequency, now + index * 0.018);
+            chime.frequency.exponentialRampToValueAtTime(
+              frequency * 0.82,
+              now + 0.24
+            );
+            chimeGain.gain.setValueAtTime(index === 0 ? 0.38 : 0.22, now);
+            chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+            chime.connect(chimeGain);
+            chimeGain.connect(output);
+            chime.start(now + index * 0.018);
+            chime.stop(now + 0.3);
+          }
         }
 
         async function playWaterSound() {
@@ -4371,6 +4628,85 @@
           );
         }
 
+        function addLightSwitchVisual(actionTime, fromCyber, geometry) {
+          woodStrikeStarted = actionTime;
+          woodStrikeFromAuto = fromCyber;
+          const emojiPool = fromCyber
+            ? LIGHT_SWITCH_CYBER_EMOJIS
+            : lightSwitchOn
+              ? LIGHT_SWITCH_ON_EMOJIS
+              : LIGHT_SWITCH_OFF_EMOJIS;
+          strikeEmojiParticles = makeStrikeEmojiParticles(fromCyber, emojiPool);
+          strikeEmojiAnchor = {
+            x: geometry.x,
+            y: geometry.y + geometry.size * 0.07,
+            strikeStarted: actionTime,
+            fromCyber
+          };
+          addRipple(
+            strikeEmojiAnchor.x,
+            strikeEmojiAnchor.y,
+            geometry.size * 0.08,
+            geometry.size * 0.38,
+            fromCyber
+              ? colors.cyberCyan
+              : lightSwitchOn
+                ? colors.washiDeep
+                : colors.purple
+          );
+        }
+
+        function addQingtuanSplash(actionTime, fromCyber) {
+          const count = reducedMotion ? 4 : 12;
+          for (let index = 0; index < count; index += 1) {
+            qingtuanSplashes.push({
+              born: actionTime,
+              angle: Math.random() * Math.PI * 2,
+              speed: 0.68 + Math.random() * 0.72,
+              size: 0.012 + Math.random() * 0.016,
+              stretch: 0.72 + Math.random() * 0.7,
+              rotation: Math.random() * Math.PI * 2,
+              spin: (Math.random() - 0.5) * 5.4,
+              fromCyber
+            });
+          }
+          qingtuanSplashes = qingtuanSplashes.slice(-56);
+        }
+
+        function addIncenseVisual(actionTime, fromCyber, geometry) {
+          woodStrikeStarted = actionTime;
+          woodStrikeFromAuto = fromCyber;
+          const serial = incenseStickSerial;
+          incenseStickSerial += 1;
+          const slot = positiveModulo(serial * 5, INCENSE_STICK_LIMIT) - 8.5;
+          incenseSticks.push({
+            born: actionTime,
+            offset: slot * 0.017 + (Math.random() - 0.5) * 0.012,
+            lean: (Math.random() - 0.5) * 0.055,
+            height: 0.29 + Math.random() * 0.045,
+            fromCyber,
+            serial
+          });
+          incenseSticks = incenseSticks.slice(-INCENSE_STICK_LIMIT);
+          strikeEmojiParticles = makeStrikeEmojiParticles(
+            fromCyber,
+            fromCyber ? INCENSE_CYBER_EMOJIS : INCENSE_MANUAL_EMOJIS
+          );
+          strikeEmojiAnchor = {
+            x: geometry.x,
+            y: geometry.y - geometry.size * 0.02,
+            strikeStarted: actionTime,
+            fromCyber
+          };
+          addRipple(
+            strikeEmojiAnchor.x,
+            strikeEmojiAnchor.y,
+            geometry.size * 0.07,
+            geometry.size * 0.32,
+            fromCyber ? colors.cyberCyan : colors.orange
+          );
+        }
+
         function strikeMerit(fromAuto = false, countIn = false) {
           if (fortuneOpen || fortunePending) return;
           const actionTime = performance.now();
@@ -4382,6 +4718,9 @@
           lastTimingGrade = timing.label;
           lastActionWasCountIn = countIn;
           const prayerBeadsSelected = isPrayerBeadsStyle();
+          const lightSwitchSelected = isLightSwitchStyle();
+          const incenseOfferingSelected = isIncenseOfferingStyle();
+          const qingtuanSelected = isQingtuanStyle();
           if (prayerBeadsSelected) {
             prayerBeadSpinVelocity = Math.min(
               PRAYER_BEAD_MAX_SPIN_VELOCITY,
@@ -4389,36 +4728,74 @@
                 + (fromAuto ? PRAYER_BEAD_CYBER_IMPULSE : PRAYER_BEAD_MANUAL_IMPULSE)
             );
           }
+          if (lightSwitchSelected && !fromAuto) {
+            lightSwitchOn = !lightSwitchOn;
+          }
           meritTotal += 1;
           sessionMeritCount += 1;
           enqueueRitualAction("merit");
           const geometry = stageGeometry();
           if (prayerBeadsSelected) {
             addPrayerBeadTurnVisual(actionTime, fromAuto, geometry);
+          } else if (lightSwitchSelected) {
+            addLightSwitchVisual(actionTime, fromAuto, geometry);
+          } else if (incenseOfferingSelected) {
+            addIncenseVisual(actionTime, fromAuto, geometry);
           } else {
             addMeritHitVisual(actionTime, fromAuto, geometry);
+            if (qingtuanSelected) addQingtuanSplash(actionTime, fromAuto);
           }
           addBurst(
             timing,
             "功德 +1",
-            prayerBeadsSelected ? "转珠" : "",
+            prayerBeadsSelected
+              ? "转珠"
+              : lightSwitchSelected
+                ? fromAuto
+                  ? "稳光"
+                  : lightSwitchOn
+                    ? "灯亮"
+                    : "灯暗"
+                : incenseOfferingSelected
+                  ? fromAuto
+                    ? "赛博添香"
+                    : `第 ${incenseStickSerial} 柱香`
+                  : "",
             geometry,
             "merit"
           );
           renderUi();
           saveState();
           if (prayerBeadsSelected) playBeadSound(timing.rank === "perfect");
-          else playWoodSound(timing.rank === "perfect");
+          else if (lightSwitchSelected) {
+            playLightSwitchSound(lightSwitchOn, timing.rank === "perfect");
+          } else if (incenseOfferingSelected) {
+            playIncenseSound(fromAuto, timing.rank === "perfect");
+          } else {
+            playWoodSound(timing.rank === "perfect");
+          }
           announce(
             countIn
               ? prayerBeadsSelected
                 ? `START，功德加一，跟随佛珠周围的拍点继续转珠，我已积攒的功德 ${formatter.format(meritTotal)}`
-                : STRINGS.meritStart(formatter.format(meritTotal))
+                : lightSwitchSelected
+                  ? `START，灯光已${lightSwitchOn ? "点亮" : "调暗"}，功德加一，跟随开关周围的拍点继续按动，我已积攒的功德 ${formatter.format(meritTotal)}`
+                  : incenseOfferingSelected
+                    ? `START，敬上一柱香，功德加一，跟随香炉周围的拍点继续上香，我已积攒的功德 ${formatter.format(meritTotal)}`
+                    : STRINGS.meritStart(formatter.format(meritTotal))
               : feverTriggered
               ? prayerBeadsSelected
                 ? "连续 3 次 PERFECT，功德时刻开始，赛博助盘已加入反拍加速，持续 10 秒"
-                : "连续 3 次 PERFECT，功德时刻开始，赛博鼓槌已加入反拍对敲，持续 10 秒"
-              : STRINGS.meritStatus(timing.label, formatter.format(meritTotal), comboCount)
+                : lightSwitchSelected
+                  ? "连续 3 次 PERFECT，功德时刻开始，赛博稳光已加入反拍助力，持续 10 秒"
+                  : incenseOfferingSelected
+                    ? "连续 3 次 PERFECT，功德时刻开始，赛博添香已加入反拍助力，持续 10 秒"
+                    : "连续 3 次 PERFECT，功德时刻开始，赛博鼓槌已加入反拍对敲，持续 10 秒"
+              : lightSwitchSelected
+                ? `${timing.label}，灯光已${lightSwitchOn ? "点亮" : "调暗"}，功德加一${comboCount > 1 ? `，连续 ${comboCount} 次` : ""}，我已积攒的功德 ${formatter.format(meritTotal)}`
+                : incenseOfferingSelected
+                  ? `${timing.label}，敬上第 ${incenseStickSerial} 柱香，功德加一${comboCount > 1 ? `，连续 ${comboCount} 次` : ""}，我已积攒的功德 ${formatter.format(meritTotal)}`
+                  : STRINGS.meritStatus(timing.label, formatter.format(meritTotal), comboCount)
           );
           if (!fromAuto && navigator.vibrate) {
             navigator.vibrate(timing.rank === "perfect" ? [12, 18, 18] : 8);
@@ -4438,15 +4815,29 @@
           sessionMeritCount += 1;
           enqueueRitualAction("merit");
           const prayerBeadsSelected = isPrayerBeadsStyle();
-          const timing = prayerBeadsSelected ? CYBER_BEAD_TIMING : CYBER_DUET_TIMING;
+          const lightSwitchSelected = isLightSwitchStyle();
+          const incenseOfferingSelected = isIncenseOfferingStyle();
+          const qingtuanSelected = isQingtuanStyle();
+          const timing = prayerBeadsSelected
+            ? CYBER_BEAD_TIMING
+            : lightSwitchSelected
+              ? CYBER_LIGHT_TIMING
+              : incenseOfferingSelected
+                ? CYBER_INCENSE_TIMING
+                : CYBER_DUET_TIMING;
           if (prayerBeadsSelected) {
             prayerBeadSpinVelocity = Math.min(
               PRAYER_BEAD_MAX_SPIN_VELOCITY,
               prayerBeadSpinVelocity + PRAYER_BEAD_CYBER_IMPULSE
             );
             addPrayerBeadTurnVisual(actionTime, true, geometry);
+          } else if (lightSwitchSelected) {
+            addLightSwitchVisual(actionTime, true, geometry);
+          } else if (incenseOfferingSelected) {
+            addIncenseVisual(actionTime, true, geometry);
           } else {
             addMeritHitVisual(actionTime, true, geometry);
+            if (qingtuanSelected) addQingtuanSplash(actionTime, true);
           }
           addBurst(
             timing,
@@ -4455,23 +4846,40 @@
               ? "功德时刻助力"
               : prayerBeadsSelected
                 ? "反拍加速"
-                : "反拍",
+                : lightSwitchSelected
+                  ? "反拍稳光"
+                  : incenseOfferingSelected
+                    ? "反拍添香"
+                    : "反拍",
             geometry,
             "merit"
           );
           renderUi();
           saveState();
           if (prayerBeadsSelected) playBeadSound(true);
+          else if (lightSwitchSelected) playLightSwitchSound(lightSwitchOn, true);
+          else if (incenseOfferingSelected) playIncenseSound(true, true);
           else playWoodSound(true);
         }
 
-        function releaseFish(fromAuto = false, countIn = false) {
+        function releaseFish(
+          fromAuto = false,
+          countIn = false,
+          timingOverride = null
+        ) {
           if (fortuneOpen || fortunePending) return;
           const actionTime = performance.now();
           const geometry = stageGeometry();
-          const item = species[Math.floor(Math.random() * species.length)];
-          const fish = createReleasedFish(item);
-          const timing = countIn ? START_TIMING : getTimingGrade(actionTime, fromAuto);
+          const timing = timingOverride
+            || (countIn ? START_TIMING : getTimingGrade(actionTime, fromAuto));
+          const spicyCrabReleased = !fromAuto && timing.rank === "perfect";
+          const item = spicyCrabReleased
+            ? SPICY_CRAB_SPECIES
+            : species[Math.floor(Math.random() * species.length)];
+          const fish = createReleasedFish(
+            item,
+            spicyCrabReleased ? "spicy-crab" : "fish"
+          );
           registerSessionAction(actionTime, fromAuto);
           resetIdleHint();
           triggerUiHit(timing);
@@ -4570,7 +4978,11 @@
               mode === "merit"
                 ? isPrayerBeadsStyle()
                   ? "赛博助盘已关闭"
-                  : "赛博对敲已关闭"
+                  : isLightSwitchStyle()
+                    ? "赛博稳光已关闭"
+                    : isIncenseOfferingStyle()
+                      ? "赛博添香已关闭"
+                      : "赛博对敲已关闭"
                 : "赛博代放已关闭"
             );
           }
@@ -4627,7 +5039,11 @@
             announce(
               isPrayerBeadsStyle()
                 ? "赛博助盘已就位：你在正拍转珠，赛博助力在反拍加速"
-                : "赛博对敲已就位：你敲正拍，赛博鼓槌敲反拍"
+                : isLightSwitchStyle()
+                  ? "赛博稳光已就位：你在正拍切换明暗，赛博助力在反拍稳光"
+                  : isIncenseOfferingStyle()
+                    ? "赛博添香已就位：你在正拍上香，赛博助力在反拍添香"
+                    : "赛博对敲已就位：你敲正拍，赛博鼓槌敲反拍"
             );
             return;
           }
@@ -4813,6 +5229,330 @@
 
         function drawPaperTexture() {
           context.drawImage(backgroundCanvas, 0, 0, canvasWidth, canvasHeight);
+        }
+
+        function drawThemeBackground(styleIndex, geometry, time, alpha = 1) {
+          if (alpha <= 0) return;
+          const styleId = WOODFISH_STYLES[styleIndex]?.id || "resonance";
+          const minSide = Math.min(canvasWidth, canvasHeight);
+          const drift = reducedMotion ? 0 : Math.sin(time * 0.00042) * minSide * 0.018;
+          const paintWash = (from, to, opacity = 0.46, horizontal = false) => {
+            const wash = context.createLinearGradient(
+              horizontal ? 0 : canvasWidth * 0.16,
+              horizontal ? canvasHeight * 0.34 : 0,
+              horizontal ? canvasWidth : canvasWidth * 0.84,
+              horizontal ? canvasHeight * 0.66 : canvasHeight
+            );
+            wash.addColorStop(0, from);
+            wash.addColorStop(1, to);
+            context.globalAlpha = alpha * opacity;
+            context.fillStyle = wash;
+            context.fillRect(0, 0, canvasWidth, canvasHeight);
+          };
+          const traceLeaf = (length, width) => {
+            context.beginPath();
+            context.moveTo(0, length * 0.5);
+            context.bezierCurveTo(
+              -width,
+              length * 0.18,
+              -width * 0.72,
+              -length * 0.26,
+              0,
+              -length * 0.5
+            );
+            context.bezierCurveTo(
+              width * 0.72,
+              -length * 0.26,
+              width,
+              length * 0.18,
+              0,
+              length * 0.5
+            );
+            context.closePath();
+          };
+
+          context.save();
+          if (styleId === "resonance") {
+            paintWash(colors.washiLight, colors.purple, 0.28);
+            const halo = context.createRadialGradient(
+              geometry.x,
+              geometry.y,
+              minSide * 0.04,
+              geometry.x,
+              geometry.y,
+              minSide * 0.66
+            );
+            halo.addColorStop(0, colors.washiDeep);
+            halo.addColorStop(0.54, colors.rust);
+            halo.addColorStop(1, colors.purple);
+            context.globalAlpha = alpha * 0.2;
+            context.fillStyle = halo;
+            context.fillRect(0, 0, canvasWidth, canvasHeight);
+            context.strokeStyle = colors.purple;
+            context.lineWidth = Math.max(2, minSide * 0.007);
+            for (let ring = 1; ring <= 6; ring += 1) {
+              context.globalAlpha = alpha * (0.16 - ring * 0.014);
+              context.beginPath();
+              context.arc(
+                geometry.x,
+                geometry.y,
+                minSide * (0.18 + ring * 0.095) + drift,
+                0,
+                Math.PI * 2
+              );
+              context.stroke();
+            }
+          } else if (styleId === "qingtuan-pounding") {
+            paintWash(colors.washiLight, colors.lime, 0.25);
+            context.strokeStyle = colors.mossDeep;
+            context.fillStyle = colors.moss;
+            context.lineWidth = Math.max(1.5, minSide * 0.004);
+            for (let leaf = 0; leaf < 12; leaf += 1) {
+              const side = leaf % 2 === 0 ? -1 : 1;
+              const lane = Math.floor(leaf / 2);
+              context.save();
+              context.translate(
+                side < 0
+                  ? minSide * (0.04 + (lane % 2) * 0.055)
+                  : canvasWidth - minSide * (0.04 + (lane % 2) * 0.055),
+                canvasHeight * (0.14 + lane * 0.14) + drift * side
+              );
+              context.rotate(side * (0.72 + (lane % 3) * 0.18));
+              context.globalAlpha = alpha * (0.12 + (lane % 2) * 0.035);
+              traceLeaf(minSide * (0.19 + (lane % 2) * 0.04), minSide * 0.052);
+              context.fill();
+              context.stroke();
+              context.restore();
+            }
+          } else if (styleId === "prayer-beads") {
+            paintWash(colors.ink, colors.purple, 0.23, true);
+            const aura = context.createRadialGradient(
+              geometry.x,
+              geometry.y,
+              minSide * 0.06,
+              geometry.x,
+              geometry.y,
+              minSide * 0.72
+            );
+            aura.addColorStop(0, colors.lakeLight);
+            aura.addColorStop(0.52, colors.purple);
+            aura.addColorStop(1, colors.ink);
+            context.globalAlpha = alpha * 0.18;
+            context.fillStyle = aura;
+            context.fillRect(0, 0, canvasWidth, canvasHeight);
+            for (let ring = 0; ring < 3; ring += 1) {
+              const radius = minSide * (0.31 + ring * 0.13);
+              const beadCount = 18 + ring * 6;
+              for (let bead = 0; bead < beadCount; bead += 1) {
+                const angle = (bead / beadCount) * Math.PI * 2
+                  + (reducedMotion ? 0 : time * 0.00004 * (ring % 2 === 0 ? 1 : -1));
+                context.globalAlpha = alpha * (0.09 + ring * 0.025);
+                context.fillStyle = ring % 2 === 0 ? colors.washiDeep : colors.cyberCyan;
+                context.beginPath();
+                context.arc(
+                  geometry.x + Math.cos(angle) * radius,
+                  geometry.y + Math.sin(angle) * radius * 0.72,
+                  Math.max(2, minSide * (0.009 - ring * 0.0015)),
+                  0,
+                  Math.PI * 2
+                );
+                context.fill();
+              }
+            }
+          } else if (styleId === "ancient-door") {
+            paintWash(colors.sand, colors.rust, 0.3);
+            context.globalAlpha = alpha * 0.15;
+            context.fillStyle = colors.washiDeep;
+            context.fillRect(0, canvasHeight * 0.18, canvasWidth, canvasHeight * 0.55);
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(3, minSide * 0.008);
+            context.beginPath();
+            context.moveTo(-minSide * 0.08, canvasHeight * 0.28);
+            for (let tile = 0; tile <= 12; tile += 1) {
+              const tileX = tile * canvasWidth / 12;
+              const tileY = canvasHeight * 0.25 + (tile % 2) * minSide * 0.026;
+              context.lineTo(tileX, tileY);
+            }
+            context.lineTo(canvasWidth + minSide * 0.08, canvasHeight * 0.28);
+            context.stroke();
+            for (const side of [-1, 1]) {
+              const lanternX = side < 0 ? minSide * 0.12 : canvasWidth - minSide * 0.12;
+              context.strokeStyle = colors.ink;
+              context.globalAlpha = alpha * 0.22;
+              context.beginPath();
+              context.moveTo(lanternX, 0);
+              context.lineTo(lanternX, canvasHeight * 0.2);
+              context.stroke();
+              context.fillStyle = colors.rust;
+              context.beginPath();
+              context.ellipse(
+                lanternX,
+                canvasHeight * 0.25,
+                minSide * 0.055,
+                minSide * 0.08,
+                0,
+                0,
+                Math.PI * 2
+              );
+              context.fill();
+            }
+          } else if (styleId === "custom-photo") {
+            paintWash(colors.lakeLight, colors.pink, 0.22, true);
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(3, minSide * 0.008);
+            for (let frame = 0; frame < 5; frame += 1) {
+              const frameWidth = minSide * (0.22 + (frame % 2) * 0.08);
+              const frameHeight = frameWidth * 1.18;
+              context.save();
+              context.translate(
+                frame % 2 === 0
+                  ? minSide * (0.07 + frame * 0.015)
+                  : canvasWidth - minSide * (0.08 + frame * 0.012),
+                canvasHeight * (0.15 + frame * 0.16) + drift * 0.4
+              );
+              context.rotate((frame % 2 === 0 ? -1 : 1) * (0.08 + frame * 0.018));
+              context.globalAlpha = alpha * 0.12;
+              context.fillStyle = frame % 2 === 0 ? colors.washiLight : colors.lake;
+              context.fillRect(-frameWidth * 0.5, -frameHeight * 0.5, frameWidth, frameHeight);
+              context.strokeRect(-frameWidth * 0.5, -frameHeight * 0.5, frameWidth, frameHeight);
+              context.restore();
+            }
+          } else if (styleId === "light-switch") {
+            paintWash(
+              lightSwitchOn ? colors.washiLight : colors.steelMid,
+              lightSwitchOn ? colors.sand : colors.inkSoft,
+              lightSwitchOn ? 0.34 : 0.24
+            );
+            context.strokeStyle = colors.inkSoft;
+            context.lineWidth = Math.max(1.5, minSide * 0.004);
+            context.globalAlpha = alpha * 0.12;
+            const panelSize = Math.max(54, minSide * 0.15);
+            for (let panelX = 0; panelX < canvasWidth; panelX += panelSize) {
+              context.beginPath();
+              context.moveTo(panelX, 0);
+              context.lineTo(panelX, canvasHeight);
+              context.stroke();
+            }
+            for (let panelY = 0; panelY < canvasHeight; panelY += panelSize) {
+              context.beginPath();
+              context.moveTo(0, panelY);
+              context.lineTo(canvasWidth, panelY);
+              context.stroke();
+            }
+            if (lightSwitchOn) {
+              const roomLight = context.createRadialGradient(
+                geometry.x,
+                canvasHeight * 0.06,
+                minSide * 0.02,
+                geometry.x,
+                canvasHeight * 0.22,
+                minSide * 0.72
+              );
+              roomLight.addColorStop(0, colors.washiLight);
+              roomLight.addColorStop(0.45, colors.washiDeep);
+              roomLight.addColorStop(1, colors.sand);
+              context.globalAlpha = alpha * 0.28;
+              context.fillStyle = roomLight;
+              context.fillRect(0, 0, canvasWidth, canvasHeight);
+            }
+          } else if (styleId === "incense-offering") {
+            paintWash(colors.washiDeep, colors.rustDeep, 0.28);
+            const templeGlow = context.createRadialGradient(
+              geometry.x,
+              geometry.y - minSide * 0.2,
+              minSide * 0.02,
+              geometry.x,
+              geometry.y,
+              minSide * 0.64
+            );
+            templeGlow.addColorStop(0, colors.washiLight);
+            templeGlow.addColorStop(0.42, colors.orange);
+            templeGlow.addColorStop(1, colors.rustDeep);
+            context.globalAlpha = alpha * 0.2;
+            context.fillStyle = templeGlow;
+            context.fillRect(0, 0, canvasWidth, canvasHeight);
+            context.fillStyle = colors.rustDeep;
+            context.globalAlpha = alpha * 0.2;
+            const pillarWidth = Math.max(26, minSide * 0.075);
+            context.fillRect(0, 0, pillarWidth, canvasHeight);
+            context.fillRect(canvasWidth - pillarWidth, 0, pillarWidth, canvasHeight);
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(2, minSide * 0.006);
+            context.beginPath();
+            context.arc(
+              geometry.x,
+              canvasHeight * 0.03,
+              Math.max(canvasWidth * 0.38, minSide * 0.48),
+              0.12,
+              Math.PI - 0.12
+            );
+            context.stroke();
+            for (let smoke = 0; smoke < 5; smoke += 1) {
+              const smokeX = canvasWidth * (0.18 + smoke * 0.16);
+              context.strokeStyle = smoke % 2 === 0 ? colors.inkSoft : colors.washiLight;
+              context.globalAlpha = alpha * 0.09;
+              context.lineWidth = Math.max(2, minSide * 0.006);
+              context.beginPath();
+              context.moveTo(smokeX, canvasHeight);
+              context.bezierCurveTo(
+                smokeX + drift * 1.8,
+                canvasHeight * 0.7,
+                smokeX - drift * 2.2,
+                canvasHeight * 0.38,
+                smokeX + drift,
+                0
+              );
+              context.stroke();
+            }
+          } else {
+            paintWash(colors.lakeLight, colors.washiLight, 0.28);
+            context.globalAlpha = alpha * 0.2;
+            context.fillStyle = colors.sand;
+            context.fillRect(0, 0, canvasWidth, canvasHeight * 0.24);
+            context.strokeStyle = colors.mossDeep;
+            context.lineWidth = Math.max(2, minSide * 0.006);
+            for (const side of [-1, 1]) {
+              const reedBaseX = side < 0 ? minSide * 0.08 : canvasWidth - minSide * 0.08;
+              for (let reed = 0; reed < 7; reed += 1) {
+                const reedX = reedBaseX + side * reed * minSide * 0.018;
+                const reedTop = canvasHeight * (0.48 + (reed % 3) * 0.055);
+                context.globalAlpha = alpha * (0.11 + (reed % 2) * 0.04);
+                context.beginPath();
+                context.moveTo(reedX, canvasHeight);
+                context.quadraticCurveTo(
+                  reedX - side * drift,
+                  canvasHeight * 0.74,
+                  reedX + side * minSide * 0.025,
+                  reedTop
+                );
+                context.stroke();
+              }
+            }
+          }
+          context.restore();
+        }
+
+        function drawThemeBackgroundTransition(geometry, time) {
+          const progress = Math.min(
+            1,
+            Math.max(0, (time - woodfishStyleChangedAt) / 480)
+          );
+          if (
+            reducedMotion
+            || previousWoodfishStyleIndex === woodfishStyleIndex
+            || progress >= 1
+          ) {
+            drawThemeBackground(woodfishStyleIndex, geometry, time);
+            return;
+          }
+          const eased = 1 - Math.pow(1 - progress, 3);
+          drawThemeBackground(
+            previousWoodfishStyleIndex,
+            geometry,
+            time,
+            1 - eased
+          );
+          drawThemeBackground(woodfishStyleIndex, geometry, time, eased);
         }
 
         function getQuarterBeatCueLayout(geometry) {
@@ -5036,9 +5776,7 @@
               context.lineWidth = Math.max(3, cueSize * 0.09);
               context.strokeStyle = colors.ink;
               const label = mode === "merit"
-                ? isPrayerBeadsStyle()
-                  ? "转"
-                  : "敲"
+                ? meritActionCueLabel()
                 : "放";
               if (mode !== "merit") context.strokeText(label, 0, 0);
               context.fillStyle = isActiveAction && !integratedWithPlate
@@ -5049,7 +5787,7 @@
               context.font = `${cssValue("--fontWeightBold")} ${Math.max(13, cueSize * (isActiveCyber ? 0.46 : 0.38))}px ${cssValue("--fontFamilyBase")}`;
               context.lineWidth = Math.max(3, cueSize * 0.085);
               context.strokeStyle = colors.ink;
-              const cyberLabel = isPrayerBeadsStyle() ? "助" : "对";
+              const cyberLabel = meritCyberCueLabel();
               context.strokeText(cyberLabel, 0, 0);
               context.fillStyle = isActiveCyber ? colors.washiLight : colors.cyberCyan;
               context.fillText(cyberLabel, 0, 0);
@@ -5668,6 +6406,37 @@
           context.restore();
         }
 
+        function drawQingtuanSplashes(size, time) {
+          const life = reducedMotion ? 520 : 920;
+          qingtuanSplashes = qingtuanSplashes.filter(
+            (splash) => time - splash.born < life
+          );
+          for (const splash of qingtuanSplashes) {
+            const rawProgress = Math.min(1, Math.max(0, (time - splash.born) / life));
+            const progress = reducedMotion ? 0.42 : rawProgress;
+            const eased = 1 - Math.pow(1 - progress, 2);
+            const distance = size * (0.12 + splash.speed * 0.25) * eased;
+            const splashX = Math.cos(splash.angle) * distance;
+            const splashY = Math.sin(splash.angle) * distance
+              + size * 0.18 * progress * progress;
+            const blobSize = size * splash.size * (1 - progress * 0.38);
+            context.save();
+            context.translate(splashX, splashY - size * 0.02);
+            context.rotate(splash.rotation + splash.spin * progress);
+            context.scale(splash.stretch, 1 / splash.stretch);
+            context.globalAlpha = reducedMotion ? 0.78 : (1 - rawProgress) * 0.94;
+            context.fillStyle = splash.fromCyber ? colors.lime : colors.moss;
+            context.strokeStyle = splash.fromCyber ? colors.cyberCyan : colors.mossDeep;
+            context.lineWidth = Math.max(1.5, size * 0.004);
+            context.beginPath();
+            context.ellipse(0, 0, blobSize * 1.32, blobSize, 0, 0, Math.PI * 2);
+            context.fill();
+            context.stroke();
+            context.restore();
+          }
+          context.globalAlpha = 1;
+        }
+
         function drawQingtuanPoundingWoodfish(x, y, size, time, beatKick, positiveImpact) {
           const activeBeat = positiveModulo(getQuarterBeatIndex(time), 4);
           context.save();
@@ -5708,6 +6477,64 @@
           context.globalAlpha = 0.62;
           context.lineWidth = size * 0.009;
           context.stroke();
+          context.globalAlpha = 1;
+
+          const leafAngles = [-2.35, -1.62, -0.88, 0.72, 1.48, 2.28];
+          leafAngles.forEach((angle, index) => {
+            context.save();
+            context.translate(0, size * 0.015);
+            context.rotate(angle);
+            const leafLength = size * (0.19 + (index % 3) * 0.018);
+            const leafWidth = size * (0.045 + (index % 2) * 0.008);
+            context.fillStyle = index % 2 === 0 ? colors.mossDeep : colors.moss;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(1.5, size * 0.004);
+            context.beginPath();
+            context.moveTo(0, size * 0.025);
+            context.bezierCurveTo(
+              -leafWidth * 0.42,
+              -leafLength * 0.16,
+              -leafWidth,
+              -leafLength * 0.38,
+              -leafWidth * 0.46,
+              -leafLength * 0.54
+            );
+            context.bezierCurveTo(
+              -leafWidth * 0.86,
+              -leafLength * 0.68,
+              -leafWidth * 0.3,
+              -leafLength * 0.88,
+              0,
+              -leafLength
+            );
+            context.bezierCurveTo(
+              leafWidth * 0.3,
+              -leafLength * 0.88,
+              leafWidth * 0.86,
+              -leafLength * 0.68,
+              leafWidth * 0.46,
+              -leafLength * 0.54
+            );
+            context.bezierCurveTo(
+              leafWidth,
+              -leafLength * 0.38,
+              leafWidth * 0.42,
+              -leafLength * 0.16,
+              0,
+              size * 0.025
+            );
+            context.closePath();
+            context.fill();
+            context.stroke();
+            context.strokeStyle = colors.lime;
+            context.globalAlpha = 0.62;
+            context.lineWidth = Math.max(1, size * 0.003);
+            context.beginPath();
+            context.moveTo(0, size * 0.012);
+            context.lineTo(0, -leafLength * 0.88);
+            context.stroke();
+            context.restore();
+          });
           context.globalAlpha = 1;
 
           const squish = Math.min(1, positiveImpact * 1.75 + beatKick * 0.12);
@@ -5839,6 +6666,8 @@
             }
             context.globalAlpha = 1;
           }
+
+          drawQingtuanSplashes(size, time);
 
           for (let marker = 0; marker < 4; marker += 1) {
             const angle = -Math.PI / 2 + marker * Math.PI / 2;
@@ -6193,6 +7022,645 @@
           context.restore();
         }
 
+        function drawLightSwitchWoodfish(x, y, size, time, beatKick, positiveImpact) {
+          const lampY = y - size * 0.31;
+          const plateY = y + size * 0.085;
+          const plateWidth = size * 0.34;
+          const plateHeight = size * 0.43;
+          const glowPulse = reducedMotion
+            ? 1
+            : 1 + beatKick * 0.06 + Math.sin(time * 0.0032) * 0.025;
+          const tracePlate = (offsetX = 0, offsetY = 0) => {
+            const left = x - plateWidth * 0.5 + offsetX;
+            const right = x + plateWidth * 0.5 + offsetX;
+            const top = plateY - plateHeight * 0.5 + offsetY;
+            const bottom = plateY + plateHeight * 0.5 + offsetY;
+            const cut = size * 0.026;
+            context.beginPath();
+            context.moveTo(left + cut, top);
+            context.lineTo(right - cut, top);
+            context.lineTo(right, top + cut);
+            context.lineTo(right, bottom - cut);
+            context.lineTo(right - cut, bottom);
+            context.lineTo(left + cut, bottom);
+            context.lineTo(left, bottom - cut);
+            context.lineTo(left, top + cut);
+            context.closePath();
+          };
+
+          context.save();
+          if (lightSwitchOn) {
+            const roomGlow = context.createRadialGradient(
+              x,
+              lampY + size * 0.04,
+              size * 0.025,
+              x,
+              lampY + size * 0.09,
+              size * 0.55
+            );
+            roomGlow.addColorStop(0, "rgba(255, 246, 184, 0.92)");
+            roomGlow.addColorStop(0.32, "rgba(255, 209, 102, 0.34)");
+            roomGlow.addColorStop(1, "rgba(255, 209, 102, 0)");
+            context.globalAlpha = glowPulse;
+            context.fillStyle = roomGlow;
+            context.fillRect(
+              x - size * 0.58,
+              lampY - size * 0.12,
+              size * 1.16,
+              size * 0.94
+            );
+
+            const lightCone = context.createLinearGradient(
+              x,
+              lampY,
+              x,
+              plateY + plateHeight * 0.62
+            );
+            lightCone.addColorStop(0, "rgba(255, 246, 184, 0.42)");
+            lightCone.addColorStop(1, "rgba(255, 246, 184, 0)");
+            context.fillStyle = lightCone;
+            context.beginPath();
+            context.moveTo(x - size * 0.075, lampY + size * 0.045);
+            context.lineTo(x + size * 0.075, lampY + size * 0.045);
+            context.lineTo(x + size * 0.38, plateY + plateHeight * 0.62);
+            context.lineTo(x - size * 0.38, plateY + plateHeight * 0.62);
+            context.closePath();
+            context.fill();
+            context.globalAlpha = 1;
+          }
+
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(3, size * 0.012);
+          context.beginPath();
+          context.moveTo(x, y - size * 0.53);
+          context.lineTo(x, lampY - size * 0.065);
+          context.stroke();
+
+          context.fillStyle = colors.ink;
+          context.beginPath();
+          context.moveTo(x - size * 0.12, lampY - size * 0.055);
+          context.lineTo(x + size * 0.12, lampY - size * 0.055);
+          context.lineTo(x + size * 0.18, lampY + size * 0.055);
+          context.lineTo(x - size * 0.18, lampY + size * 0.055);
+          context.closePath();
+          context.fill();
+
+          const shade = context.createLinearGradient(
+            x - size * 0.16,
+            lampY,
+            x + size * 0.16,
+            lampY
+          );
+          shade.addColorStop(0, colors.rustDeep);
+          shade.addColorStop(0.48, lightSwitchOn ? colors.orange : colors.inkSoft);
+          shade.addColorStop(1, colors.rust);
+          context.fillStyle = shade;
+          context.beginPath();
+          context.moveTo(x - size * 0.105, lampY - size * 0.045);
+          context.lineTo(x + size * 0.105, lampY - size * 0.045);
+          context.lineTo(x + size * 0.16, lampY + size * 0.045);
+          context.lineTo(x - size * 0.16, lampY + size * 0.045);
+          context.closePath();
+          context.fill();
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(3, size * 0.01);
+          context.stroke();
+
+          context.save();
+          context.shadowColor = lightSwitchOn ? colors.washiDeep : "transparent";
+          context.shadowBlur = lightSwitchOn ? size * 0.12 * glowPulse : 0;
+          context.fillStyle = lightSwitchOn ? colors.washiLight : colors.inkFaint;
+          context.beginPath();
+          context.arc(x, lampY + size * 0.065, size * 0.043, 0, Math.PI * 2);
+          context.fill();
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(2, size * 0.007);
+          context.stroke();
+          context.restore();
+
+          tracePlate(size * 0.022, size * 0.028);
+          context.fillStyle = colors.ink;
+          context.fill();
+
+          tracePlate();
+          const plateShade = context.createLinearGradient(
+            x - plateWidth * 0.5,
+            plateY - plateHeight * 0.5,
+            x + plateWidth * 0.5,
+            plateY + plateHeight * 0.5
+          );
+          plateShade.addColorStop(0, colors.washiLight);
+          plateShade.addColorStop(0.55, lightSwitchOn ? colors.washiDeep : colors.lakeLight);
+          plateShade.addColorStop(1, lightSwitchOn ? colors.sand : colors.steelMid);
+          context.fillStyle = plateShade;
+          context.fill();
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(4, size * 0.014);
+          context.stroke();
+
+          context.strokeStyle = colors.inkSoft;
+          context.globalAlpha = 0.48;
+          context.lineWidth = Math.max(2, size * 0.005);
+          context.strokeRect(
+            x - plateWidth * 0.39,
+            plateY - plateHeight * 0.4,
+            plateWidth * 0.78,
+            plateHeight * 0.8
+          );
+          context.globalAlpha = 1;
+
+          for (const screwY of [-1, 1]) {
+            context.fillStyle = colors.steelLight;
+            context.beginPath();
+            context.arc(
+              x,
+              plateY + screwY * plateHeight * 0.39,
+              size * 0.014,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(1.5, size * 0.004);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(x - size * 0.008, plateY + screwY * plateHeight * 0.39);
+            context.lineTo(x + size * 0.008, plateY + screwY * plateHeight * 0.39);
+            context.stroke();
+          }
+
+          const rockerWidth = size * 0.15;
+          const rockerHeight = size * 0.23;
+          const upperInset = lightSwitchOn ? rockerWidth * 0.12 : 0;
+          const lowerInset = lightSwitchOn ? 0 : rockerWidth * 0.12;
+          const impactOffset = positiveImpact * size * 0.012;
+          context.save();
+          context.translate(x, plateY + impactOffset * (lightSwitchOn ? -1 : 1));
+          context.rotate(
+            (lightSwitchOn ? -1 : 1)
+              * (0.035 + positiveImpact * 0.055 + beatKick * 0.006)
+          );
+          context.fillStyle = colors.ink;
+          context.fillRect(
+            -rockerWidth * 0.58,
+            -rockerHeight * 0.55,
+            rockerWidth * 1.16,
+            rockerHeight * 1.12
+          );
+
+          const rockerShade = context.createLinearGradient(
+            0,
+            -rockerHeight * 0.5,
+            0,
+            rockerHeight * 0.5
+          );
+          rockerShade.addColorStop(
+            0,
+            lightSwitchOn ? colors.washiDeep : colors.washiLight
+          );
+          rockerShade.addColorStop(
+            1,
+            lightSwitchOn ? colors.washiLight : colors.steelMid
+          );
+          context.fillStyle = rockerShade;
+          context.beginPath();
+          context.moveTo(-rockerWidth * 0.5 + upperInset, -rockerHeight * 0.5);
+          context.lineTo(rockerWidth * 0.5 - upperInset, -rockerHeight * 0.5);
+          context.lineTo(rockerWidth * 0.5 - lowerInset, rockerHeight * 0.5);
+          context.lineTo(-rockerWidth * 0.5 + lowerInset, rockerHeight * 0.5);
+          context.closePath();
+          context.fill();
+          context.strokeStyle = colors.inkSoft;
+          context.lineWidth = Math.max(2, size * 0.005);
+          context.stroke();
+
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(2, size * 0.006);
+          context.beginPath();
+          context.moveTo(-rockerWidth * 0.3, 0);
+          context.lineTo(rockerWidth * 0.3, 0);
+          context.stroke();
+          context.restore();
+
+          context.font = `${cssValue("--fontWeightBold")} ${Math.max(14, size * 0.038)}px ${cssValue("--fontFamilyBase")}`;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillStyle = colors.ink;
+          context.fillText(
+            lightSwitchOn ? "灯亮" : "灯暗",
+            x,
+            plateY + plateHeight * 0.3
+          );
+
+          if (positiveImpact > 0.04) {
+            context.save();
+            context.translate(x, plateY);
+            context.globalAlpha = Math.min(1, positiveImpact * 0.82);
+            context.strokeStyle = lightSwitchOn ? colors.orange : colors.purple;
+            context.lineWidth = Math.max(3, size * 0.009);
+            for (let ray = 0; ray < 10; ray += 1) {
+              const angle = (ray / 10) * Math.PI * 2;
+              const inner = size * 0.25;
+              const outer = size * (0.3 + (ray % 2) * 0.035);
+              context.beginPath();
+              context.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner);
+              context.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+              context.stroke();
+            }
+            context.restore();
+          }
+          context.restore();
+        }
+
+        function drawIncenseOfferingWoodfish(x, y, size, time, beatKick, positiveImpact) {
+          const rimY = y + size * 0.075;
+          const ashY = rimY - size * 0.004;
+          const bodyBottomY = y + size * 0.31;
+          const entryDuration = reducedMotion ? 1 : 520;
+          const enteringSticks = [];
+
+          const drawIncenseStick = (stick, entering = false) => {
+            const rawProgress = Math.min(
+              1,
+              Math.max(0, (time - stick.born) / entryDuration)
+            );
+            if (entering !== (rawProgress < 1)) return;
+            const progress = reducedMotion
+              ? 1
+              : 1 - Math.pow(1 - rawProgress, 3);
+            const targetBaseX = x + stick.offset * size;
+            const targetBaseY = ashY - size * 0.003;
+            const startBaseX = x + size * (stick.fromCyber ? -0.52 : 0.52);
+            const startBaseY = y + size * (stick.fromCyber ? -0.46 : 0.54);
+            const baseX = startBaseX + (targetBaseX - startBaseX) * progress;
+            const baseY = startBaseY + (targetBaseY - startBaseY) * progress;
+            const startLean = stick.fromCyber ? 0.76 : -0.68;
+            const lean = startLean + (stick.lean - startLean) * progress;
+            const stickHeight = size * stick.height;
+            const emberPulse = reducedMotion
+              ? 1
+              : 0.78 + Math.sin(time * 0.012 + stick.serial) * 0.22;
+
+            context.save();
+            context.translate(baseX, baseY);
+            context.rotate(lean);
+            context.lineCap = "round";
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(3.5, size * 0.012);
+            context.beginPath();
+            context.moveTo(0, size * 0.005);
+            context.lineTo(0, -stickHeight);
+            context.stroke();
+
+            const incenseShade = context.createLinearGradient(
+              -size * 0.006,
+              0,
+              size * 0.006,
+              0
+            );
+            incenseShade.addColorStop(0, colors.rustDeep);
+            incenseShade.addColorStop(0.48, colors.orange);
+            incenseShade.addColorStop(1, colors.rust);
+            context.strokeStyle = incenseShade;
+            context.lineWidth = Math.max(2, size * 0.006);
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(0, -stickHeight);
+            context.stroke();
+
+            if (stick.fromCyber) {
+              context.strokeStyle = colors.cyberCyan;
+              context.globalAlpha = 0.92;
+              context.lineWidth = Math.max(2, size * 0.005);
+              context.beginPath();
+              context.moveTo(0, -stickHeight * 0.18);
+              context.lineTo(0, -stickHeight * 0.31);
+              context.stroke();
+              context.globalAlpha = 1;
+            }
+
+            context.strokeStyle = colors.steelMid;
+            context.lineWidth = Math.max(2.5, size * 0.008);
+            context.beginPath();
+            context.moveTo(0, -stickHeight);
+            context.lineTo(0, -stickHeight - size * 0.012);
+            context.stroke();
+            context.shadowColor = colors.orange;
+            context.shadowBlur = size * 0.03 * emberPulse;
+            context.fillStyle = colors.orange;
+            context.beginPath();
+            context.arc(0, -stickHeight, size * 0.009, 0, Math.PI * 2);
+            context.fill();
+            context.shadowColor = "transparent";
+
+            if (rawProgress >= 1) {
+              const smokeAge = Math.max(0, (time - stick.born - entryDuration) / 1000);
+              const smokeDrift = reducedMotion
+                ? 0
+                : Math.sin(smokeAge * 1.7 + stick.serial) * size * 0.022;
+              context.strokeStyle = colors.inkSoft;
+              context.globalAlpha = 0.17 + emberPulse * 0.08;
+              context.lineWidth = Math.max(1.2, size * 0.0038);
+              context.beginPath();
+              context.moveTo(0, -stickHeight - size * 0.015);
+              context.bezierCurveTo(
+                smokeDrift,
+                -stickHeight - size * 0.07,
+                -smokeDrift * 1.15,
+                -stickHeight - size * 0.125,
+                smokeDrift * 0.6,
+                -stickHeight - size * 0.19
+              );
+              context.stroke();
+            }
+            context.restore();
+          };
+
+          const traceBody = () => {
+            context.beginPath();
+            context.moveTo(x - size * 0.27, rimY + size * 0.015);
+            context.bezierCurveTo(
+              x - size * 0.255,
+              y + size * 0.19,
+              x - size * 0.18,
+              bodyBottomY,
+              x,
+              bodyBottomY + size * 0.018
+            );
+            context.bezierCurveTo(
+              x + size * 0.18,
+              bodyBottomY,
+              x + size * 0.255,
+              y + size * 0.19,
+              x + size * 0.27,
+              rimY + size * 0.015
+            );
+            context.closePath();
+          };
+
+          context.save();
+          context.globalAlpha = 0.24;
+          context.fillStyle = colors.ink;
+          context.beginPath();
+          context.ellipse(
+            x,
+            bodyBottomY + size * 0.12,
+            size * 0.39,
+            size * 0.075,
+            0,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+          context.globalAlpha = 1;
+
+          context.lineCap = "round";
+          context.lineJoin = "round";
+          for (const side of [-1, 1]) {
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(10, size * 0.032);
+            context.beginPath();
+            context.moveTo(x + side * size * 0.225, rimY + size * 0.025);
+            context.lineTo(x + side * size * 0.35, rimY - size * 0.035);
+            context.lineTo(x + side * size * 0.345, rimY - size * 0.165);
+            context.lineTo(x + side * size * 0.255, rimY - size * 0.13);
+            context.stroke();
+            context.strokeStyle = colors.mossDeep;
+            context.lineWidth = Math.max(5, size * 0.017);
+            context.stroke();
+            context.strokeStyle = colors.rust;
+            context.globalAlpha = 0.66;
+            context.lineWidth = Math.max(2, size * 0.005);
+            context.stroke();
+            context.globalAlpha = 1;
+          }
+
+          context.fillStyle = colors.ink;
+          for (const side of [-1, 0, 1]) {
+            const footX = x + side * size * 0.125;
+            const footLean = side * size * 0.035;
+            context.beginPath();
+            context.moveTo(footX - size * 0.055, bodyBottomY - size * 0.018);
+            context.quadraticCurveTo(
+              footX - footLean,
+              bodyBottomY + size * 0.07,
+              footX + footLean,
+              bodyBottomY + size * 0.13
+            );
+            context.lineTo(footX + footLean + size * 0.06, bodyBottomY + size * 0.13);
+            context.quadraticCurveTo(
+              footX + size * 0.04,
+              bodyBottomY + size * 0.035,
+              footX + size * 0.05,
+              bodyBottomY - size * 0.02
+            );
+            context.closePath();
+            context.fill();
+          }
+
+          const bodyShade = context.createLinearGradient(
+            x - size * 0.28,
+            y,
+            x + size * 0.28,
+            bodyBottomY
+          );
+          bodyShade.addColorStop(0, colors.woodDeep);
+          bodyShade.addColorStop(0.2, colors.mossDeep);
+          bodyShade.addColorStop(0.48, colors.rustDeep);
+          bodyShade.addColorStop(0.72, colors.rust);
+          bodyShade.addColorStop(1, colors.inkSoft);
+          context.fillStyle = bodyShade;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(5, size * 0.015);
+          traceBody();
+          context.fill();
+          context.stroke();
+
+          context.strokeStyle = colors.orange;
+          context.globalAlpha = 0.34;
+          context.lineWidth = Math.max(2, size * 0.006);
+          context.beginPath();
+          context.moveTo(x - size * 0.22, y + size * 0.19);
+          context.bezierCurveTo(
+            x - size * 0.1,
+            y + size * 0.26,
+            x + size * 0.1,
+            y + size * 0.26,
+            x + size * 0.22,
+            y + size * 0.19
+          );
+          context.stroke();
+          context.globalAlpha = 1;
+
+          for (const side of [-1, 1]) {
+            context.save();
+            context.translate(x + side * size * 0.12, y + size * 0.19);
+            context.scale(side, 1);
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(3, size * 0.009);
+            context.beginPath();
+            context.arc(0, 0, size * 0.065, Math.PI * 0.2, Math.PI * 1.72);
+            context.stroke();
+            context.strokeStyle = colors.orange;
+            context.globalAlpha = 0.52;
+            context.lineWidth = Math.max(1.5, size * 0.004);
+            context.beginPath();
+            context.arc(0, 0, size * 0.043, Math.PI * 0.08, Math.PI * 1.82);
+            context.stroke();
+            context.restore();
+          }
+
+          const rimShade = context.createLinearGradient(
+            x - size * 0.31,
+            rimY,
+            x + size * 0.31,
+            rimY
+          );
+          rimShade.addColorStop(0, colors.inkSoft);
+          rimShade.addColorStop(0.2, colors.mossDeep);
+          rimShade.addColorStop(0.48, colors.rust);
+          rimShade.addColorStop(0.72, colors.orange);
+          rimShade.addColorStop(1, colors.woodDeep);
+          context.fillStyle = rimShade;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(5, size * 0.015);
+          context.beginPath();
+          context.ellipse(
+            x,
+            rimY,
+            size * 0.305,
+            size * 0.088,
+            0,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+          context.stroke();
+
+          const ashShade = context.createRadialGradient(
+            x - size * 0.06,
+            ashY - size * 0.018,
+            size * 0.012,
+            x,
+            ashY,
+            size * 0.25
+          );
+          ashShade.addColorStop(0, colors.washiLight);
+          ashShade.addColorStop(0.58, colors.sand);
+          ashShade.addColorStop(1, colors.steelMid);
+          context.fillStyle = ashShade;
+          context.beginPath();
+          context.ellipse(
+            x,
+            ashY,
+            size * 0.252,
+            size * 0.056,
+            0,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+          context.strokeStyle = colors.inkSoft;
+          context.globalAlpha = 0.32;
+          context.lineWidth = Math.max(1.2, size * 0.003);
+          for (let ridge = 0; ridge < 4; ridge += 1) {
+            context.beginPath();
+            context.ellipse(
+              x + (ridge - 1.5) * size * 0.012,
+              ashY,
+              size * (0.18 - ridge * 0.025),
+              size * (0.038 - ridge * 0.005),
+              0,
+              Math.PI * 0.08,
+              Math.PI * 0.92
+            );
+            context.stroke();
+          }
+          context.fillStyle = colors.inkSoft;
+          for (let speck = 0; speck < 11; speck += 1) {
+            const speckX = x + Math.sin(speck * 2.17) * size * 0.2;
+            const speckY = ashY + Math.cos(speck * 1.73) * size * 0.028;
+            context.beginPath();
+            context.arc(
+              speckX,
+              speckY,
+              Math.max(1, size * (0.002 + (speck % 3) * 0.0007)),
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+          }
+          context.globalAlpha = 1;
+
+          for (const stick of incenseSticks) {
+            const isEntering = time - stick.born < entryDuration;
+            if (isEntering) enteringSticks.push(stick);
+            else drawIncenseStick(stick);
+          }
+
+          context.fillStyle = rimShade;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(3.5, size * 0.011);
+          context.beginPath();
+          context.moveTo(x + size * 0.305, rimY);
+          context.bezierCurveTo(
+            x + size * 0.29,
+            rimY + size * 0.09,
+            x - size * 0.29,
+            rimY + size * 0.09,
+            x - size * 0.305,
+            rimY
+          );
+          context.lineTo(x - size * 0.25, rimY + size * 0.006);
+          context.bezierCurveTo(
+            x - size * 0.22,
+            rimY + size * 0.05,
+            x + size * 0.22,
+            rimY + size * 0.05,
+            x + size * 0.25,
+            rimY + size * 0.006
+          );
+          context.closePath();
+          context.fill();
+          context.stroke();
+
+          context.fillStyle = colors.washiDeep;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(2.5, size * 0.007);
+          context.beginPath();
+          context.arc(x, y + size * 0.205, size * 0.072, 0, Math.PI * 2);
+          context.fill();
+          context.stroke();
+          context.fillStyle = colors.mossDeep;
+          context.font = `${cssValue("--fontWeightBold")} ${Math.max(18, size * 0.068)}px ${cssValue("--fontFamilyInk")}`;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillText("香", x, y + size * 0.21);
+
+          enteringSticks.forEach((stick) => drawIncenseStick(stick, true));
+
+          if (positiveImpact > 0.04 || beatKick > 0.06) {
+            const pulse = Math.max(positiveImpact, beatKick * 0.5);
+            context.strokeStyle = colors.orange;
+            context.globalAlpha = Math.min(0.76, 0.22 + pulse);
+            context.lineWidth = Math.max(2, size * 0.006);
+            for (let ray = 0; ray < 8; ray += 1) {
+              const angle = (ray / 8) * Math.PI * 2;
+              context.beginPath();
+              context.moveTo(
+                x + Math.cos(angle) * size * 0.35,
+                y + size * 0.12 + Math.sin(angle) * size * 0.25
+              );
+              context.lineTo(
+                x + Math.cos(angle) * size * 0.41,
+                y + size * 0.12 + Math.sin(angle) * size * 0.31
+              );
+              context.stroke();
+            }
+          }
+          context.restore();
+        }
+
         function drawWoodfish(
           x,
           y,
@@ -6203,6 +7671,8 @@
         ) {
           const forcedStyleId = WOODFISH_STYLES[forcedStyleIndex]?.id || "resonance";
           const prayerBeadsStyle = forcedStyleId === "prayer-beads";
+          const lightSwitchStyle = forcedStyleId === "light-switch";
+          const incenseOfferingStyle = forcedStyleId === "incense-offering";
           const elapsed = (time - woodStrikeStarted) / 1000;
           const duration = reducedMotion ? 0.001 : WOOD_STRIKE_DURATION;
           const progress = Math.min(1, Math.max(0, elapsed / duration));
@@ -6229,7 +7699,10 @@
           const tiltY = pointerY * size * 0.009;
           const bodyX = x + tiltX;
           const bodyY = y + idle + tiltY - beatKick * size * 0.006 + positiveImpact * size * 0.008;
-          const showCyberMallet = !prayerBeadsStyle && (
+          const showCyberMallet = !prayerBeadsStyle
+            && !lightSwitchStyle
+            && !incenseOfferingStyle
+            && (
             isMeritDuetActive(time)
             || (woodStrikeFromAuto && elapsed <= duration + 0.18)
           );
@@ -6239,9 +7712,13 @@
           const strikePointY = woodStrikeFromAuto ? cyberStrikePointY : woodStrikePointY;
 
           if (!styleOnly) {
-            drawEnso(x, y, size, time);
-            drawMeritImprints(time, size);
-            if (!prayerBeadsStyle) drawCushion(x, bodyY, size);
+            if (!lightSwitchStyle) {
+              drawEnso(x, y, size, time);
+              if (!incenseOfferingStyle) {
+                drawMeritImprints(time, size);
+                if (!prayerBeadsStyle) drawCushion(x, bodyY, size);
+              }
+            }
           }
 
           const transitionProgress = Math.min(
@@ -6461,9 +7938,32 @@
             drawPrayerBeadsWoodfish(bodyX, bodyY, size, time, beatKick, positiveImpact);
           } else if (forcedStyleId === "custom-photo") {
             drawPhotoWoodfish(bodyX, bodyY, size, time, beatKick);
+          } else if (forcedStyleId === "light-switch") {
+            drawLightSwitchWoodfish(
+              bodyX,
+              bodyY,
+              size,
+              time,
+              beatKick,
+              positiveImpact
+            );
+          } else if (forcedStyleId === "incense-offering") {
+            drawIncenseOfferingWoodfish(
+              bodyX,
+              bodyY,
+              size,
+              time,
+              beatKick,
+              positiveImpact
+            );
           }
 
-          if (!prayerBeadsStyle && positiveImpact > 0.05) {
+          if (
+            !prayerBeadsStyle
+            && !lightSwitchStyle
+            && !incenseOfferingStyle
+            && positiveImpact > 0.05
+          ) {
             context.save();
             context.translate(strikePointX, strikePointY);
             context.globalAlpha = positiveImpact * 0.9;
@@ -6514,7 +8014,14 @@
           context.restore();
           }
 
-          if (styleOnly || prayerBeadsStyle) return;
+          if (
+            styleOnly
+            || prayerBeadsStyle
+            || lightSwitchStyle
+            || incenseOfferingStyle
+          ) {
+            return;
+          }
 
           const woodStrikePointX = bodyX + size * 0.17;
           const cyberStrikePointX = bodyX - size * 0.17;
@@ -6642,38 +8149,85 @@
           };
         }
 
-        function createReleasedFish(item) {
+        function createReleasedFish(item, kind = "fish") {
+          const spicyCrab = kind === "spicy-crab";
+          const speed = spicyCrab
+            ? 0.13 + Math.random() * 0.055
+            : 0.115 + Math.random() * 0.05;
           return {
+            kind,
             species: item,
             lane: 0,
             depth: 0.015,
             targetLane: (Math.random() - 0.5) * 1.45,
-            speed: 0.065 + Math.random() * 0.035,
+            speed,
+            instantSpeed: speed,
+            surgePhase: Math.random() * Math.PI * 2,
+            surgeRate: spicyCrab
+              ? 1.35 + Math.random() * 0.55
+              : 0.86 + Math.random() * 0.42,
             size: 0.9 + Math.random() * 0.34,
             phase: Math.random() * Math.PI * 2,
-            turnTimer: 2.2 + Math.random() * 3.8,
-            wander: 0.08 + Math.random() * 0.12,
-            age: 0
+            turnTimer: spicyCrab
+              ? 0.85 + Math.random() * 1.35
+              : 1.4 + Math.random() * 2.4,
+            wander: spicyCrab
+              ? 0.18 + Math.random() * 0.16
+              : 0.11 + Math.random() * 0.14,
+            age: 0,
+            arrivedAt: null
           };
         }
 
         function updateFish(delta) {
           if (reducedMotion) return;
           for (const fish of fishSchool) {
+            const spicyCrab = fish.kind === "spicy-crab";
             fish.age += delta;
-            fish.phase += delta * (2.8 + fish.speed * 6);
+            fish.phase += delta * (spicyCrab ? 5.2 : 3.9);
             fish.turnTimer -= delta;
             if (fish.turnTimer <= 0) {
-              fish.targetLane = Math.max(-0.82, Math.min(0.82, fish.targetLane + (Math.random() - 0.5) * 0.62));
-              fish.turnTimer = 2.2 + Math.random() * 4.8;
+              fish.targetLane = Math.max(
+                -0.82,
+                Math.min(
+                  0.82,
+                  fish.targetLane + (Math.random() - 0.5) * (spicyCrab ? 0.86 : 0.68)
+                )
+              );
+              fish.turnTimer = spicyCrab
+                ? 0.75 + Math.random() * 1.55
+                : 1.35 + Math.random() * 2.9;
             }
-            fish.lane += (fish.targetLane - fish.lane) * Math.min(1, delta * 0.72);
-            fish.lane += Math.sin(fish.phase * 0.58) * delta * fish.wander;
+            const surgeWave = 0.5 + Math.sin(
+              fish.surgePhase + fish.age * fish.surgeRate
+            ) * 0.5;
+            const surge = spicyCrab
+              ? 0.58 + Math.pow(surgeWave, 2.35) * 1.18
+              : 0.76 + Math.pow(surgeWave, 1.7) * 0.62;
+            const launchBoost = 1 + Math.exp(-fish.age * 2.5) * 0.5;
+            const horizonBrake = fish.depth > 0.86
+              ? 1 - Math.min(0.34, (fish.depth - 0.86) * 2.6)
+              : 1;
+            fish.instantSpeed = fish.speed * surge * launchBoost * horizonBrake;
+            fish.lane += (fish.targetLane - fish.lane)
+              * Math.min(1, delta * (spicyCrab ? 1.18 : 0.92));
+            fish.lane += Math.sin(fish.phase * (spicyCrab ? 1.08 : 0.62))
+              * delta
+              * fish.wander;
             fish.lane = Math.max(-0.92, Math.min(0.92, fish.lane));
-            fish.depth = Math.min(0.965, fish.depth + fish.speed * delta);
-            if (fish.depth > 0.9) fish.speed *= Math.pow(0.985, delta * 60);
+            fish.depth = Math.min(0.965, fish.depth + fish.instantSpeed * delta);
+            if (fish.depth >= 0.965 && fish.arrivedAt === null) {
+              fish.arrivedAt = fish.age;
+            }
           }
-          fishSchool = fishSchool.filter((fish) => fish.age < 34);
+          fishSchool = fishSchool.filter(
+            (fish) =>
+              fish.age < 18
+              && (
+                fish.arrivedAt === null
+                || fish.age - fish.arrivedAt < 1.8
+              )
+          );
         }
 
         function drawFish(fish, projection, scale, angle, depthScale) {
@@ -6756,6 +8310,295 @@
           context.restore();
         }
 
+        function drawSpicyCrab(crab, projection, scale, angle, depthScale) {
+          const shellWidth = scale * 0.14 * crab.size * depthScale;
+          const shellHeight = shellWidth * 0.68;
+          const clawPulse = reducedMotion ? 0 : Math.sin(crab.phase * 2.4) * 0.08;
+
+          context.save();
+          context.translate(projection.x, projection.y);
+          context.rotate(angle + Math.PI / 2);
+          context.globalAlpha = 0.94;
+
+          context.fillStyle = colors.lakeDeep;
+          context.globalAlpha = 0.2;
+          context.beginPath();
+          context.ellipse(
+            0,
+            shellHeight * 0.55,
+            shellWidth * 0.78,
+            shellHeight * 0.25,
+            0,
+            0,
+            Math.PI * 2
+          );
+          context.fill();
+          context.globalAlpha = 0.94;
+
+          context.strokeStyle = colors.ink;
+          context.lineCap = "round";
+          context.lineJoin = "round";
+          context.lineWidth = Math.max(2.5, shellWidth * 0.075);
+          for (const side of [-1, 1]) {
+            for (let leg = 0; leg < 3; leg += 1) {
+              const legY = shellHeight * (-0.18 + leg * 0.24);
+              context.beginPath();
+              context.moveTo(side * shellWidth * 0.34, legY);
+              context.lineTo(
+                side * shellWidth * (0.64 + leg * 0.06),
+                legY + shellHeight * (leg - 1) * 0.16
+              );
+              context.lineTo(
+                side * shellWidth * (0.83 + leg * 0.05),
+                legY + shellHeight * (leg - 1) * 0.24
+              );
+              context.stroke();
+              context.strokeStyle = leg % 2 === 0 ? colors.rust : colors.orange;
+              context.lineWidth = Math.max(1.5, shellWidth * 0.035);
+              context.stroke();
+              context.strokeStyle = colors.ink;
+              context.lineWidth = Math.max(2.5, shellWidth * 0.075);
+            }
+
+            const clawY = -shellHeight * 0.42;
+            context.beginPath();
+            context.moveTo(side * shellWidth * 0.3, clawY);
+            context.lineTo(
+              side * shellWidth * 0.68,
+              clawY - shellHeight * (0.2 + clawPulse)
+            );
+            context.stroke();
+            context.fillStyle = colors.rust;
+            context.beginPath();
+            context.arc(
+              side * shellWidth * 0.78,
+              clawY - shellHeight * (0.24 + clawPulse),
+              shellWidth * 0.18,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.stroke();
+            context.fillStyle = colors.lake;
+            context.beginPath();
+            context.moveTo(
+              side * shellWidth * 0.75,
+              clawY - shellHeight * (0.29 + clawPulse)
+            );
+            context.lineTo(
+              side * shellWidth * 0.91,
+              clawY - shellHeight * (0.39 + clawPulse)
+            );
+            context.lineTo(
+              side * shellWidth * 0.84,
+              clawY - shellHeight * (0.21 + clawPulse)
+            );
+            context.closePath();
+            context.fill();
+          }
+
+          const shellShade = context.createRadialGradient(
+            -shellWidth * 0.2,
+            -shellHeight * 0.28,
+            shellWidth * 0.04,
+            0,
+            0,
+            shellWidth * 0.62
+          );
+          shellShade.addColorStop(0, colors.washiDeep);
+          shellShade.addColorStop(0.26, colors.orange);
+          shellShade.addColorStop(0.62, colors.rust);
+          shellShade.addColorStop(1, colors.rustDeep);
+          context.fillStyle = shellShade;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(3, shellWidth * 0.08);
+          context.beginPath();
+          context.ellipse(0, 0, shellWidth * 0.56, shellHeight * 0.53, 0, 0, Math.PI * 2);
+          context.fill();
+          context.stroke();
+
+          context.strokeStyle = colors.washiDeep;
+          context.globalAlpha = 0.52;
+          context.lineWidth = Math.max(1.2, shellWidth * 0.025);
+          for (let ridge = -2; ridge <= 2; ridge += 1) {
+            context.beginPath();
+            context.arc(
+              ridge * shellWidth * 0.11,
+              shellHeight * 0.04,
+              shellWidth * 0.19,
+              Math.PI * 1.12,
+              Math.PI * 1.88
+            );
+            context.stroke();
+          }
+          context.globalAlpha = 1;
+
+          for (const side of [-1, 1]) {
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(2, shellWidth * 0.045);
+            context.beginPath();
+            context.moveTo(side * shellWidth * 0.2, -shellHeight * 0.39);
+            context.lineTo(side * shellWidth * 0.24, -shellHeight * 0.62);
+            context.stroke();
+            context.fillStyle = colors.washiLight;
+            context.beginPath();
+            context.arc(
+              side * shellWidth * 0.24,
+              -shellHeight * 0.67,
+              shellWidth * 0.075,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+            context.stroke();
+            context.fillStyle = colors.ink;
+            context.beginPath();
+            context.arc(
+              side * shellWidth * 0.25,
+              -shellHeight * 0.68,
+              shellWidth * 0.028,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+          }
+
+          const decorations = [
+            { icon: "🌶️", x: -0.26, y: -0.12, rotate: -0.35 },
+            { icon: "🔥", x: 0, y: -0.05, rotate: 0 },
+            { icon: "🌶️", x: 0.27, y: 0.1, rotate: 0.42 },
+            { icon: "🔥", x: -0.2, y: 0.23, rotate: -0.12 },
+            { icon: "🌶️", x: 0.08, y: 0.28, rotate: 0.24 }
+          ];
+          context.font = `${Math.max(12, shellWidth * 0.25)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          for (const decoration of decorations) {
+            context.save();
+            context.translate(
+              decoration.x * shellWidth,
+              decoration.y * shellHeight
+            );
+            context.rotate(decoration.rotate);
+            context.fillText(decoration.icon, 0, 0);
+            context.restore();
+          }
+
+          if (!reducedMotion) {
+            context.font = `${Math.max(11, shellWidth * 0.22)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+            context.globalAlpha = 0.72 + Math.sin(crab.phase * 4) * 0.18;
+            context.fillText("🔥", 0, -shellHeight * 0.9);
+          }
+          context.restore();
+        }
+
+        function getLakeInkProgress(time = performance.now()) {
+          if (reducedMotion || !isReleaseStyle(woodfishStyleIndex)) return 1;
+          return Math.min(
+            1,
+            Math.max(
+              0,
+              (time - woodfishStyleChangedAt - 100) / LAKE_INK_REVEAL_DURATION
+            )
+          );
+        }
+
+        function drawLakeInkTitle(x, y, titleSize, time) {
+          const progress = getLakeInkProgress(time);
+          if (progress <= 0) return;
+          const characters = [..."阳澄湖"];
+          const advance = titleSize * 0.9;
+          const totalWidth = advance * characters.length;
+          const startX = -totalWidth * 0.5 + advance * 0.5;
+          const inkBlots = [
+            [-0.24, -0.2, 0.12],
+            [0.18, -0.28, 0.09],
+            [-0.14, 0.24, 0.1],
+            [0.26, 0.16, 0.075]
+          ];
+
+          context.save();
+          context.translate(x, y);
+          context.rotate(-0.035);
+          context.font = `${cssValue("--fontWeightBold")} ${titleSize}px ${cssValue("--fontFamilyInk")}`;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.lineJoin = "round";
+
+          characters.forEach((character, index) => {
+            const localProgress = Math.min(
+              1,
+              Math.max(
+                0,
+                (progress * (characters.length + 1.2) - index) / 1.25
+              )
+            );
+            if (localProgress <= 0) return;
+            const eased = 1 - Math.pow(1 - localProgress, 3);
+            const characterX = startX + index * advance;
+
+            context.save();
+            context.translate(characterX, 0);
+            context.fillStyle = colors.ink;
+            for (const [blotX, blotY, blotSize] of inkBlots) {
+              context.globalAlpha = (
+                0.055 + (1 - localProgress) * 0.14
+              ) * Math.min(1, localProgress * 3);
+              context.beginPath();
+              context.ellipse(
+                blotX * titleSize,
+                blotY * titleSize,
+                titleSize * blotSize * (0.42 + eased * 0.72),
+                titleSize * blotSize * (0.28 + eased * 0.58),
+                index * 0.17 + blotX,
+                0,
+                Math.PI * 2
+              );
+              context.fill();
+            }
+
+            context.beginPath();
+            context.rect(
+              -advance * 0.54,
+              -titleSize * 0.72,
+              advance * 1.08 * eased,
+              titleSize * 1.44
+            );
+            context.clip();
+            context.shadowColor = colors.inkSoft;
+            context.shadowBlur = titleSize * 0.045;
+            context.fillStyle = colors.ink;
+            context.globalAlpha = 0.8;
+            context.fillText(character, 0, 0);
+            context.shadowColor = "transparent";
+            context.globalAlpha = 0.12;
+            context.fillText(character, titleSize * 0.012, titleSize * 0.008);
+            context.restore();
+          });
+
+          const lineProgress = Math.min(1, Math.max(0, progress * 1.18 - 0.18));
+          if (lineProgress > 0) {
+            const lineStart = -totalWidth * 0.53;
+            const lineEnd = lineStart + totalWidth * 1.06 * lineProgress;
+            context.strokeStyle = colors.ink;
+            context.lineCap = "round";
+            context.globalAlpha = 0.34;
+            context.lineWidth = Math.max(2, titleSize * 0.035);
+            context.beginPath();
+            context.moveTo(lineStart, titleSize * 0.53);
+            context.bezierCurveTo(
+              lineStart + totalWidth * 0.24,
+              titleSize * 0.58,
+              lineEnd - totalWidth * 0.2,
+              titleSize * 0.46,
+              lineEnd,
+              titleSize * 0.5
+            );
+            context.stroke();
+          }
+          context.restore();
+        }
+
         function drawSea(x, y, width, height, time, delta) {
           const scale = Math.min(width, height);
           const phase = reducedMotion ? 0.72 : getRhythmPhase(time);
@@ -6768,8 +8611,8 @@
           context.fillStyle = colors.lake;
           context.fillRect(left, top, seaWidth, seaHeight);
 
-          context.fillStyle = colors.lakeDeep;
-          context.globalAlpha = 0.72;
+          context.fillStyle = colors.washiLight;
+          context.globalAlpha = 0.62;
           context.beginPath();
           context.moveTo(left, y - height * 0.48);
           context.lineTo(left + seaWidth, y - height * 0.53);
@@ -6777,6 +8620,9 @@
           context.lineTo(left, y - height * 0.29);
           context.closePath();
           context.fill();
+
+          const lakeTitleSize = Math.max(42, Math.min(112, scale * 0.19));
+          drawLakeInkTitle(x, y - height * 0.29, lakeTitleSize, time);
 
           context.globalAlpha = 0.22;
           context.fillStyle = colors.ink;
@@ -6906,7 +8752,17 @@
             };
           }).sort((first, second) => second.fish.depth - first.fish.depth);
           for (const item of projectedFish) {
-            drawFish(item.fish, item.projection, scale, item.angle, item.depthScale);
+            if (item.fish.kind === "spicy-crab") {
+              drawSpicyCrab(
+                item.fish,
+                item.projection,
+                scale,
+                item.angle,
+                item.depthScale
+              );
+            } else {
+              drawFish(item.fish, item.projection, scale, item.angle, item.depthScale);
+            }
           }
 
           context.restore();
@@ -7435,7 +9291,11 @@
             mode === "merit"
               ? isPrayerBeadsStyle()
                 ? "赛博助盘 · 反拍加速 +1"
-                : "赛博对敲 · 反拍助力 +1"
+                : isLightSwitchStyle()
+                  ? "赛博稳光 · 反拍助力 +1"
+                  : isIncenseOfferingStyle()
+                    ? "赛博添香 · 反拍助力 +1"
+                    : "赛博对敲 · 反拍助力 +1"
               : "连击加速中",
             0,
             titleSize * 0.78
@@ -7566,12 +9426,12 @@
           context.clearRect(0, 0, canvasWidth, canvasHeight);
           feedbackContext.clearRect(0, 0, canvasWidth, canvasHeight);
           drawPaperTexture(time);
-          drawFeverBackdrop(time);
-
           const geometry = stageGeometry();
+          maybeRotateWoodfishStyle(time);
+          drawThemeBackgroundTransition(geometry, time);
+          drawFeverBackdrop(time);
           drawSongHourglass(time, geometry);
           updateSessionMissClock(time, geometry);
-          maybeRotateWoodfishStyle(time);
           const releaseTransitionActive = drawReleaseThemeTransition(
             geometry,
             time,
@@ -7757,18 +9617,30 @@
           const deltaY = event.clientY - screenPointerStart.y;
           const startedOnControl = screenPointerStart.startedOnControl;
           const distance = Math.hypot(deltaX, deltaY);
+          const isPrimaryButton = event.pointerType !== "mouse" || event.button === 0;
           screenPointerStart = null;
           const isHorizontalStyleSwipe = canChooseWoodfishStyle()
             && !startedOnControl
-            && Math.abs(deltaX) >= 48
-            && Math.abs(deltaX) > Math.abs(deltaY) * 1.25;
+            && isPrimaryButton
+            && Math.abs(deltaX) >= SCREEN_SWIPE_MIN_DISTANCE
+            && Math.abs(deltaX) > Math.abs(deltaY) * SCREEN_SWIPE_AXIS_RATIO;
           if (isHorizontalStyleSwipe) {
             event.preventDefault();
-            suppressActionUntil = performance.now() + 450;
+            suppressActionUntil = performance.now() + SWIPE_CLICK_SUPPRESSION_MS;
             cycleWoodfishStyle(deltaX < 0 ? 1 : -1);
             return;
           }
-          if (distance > 18 || (event.pointerType === "mouse" && event.button !== 0)) return;
+          const isVerticalActionSwipe = !startedOnControl
+            && isPrimaryButton
+            && Math.abs(deltaY) >= SCREEN_SWIPE_MIN_DISTANCE
+            && Math.abs(deltaY) > Math.abs(deltaX) * SCREEN_SWIPE_AXIS_RATIO;
+          if (isVerticalActionSwipe) {
+            event.preventDefault();
+            suppressActionUntil = performance.now() + SWIPE_CLICK_SUPPRESSION_MS;
+            performUserAction();
+            return;
+          }
+          if (distance > SCREEN_TAP_MAX_DISTANCE || !isPrimaryButton) return;
 
           const target = event.target;
           if (
@@ -7867,7 +9739,16 @@
           meritPerfect: () => strikeMerit(true),
           cyberDuet: strikeCyberDuet,
           release: () => releaseFish(false),
-          releasePerfect: () => releaseFish(true),
+          releasePerfect: () => releaseFish(
+            false,
+            false,
+            { label: "PERFECT", rank: "perfect" }
+          ),
+          releaseGood: () => releaseFish(
+            false,
+            false,
+            { label: "GOOD", rank: "good" }
+          ),
           previewMiss: (count = MISS_FORTUNE_THRESHOLD) => {
             const previewCount = Math.max(
               1,
@@ -7907,6 +9788,12 @@
             const debugGeometry = stageGeometry();
             const cueLayout = getQuarterBeatCueLayout(debugGeometry);
             const missWindowMs = MODES[mode].autoDelay * MISS_GRACE_RATIO;
+            const incenseOfferingSelected = isIncenseOfferingStyle();
+            const standardMalletHidden = isPrayerBeadsStyle()
+              || isLightSwitchStyle()
+              || incenseOfferingSelected;
+            const latestIncenseStick =
+              incenseSticks[incenseSticks.length - 1] || null;
             return {
               mode,
               merit: meritTotal,
@@ -7916,6 +9803,7 @@
               bgmEnabled: soundEnabled,
               ritualEffectsAlwaysAudible: true,
               woodSoundPeakGain: { ...WOOD_SOUND_PEAK },
+              lightSwitchSoundPeakGain: { ...LIGHT_SWITCH_SOUND_PEAK },
               fortuneSoundProfiles: Object.fromEntries(
                 Object.entries(FORTUNE_SOUND_PROFILES).map(([key, value]) => [
                   key,
@@ -7929,7 +9817,7 @@
                 name: WOODFISH_STYLES[woodfishStyleIndex].name,
                 selectable: canChooseWoodfishStyle(),
                 count: WOODFISH_STYLES.length,
-                swipeThresholdPx: 48,
+                swipeThresholdPx: SCREEN_SWIPE_MIN_DISTANCE,
                 transition: {
                   previousIndex: previousWoodfishStyleIndex,
                   direction: woodfishTransitionDirection,
@@ -7940,7 +9828,28 @@
                   selected: isCustomPhotoStyle(),
                   loaded: Boolean(customPhotoImage),
                   storedLocally: Boolean(customPhotoDataUrl)
-                }
+                },
+                lightSwitch: {
+                  selected: isLightSwitchStyle(),
+                  on: lightSwitchOn,
+                  screenTone: lightSwitchOn ? "bright" : "dim",
+                  cyberBehavior: "stabilize-without-toggle"
+                },
+                incenseOffering: {
+                  selected: incenseOfferingSelected,
+                  sticks: incenseSticks.length,
+                  limit: INCENSE_STICK_LIMIT,
+                  latestFromCyber: latestIncenseStick?.fromCyber ?? null,
+                  actionTool: "incense-stick",
+                  baseAlignment: "ash-surface",
+                  entryDurationMs: reducedMotion ? 0 : 520
+                },
+                qingtuan: {
+                  selected: isQingtuanStyle(),
+                  mugwortLeaves: 6,
+                  splashes: qingtuanSplashes.length
+                },
+                background: WOODFISH_STYLES[woodfishStyleIndex].id
               },
               ritualNetwork: {
                 endpoint: RITUAL_API_ENDPOINT,
@@ -7970,17 +9879,33 @@
               autoBehavior: mode === "merit"
                 ? isPrayerBeadsStyle()
                   ? "cyber-offbeat-bead-assist"
-                  : "cyber-offbeat-duet"
+                  : isLightSwitchStyle()
+                    ? "cyber-offbeat-light-stabilizer"
+                    : incenseOfferingSelected
+                      ? "cyber-offbeat-incense-offering"
+                      : "cyber-offbeat-duet"
                 : "hands-free",
               cyberDuetActive: isMeritDuetActive(),
               cyberOffbeatPhaseMs: mode === "merit"
                 ? Math.round(getCyberOffbeatPhaseMs())
                 : null,
               fish: fishSchool.length,
+              spicyCrabs: fishSchool.filter(
+                (creature) => creature.kind === "spicy-crab"
+              ).length,
+              lakeInk: {
+                progress: Number(getLakeInkProgress().toFixed(3)),
+                durationMs: reducedMotion ? 0 : LAKE_INK_REVEAL_DURATION,
+                style: "staggered-ink-bloom"
+              },
               fishDirections: fishSchool.slice(-8).map((fish) => ({
+                kind: fish.kind,
+                species: fish.species.name,
                 lane: Number(fish.lane.toFixed(3)),
                 depth: Number(fish.depth.toFixed(3)),
-                targetLane: Number(fish.targetLane.toFixed(3))
+                targetLane: Number(fish.targetLane.toFixed(3)),
+                baseSpeed: Number(fish.speed.toFixed(3)),
+                instantSpeed: Number(fish.instantSpeed.toFixed(3))
               })),
               rhythmPhase: Number(getRhythmPhase().toFixed(3)),
               rhythmBeat: getRhythmBeatNumber(),
@@ -7998,15 +9923,11 @@
                 positiveModulo(beat, MODES[mode].beatStep) === 0
                   ? (
                     mode === "merit"
-                      ? isPrayerBeadsStyle()
-                        ? "转"
-                        : "敲"
+                      ? meritActionCueLabel()
                       : "放"
-                  )
+                    )
                   : mode === "merit" && isMeritDuetActive()
-                    ? isPrayerBeadsStyle()
-                      ? "助"
-                      : "对"
+                    ? meritCyberCueLabel()
                     : "dot"
               ),
               beatCueLayout: cueLayout.positions.map((position) => ({
@@ -8042,28 +9963,38 @@
                 : null,
               woodImpactAtMs: Math.round(WOOD_STRIKE_DURATION * WOOD_IMPACT_PHASE * 1000),
               woodStrikeDurationMs: Math.round(WOOD_STRIKE_DURATION * 1000),
-              cyberMalletVisible: !isPrayerBeadsStyle() && (
+              cyberMalletVisible: !standardMalletHidden && (
                 isMeritDuetActive()
                 || (
                   woodStrikeFromAuto
                   && performance.now() - woodStrikeStarted <= (WOOD_STRIKE_DURATION + 0.18) * 1000
                 )
               ),
-              cyberMalletResting: !isPrayerBeadsStyle() && isMeritDuetActive()
+              cyberMalletResting: !standardMalletHidden && isMeritDuetActive()
                 && !(
                   woodStrikeFromAuto
                   && performance.now() - woodStrikeStarted <= WOOD_STRIKE_DURATION * 1000
                 ),
-              cyberMalletOrigin: "top-right",
+              cyberMalletOrigin: standardMalletHidden ? "none" : "top-right",
               cyberStrikeOffsetY: CYBER_STRIKE_OFFSET_Y,
-              manualMalletOrigin: "bottom-right",
-              malletOrigin: isPrayerBeadsStyle()
-                ? "none"
+              manualMalletOrigin: incenseOfferingSelected
+                ? "bottom-right"
+                : standardMalletHidden
+                  ? "none"
+                  : "bottom-right",
+              malletOrigin: incenseOfferingSelected
+                ? latestIncenseStick?.fromCyber
+                  ? "top-left"
+                  : "bottom-right"
+                : standardMalletHidden
+                  ? "none"
                 : woodStrikeFromAuto
                   ? "top-right"
                   : "bottom-right",
-              malletMaterial: isPrayerBeadsStyle()
-                ? "none"
+              malletMaterial: incenseOfferingSelected
+                ? "incense"
+                : standardMalletHidden
+                  ? "none"
                 : woodStrikeFromAuto
                   && (
                     isMeritDuetActive()
@@ -8098,8 +10029,10 @@
               automaticThemeSwitchCount,
               themeBeatsUntilRotation,
               autoThemeQuarterBeats: THEME_ROTATION_QUARTER_BEATS,
-              malletImpactSide: isPrayerBeadsStyle()
-                ? "none"
+              malletImpactSide: incenseOfferingSelected
+                ? "censer-center"
+                : standardMalletHidden
+                  ? "none"
                 : woodStrikeFromAuto
                   && (
                     isMeritDuetActive()
@@ -8107,8 +10040,12 @@
                   )
                   ? "left"
                   : "right",
-              malletTravelDirection: isPrayerBeadsStyle()
-                ? "none"
+              malletTravelDirection: incenseOfferingSelected
+                ? latestIncenseStick?.fromCyber
+                  ? "top-left-to-censer"
+                  : "bottom-right-to-censer"
+                : standardMalletHidden
+                  ? "none"
                 : woodStrikeFromAuto
                   ? "top-to-bottom-arc"
                   : "bottom-to-top",
