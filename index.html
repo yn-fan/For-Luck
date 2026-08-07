@@ -204,7 +204,8 @@
         --fortuneMetaLift: -26px;
         --fortuneButtonLift: -18px;
         --fortuneButtonDepth: 24px;
-        --startActionSize: clamp(112px, 31vmin, 164px);
+        --pregameLauncherWidth: clamp(264px, 82vw, 390px);
+        --pregameLauncherHeight: 64px;
         --fortuneActionSize: clamp(132px, 36vw, 168px);
         --durationReducedMotion: 1ms;
       }
@@ -529,6 +530,10 @@
         aspect-ratio: 1;
       }
 
+      body[data-game-started="false"] .stage {
+        margin-bottom: calc(var(--pregameLauncherHeight) + var(--spacingVerticalM));
+      }
+
       body[data-woodfish-selectable="true"],
       body[data-woodfish-selectable="true"] .screen {
         overscroll-behavior-x: none;
@@ -726,41 +731,109 @@
         pointer-events: none;
       }
 
-      body[data-game-started="false"] .stage-action::before {
-        content: "START";
+      .pregame-launcher {
         position: absolute;
-        z-index: 3;
+        z-index: 5;
         left: 50%;
-        top: 50%;
-        width: var(--startActionSize);
-        height: var(--startActionSize);
-        display: grid;
-        place-items: center;
+        top: calc(100% + var(--spacingVerticalS));
+        width: var(--pregameLauncherWidth);
+        min-height: var(--pregameLauncherHeight);
+        display: none;
+        grid-template-columns: auto minmax(0, 1fr) var(--controlMinSize);
+        align-items: center;
+        gap: var(--spacingHorizontalS);
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalS);
         color: var(--colorInk);
-        background: var(--colorWashiDeep);
+        background: var(--colorWashiLight);
         border: var(--strokeMedium) solid var(--colorInk);
-        border-radius: var(--borderRadiusCircular);
         box-shadow:
           var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPink),
           calc(0px - var(--spacingHorizontalXS)) calc(0px - var(--spacingVerticalXS)) 0 var(--colorLake);
-        font-family: var(--fontFamilyMonospace);
-        font-size: var(--fontSizeBase600);
-        line-height: var(--lineHeightBase600);
-        font-weight: var(--fontWeightBold);
-        letter-spacing: var(--labelTracking);
-        transform: translate(-50%, -50%) rotate(-2deg);
+        clip-path: polygon(0 8%, 97% 0, 100% 84%, 4% 100%);
+        transform: translateX(-50%) rotate(-0.8deg);
         transition:
           transform var(--durationFast) var(--curveEasyEase),
           background var(--durationFast) var(--curveEasyEase);
-        pointer-events: none;
+        pointer-events: auto;
       }
 
-      body[data-game-started="false"] .stage-action:hover::before {
+      body[data-game-started="false"] .stage-action .pregame-launcher {
+        display: grid;
+      }
+
+      body[data-game-started="false"] .mode-copy {
+        display: none;
+      }
+
+      body[data-game-started="false"][data-woodfish-style="custom-photo"] .stage {
+        margin-bottom: var(--spacingVerticalL);
+      }
+
+      body[data-game-started="false"][data-woodfish-style="custom-photo"] .pregame-launcher {
+        display: none;
+      }
+
+      .pregame-stamp {
+        align-self: stretch;
+        display: grid;
+        place-items: center;
+        padding-inline: var(--spacingHorizontalS);
+        color: var(--colorWashiLight);
+        background: var(--colorInk);
+        font-family: var(--fontFamilyMonospace);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+        font-weight: var(--fontWeightBold);
+        letter-spacing: var(--labelTracking);
+        transform: rotate(-1.5deg);
+      }
+
+      .pregame-copy {
+        min-width: 0;
+        display: grid;
+        justify-items: start;
+        gap: var(--spacingVerticalXXS);
+        text-align: left;
+      }
+
+      .pregame-theme {
+        max-width: 100%;
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+        font-weight: var(--fontWeightBold);
+        text-wrap: balance;
+      }
+
+      .pregame-hint {
+        max-width: 100%;
+        color: var(--colorInkSoft);
+        font-size: var(--fontSizeBase100);
+        line-height: var(--lineHeightBase100);
+        font-weight: var(--fontWeightSemibold);
+        text-wrap: balance;
+      }
+
+      .pregame-arrow {
+        width: var(--controlMinSize);
+        height: var(--controlMinSize);
+        display: grid;
+        place-items: center;
+        color: var(--colorInk);
         background: var(--colorAccentLime);
-        transform: translate(-50%, calc(-50% + var(--hoverOffset))) rotate(2deg);
+        border: var(--strokeThin) solid var(--colorInk);
+        font-family: var(--fontFamilyMonospace);
+        font-size: var(--fontSizeBase500);
+        line-height: var(--lineHeightBase500);
+        font-weight: var(--fontWeightBold);
+        animation: pregame-arrow-beat var(--rhythmPeriod) var(--curveEasyEase) infinite;
       }
 
-      body[data-game-started="false"] button.stage-action:focus-visible::before {
+      body[data-game-started="false"] .stage-action:hover .pregame-launcher {
+        background: var(--colorWashiDeep);
+        transform: translateX(-50%) translateY(var(--hoverOffset)) rotate(0.6deg);
+      }
+
+      body[data-game-started="false"] button.stage-action:focus-visible .pregame-launcher {
         outline: var(--focusRingWidth) solid var(--colorWashiLight);
         outline-offset: var(--focusRingOffset);
         box-shadow:
@@ -776,6 +849,11 @@
       button.stage-action:focus-visible::after {
         opacity: 1;
         animation: stage-focus-beacon var(--rhythmPeriod) var(--curveEasyEase) infinite;
+      }
+
+      body[data-game-started="false"] button.stage-action:focus-visible::after {
+        opacity: 0;
+        animation: none;
       }
 
       .stage-action:active {
@@ -1859,6 +1937,16 @@
         0% {
           transform: translateY(var(--spacingVerticalXS)) scale(1.018);
         }
+
+        @keyframes pregame-arrow-beat {
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          18% {
+            transform: translateX(var(--spacingHorizontalXS));
+          }
+        }
         18%,
         100% {
           transform: translateY(0) scale(1);
@@ -1953,6 +2041,8 @@
       @media (max-width: 560px) {
         :root {
           --stageSize: clamp(265px, 80vw, 360px);
+          --pregameLauncherWidth: min(86vw, 320px);
+          --pregameLauncherHeight: 56px;
           --safePadTop: calc(var(--spacingVerticalS) + env(safe-area-inset-top));
           --safePadRight: calc(var(--spacingHorizontalS) + env(safe-area-inset-right));
           --safePadBottom: calc(var(--spacingVerticalXS) + env(safe-area-inset-bottom));
@@ -2334,6 +2424,10 @@
           display: none;
         }
 
+        .pregame-launcher {
+          display: none !important;
+        }
+
         .hc-label {
           display: grid;
           place-items: center;
@@ -2430,6 +2524,14 @@
           >
             <span class="visually-hidden">敲击木鱼，积攒一份功德</span>
             <span class="hc-label" aria-hidden="true">敲击木鱼</span>
+            <span class="pregame-launcher" aria-hidden="true">
+              <span class="pregame-stamp">START</span>
+              <span class="pregame-copy">
+                <strong class="pregame-theme">玄木共鸣</strong>
+                <span class="pregame-hint">轻触开始本轮</span>
+              </span>
+              <span class="pregame-arrow">→</span>
+            </span>
           </button>
         </section>
 
@@ -2448,6 +2550,14 @@
           >
             <span class="visually-hidden">向阳澄湖水怪主题放生；PERFECT 会放生火辣蟹</span>
             <span class="hc-label" aria-hidden="true">放生一尾鱼</span>
+            <span class="pregame-launcher" aria-hidden="true">
+              <span class="pregame-stamp">START</span>
+              <span class="pregame-copy">
+                <strong class="pregame-theme">阳澄湖水怪</strong>
+                <span class="pregame-hint">轻触放生第一尾</span>
+              </span>
+              <span class="pregame-arrow">→</span>
+            </span>
           </button>
           <div class="mode-copy">
             <p class="mode-detail" id="releaseDetail">PERFECT 放火辣蟹，其余判定放鱼</p>
@@ -2985,6 +3095,8 @@
         const meritAction = document.getElementById("meritAction");
         const meritSrLabel = meritAction.querySelector(".visually-hidden");
         const meritHcLabel = meritAction.querySelector(".hc-label");
+        const meritPregameTheme = meritAction.querySelector(".pregame-theme");
+        const meritPregameHint = meritAction.querySelector(".pregame-hint");
         const releaseAction = document.getElementById("releaseAction");
         const releaseSrLabel = releaseAction.querySelector(".visually-hidden");
         const releaseHcLabel = releaseAction.querySelector(".hc-label");
@@ -4219,9 +4331,23 @@
                 : incenseOfferingSelected
                   ? `敬上一柱香，香炉中已有 ${incenseSticks.length} 柱香`
                   : "敲击木鱼，积攒一份功德";
+          meritPregameTheme.textContent = selectedWoodfishStyle.name;
+          meritPregameHint.textContent = photoStyleSelected
+            ? customPhotoImage
+              ? "轻触开始敲照片"
+              : "先选择一张本地照片"
+            : easternGateSelected
+              ? "轻触锁定亲吻目标"
+              : prayerBeadsSelected
+                ? "轻触转动第一颗佛珠"
+                : lightSwitchSelected
+                  ? "轻触按亮第一盏灯"
+                  : incenseOfferingSelected
+                    ? "轻触敬上第一柱香"
+                    : "轻触开始本轮";
           const meritAccessibleLabel = gameStarted
             ? meritActionLabel
-            : `开始游戏；${meritActionLabel}`;
+            : `开始本轮；${meritActionLabel}`;
           meritAction.setAttribute("aria-label", meritAccessibleLabel);
           meritSrLabel.textContent = meritAccessibleLabel;
           if (lightSwitchSelected) {
@@ -4242,7 +4368,7 @@
             : "START";
           const releaseActionLabel = gameStarted
             ? "向阳澄湖水怪主题放生一尾鱼；放生记录始终计入"
-            : "开始游戏；向阳澄湖水怪主题放生一尾鱼";
+            : "开始本轮；向阳澄湖水怪主题放生一尾鱼";
           releaseAction.setAttribute("aria-label", releaseActionLabel);
           releaseSrLabel.textContent = releaseActionLabel;
           releaseHcLabel.textContent = gameStarted ? "放生一尾鱼" : "START";
@@ -5947,13 +6073,13 @@
             );
             context.fill();
 
-            const inkTitleSize = Math.max(48, Math.min(108, minSide * 0.19));
+            const inkTitleSize = Math.max(42, Math.min(72, minSide * 0.14));
             const topbarBottom =
               document.querySelector(".topbar")?.getBoundingClientRect().bottom
               || geometry.y - geometry.height * 0.5;
             const inkTitleY = Math.min(
-              geometry.y - geometry.height * 0.36,
-              topbarBottom + inkTitleSize * 0.68
+              geometry.y - geometry.height * 0.4,
+              topbarBottom + inkTitleSize * 0.72
             );
             drawPixelText(
               "爱在西园寺",
@@ -5961,7 +6087,7 @@
               inkTitleY,
               inkTitleSize,
               canvasWidth * 0.84,
-              alpha * 0.18
+              alpha * 0.46
             );
           } else if (styleId === "qingtuan-pounding") {
             paintWash(colors.washiLight, colors.lime, 0.25);
@@ -8690,6 +8816,16 @@
           context.restore();
         }
 
+        function getEasternGateCoupleBeat(time = performance.now()) {
+          const phase = getQuarterBeatPhase(time);
+          const envelope = Math.max(0, 1 - phase * 3.4);
+          return {
+            phase,
+            pulse: reducedMotion ? 0 : envelope * envelope,
+            direction: getQuarterBeatNumber(time) % 2 === 0 ? 1 : -1
+          };
+        }
+
         function drawEasternGateWhack(
           x,
           y,
@@ -8719,6 +8855,7 @@
           const archShoulderY = buildingTop + buildingHeight * 0.66;
           const pairBaseY = y + size * 0.405;
           const groundY = y + size * 0.445;
+          const coupleBeat = getEasternGateCoupleBeat(time);
 
           context.save();
           context.lineJoin = "round";
@@ -8930,7 +9067,10 @@
             shocked,
             coatColor,
             partnerColor,
-            pairIndex
+            pairIndex,
+            rhythmLift = 0,
+            rhythmScale = 1,
+            rhythmLean = 0
           }) => {
             const shake = shocked && !reducedMotion
               ? Math.sin(time * 0.085 + pairIndex * 2.2 + side) * size * 0.006 * (1 - laserProgress)
@@ -8941,8 +9081,9 @@
             const lean = kissing ? -side * 0.17 : shocked ? side * 0.14 : 0;
             const headRadius = size * 0.023;
             context.save();
-            context.translate(personX + shake, baseY - bounce);
-            context.rotate(lean);
+            context.translate(personX + shake, baseY - bounce - rhythmLift);
+            context.rotate(lean + rhythmLean);
+            context.scale(rhythmScale, rhythmScale);
 
             context.fillStyle = coatColor;
             context.strokeStyle = colors.ink;
@@ -9004,11 +9145,29 @@
               : shocked
                 ? size * 0.055
                 : 0;
-            const separation = size * (kissing ? 0.024 : 0.053) + shockSpread;
+            const rhythmWeight = kissing ? 1 : 0.72 + pairIndex * 0.08;
+            const rhythmLift = coupleBeat.pulse
+              * size
+              * (kissing ? 0.038 : 0.024)
+              * rhythmWeight;
+            const rhythmScale = 1 + coupleBeat.pulse * (kissing ? 0.1 : 0.058);
+            const rhythmLean = coupleBeat.direction
+              * (pairIndex % 2 === 0 ? -1 : 1)
+              * coupleBeat.pulse
+              * (kissing ? 0.04 : 0.075);
+            const rhythmSeparation = kissing
+              ? coupleBeat.pulse * size * -0.009
+              : coupleBeat.pulse * size * 0.004;
+            const separation =
+              size * (kissing ? 0.024 : 0.053)
+              + shockSpread
+              + rhythmSeparation;
 
             context.fillStyle = kissing ? colors.pink : colors.washiLight;
             context.strokeStyle = colors.ink;
-            context.globalAlpha = kissing ? 0.28 + beatKick * 0.18 : 0.16;
+            context.globalAlpha = kissing
+              ? 0.28 + beatKick * 0.18 + coupleBeat.pulse * 0.16
+              : 0.16 + coupleBeat.pulse * 0.08;
             context.lineWidth = Math.max(1.5, size * 0.004);
             context.beginPath();
             context.ellipse(
@@ -9032,7 +9191,10 @@
               shocked,
               coatColor: pairColors[pairIndex][0],
               partnerColor: pairColors[pairIndex][1],
-              pairIndex
+              pairIndex,
+              rhythmLift,
+              rhythmScale,
+              rhythmLean
             });
             drawPerson({
               personX: pairCenterX + separation,
@@ -9042,15 +9204,46 @@
               shocked,
               coatColor: pairColors[pairIndex][1],
               partnerColor: pairColors[pairIndex][0],
-              pairIndex
+              pairIndex,
+              rhythmLift,
+              rhythmScale,
+              rhythmLean
             });
+
+            if (coupleBeat.pulse > 0.08) {
+              context.save();
+              context.globalAlpha = coupleBeat.pulse * 0.72;
+              context.strokeStyle = kissing ? colors.pink : colors.washiLight;
+              context.lineWidth = Math.max(2, size * 0.005);
+              context.lineCap = "round";
+              for (const side of [-1, 1]) {
+                context.beginPath();
+                context.moveTo(
+                  pairCenterX + side * size * 0.074,
+                  pairBaseY - size * 0.02
+                );
+                context.lineTo(
+                  pairCenterX + side * size * 0.092,
+                  pairBaseY - size * (0.052 + coupleBeat.pulse * 0.016)
+                );
+                context.stroke();
+              }
+              context.restore();
+            }
 
             if (kissing) {
               const pulse = reducedMotion
                 ? 1
-                : 1 + Math.sin(time * 0.009) * 0.1 + beatKick * 0.08;
+                : 1
+                  + Math.sin(time * 0.009) * 0.1
+                  + beatKick * 0.08
+                  + coupleBeat.pulse * 0.18;
               const guideCenterY = pairBaseY - size * 0.125;
-              const guideRadius = size * (0.092 + beatKick * 0.012);
+              const guideRadius = size * (
+                0.092
+                + beatKick * 0.012
+                + coupleBeat.pulse * 0.012
+              );
               const heartY = pairBaseY - size * 0.255;
               context.save();
               context.lineCap = "square";
@@ -11815,7 +12008,7 @@
                 resonance: {
                   backdropText: "爱在西园寺",
                   treatment: "kashaya-rice-field-patchwork-with-pixel-title",
-                  titleOpacity: 0.18,
+                  titleOpacity: 0.46,
                   pattern: "five-column-seven-row-stitched-fields"
                 },
                 ancientDoor: {
@@ -11838,6 +12031,10 @@
                   coupleGateGapRatio: 0.152,
                   feedbackPlacement: "above-landmark-safe-zone",
                   targetGuide: "double-ring-cardinal-ticks-and-heart-leader",
+                  rhythmMotion: "quarter-beat-bounce-scale-sway-and-motion-lines",
+                  rhythmPulse: Number(
+                    getEasternGateCoupleBeat(performance.now()).pulse.toFixed(3)
+                  ),
                   couples: EASTERN_GATE_PAIR_LABELS.length,
                   targetIndex: easternGateTargetIndex,
                   targetLabel: EASTERN_GATE_PAIR_LABELS[easternGateTargetIndex],
