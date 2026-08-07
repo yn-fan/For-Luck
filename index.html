@@ -168,6 +168,10 @@
         --colorFishGold: #ffb83e;
         --colorFishBitterling: #ff5ca8;
         --colorFishSilver: #f7fbff;
+        --colorKashayaSaffron: #d9902f;
+        --colorKashayaOchre: #b8632f;
+        --colorKashayaMaroon: #702f3f;
+        --colorKashayaGold: #efbd54;
         --fontFamilyBase: "Segoe UI Variable Display", "Segoe UI", sans-serif;
         --fontFamilyInk: "Kaiti SC", "STKaiti", "KaiTi", "FangSong", serif;
         --fontSizeFortune: clamp(64px, 18vw, 92px);
@@ -200,6 +204,8 @@
         --fortuneMetaLift: -26px;
         --fortuneButtonLift: -18px;
         --fortuneButtonDepth: 24px;
+        --startActionSize: clamp(112px, 31vmin, 164px);
+        --fortuneActionSize: clamp(132px, 36vw, 168px);
         --durationReducedMotion: 1ms;
       }
 
@@ -718,6 +724,48 @@
         clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
         transform: translateX(-50%) scale(0.7);
         pointer-events: none;
+      }
+
+      body[data-game-started="false"] .stage-action::before {
+        content: "START";
+        position: absolute;
+        z-index: 3;
+        left: 50%;
+        top: 50%;
+        width: var(--startActionSize);
+        height: var(--startActionSize);
+        display: grid;
+        place-items: center;
+        color: var(--colorInk);
+        background: var(--colorWashiDeep);
+        border: var(--strokeMedium) solid var(--colorInk);
+        border-radius: var(--borderRadiusCircular);
+        box-shadow:
+          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPink),
+          calc(0px - var(--spacingHorizontalXS)) calc(0px - var(--spacingVerticalXS)) 0 var(--colorLake);
+        font-family: var(--fontFamilyMonospace);
+        font-size: var(--fontSizeBase600);
+        line-height: var(--lineHeightBase600);
+        font-weight: var(--fontWeightBold);
+        letter-spacing: var(--labelTracking);
+        transform: translate(-50%, -50%) rotate(-2deg);
+        transition:
+          transform var(--durationFast) var(--curveEasyEase),
+          background var(--durationFast) var(--curveEasyEase);
+        pointer-events: none;
+      }
+
+      body[data-game-started="false"] .stage-action:hover::before {
+        background: var(--colorAccentLime);
+        transform: translate(-50%, calc(-50% + var(--hoverOffset))) rotate(2deg);
+      }
+
+      body[data-game-started="false"] button.stage-action:focus-visible::before {
+        outline: var(--focusRingWidth) solid var(--colorWashiLight);
+        outline-offset: var(--focusRingOffset);
+        box-shadow:
+          0 0 0 calc(var(--focusRingWidth) + var(--focusRingWidth)) var(--colorInk),
+          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPink);
       }
 
       button.stage-action:focus-visible {
@@ -1370,15 +1418,24 @@
       .fortune-continue {
         position: relative;
         z-index: 99;
-        width: min(78vw, 310px);
-        min-width: 168px;
-        min-height: var(--controlMinSize);
-        padding: var(--controlPadBlock) var(--spacingHorizontalXXL);
+        width: var(--fortuneActionSize);
+        min-width: var(--fortuneActionSize);
+        height: var(--fortuneActionSize);
+        min-height: var(--fortuneActionSize);
+        display: grid;
+        place-items: center;
+        padding: var(--spacingVerticalL);
         color: var(--colorInk);
         background: var(--colorWashiDeep);
         border: var(--strokeMedium) solid var(--colorInk);
+        border-radius: var(--borderRadiusCircular);
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorLake);
+        font-size: var(--fontSizeBase300);
+        line-height: var(--lineHeightBase300);
         font-weight: var(--fontWeightBold);
+        text-align: center;
+        text-wrap: balance;
+        white-space: normal;
         cursor: pointer;
         transform: translateY(var(--fortuneButtonLift)) translateZ(var(--fortuneButtonDepth));
       }
@@ -2273,6 +2330,10 @@
           border-color: Highlight;
         }
 
+        body[data-game-started="false"] .stage-action::before {
+          display: none;
+        }
+
         .hc-label {
           display: grid;
           place-items: center;
@@ -2385,7 +2446,7 @@
             type="button"
             aria-describedby="releaseDetail gestureHelp storagePolicy"
           >
-            <span class="visually-hidden">向阳澄湖放生；PERFECT 会放生火辣蟹</span>
+            <span class="visually-hidden">向阳澄湖水怪主题放生；PERFECT 会放生火辣蟹</span>
             <span class="hc-label" aria-hidden="true">放生一尾鱼</span>
           </button>
           <div class="mode-copy">
@@ -2613,7 +2674,13 @@
         const THEME_SCHEMA_VERSION = 6;
         const INCENSE_STICK_LIMIT = 18;
         const LAKE_INK_REVEAL_DURATION = 1800;
-        const LAKE_TITLE_SCALE = 0.25;
+        const LAKE_TITLE_TEXT = "阳澄湖水怪";
+        const LAKE_TITLE_SCALE = 0.22;
+        const LAKE_MONSTER_NAME = "Lv999 窑鸡王";
+        const LAKE_MONSTER_ATTACK_CHANCE = 0.24;
+        const LAKE_MONSTER_ATTACK_DURATION_MS = 1900;
+        const LAKE_MONSTER_CHOMP_PROGRESS = 0.56;
+        const LAKE_MONSTER_RELEASE_COOLDOWN = 3;
         const SPICY_CRAB_SHELL_SCALE = 0.086;
         const EASTERN_GATE_TARGET_INTERVAL_MS = 2800;
         const EASTERN_GATE_LASER_DURATION_MS = 620;
@@ -2919,6 +2986,8 @@
         const meritSrLabel = meritAction.querySelector(".visually-hidden");
         const meritHcLabel = meritAction.querySelector(".hc-label");
         const releaseAction = document.getElementById("releaseAction");
+        const releaseSrLabel = releaseAction.querySelector(".visually-hidden");
+        const releaseHcLabel = releaseAction.querySelector(".hc-label");
         const woodfishPicker = document.getElementById("woodfishPicker");
         const woodfishPrevious = document.getElementById("woodfishPrevious");
         const woodfishNext = document.getElementById("woodfishNext");
@@ -2998,7 +3067,11 @@
           fishCrucian: cssValue("--colorFishCrucian"),
           fishGold: cssValue("--colorFishGold"),
           fishBitterling: cssValue("--colorFishBitterling"),
-          fishSilver: cssValue("--colorFishSilver")
+          fishSilver: cssValue("--colorFishSilver"),
+          kashayaSaffron: cssValue("--colorKashayaSaffron"),
+          kashayaOchre: cssValue("--colorKashayaOchre"),
+          kashayaMaroon: cssValue("--colorKashayaMaroon"),
+          kashayaGold: cssValue("--colorKashayaGold")
         };
         const pixelTextCache = new Map();
 
@@ -3123,6 +3196,7 @@
           incense: 0,
           gateLaser: 0,
           water: 0,
+          lakeMonster: 0,
           fortuneAuspicious: 0,
           fortuneInauspicious: 0,
           fortuneSpecial: 0
@@ -3162,6 +3236,12 @@
         let meritImprints = [];
         let qingtuanSplashes = [];
         let fishSchool = [];
+        let fishSerial = 0;
+        let lakeMonsterAttack = null;
+        let lakeMonsterEncounterCount = 0;
+        let lakeMonsterEatenCount = 0;
+        let lakeMonsterLastReleaseCount = Number.NEGATIVE_INFINITY;
+        let lakeMonsterAnnouncementTimer = 0;
         let woodStrikeStarted = Number.NEGATIVE_INFINITY;
         let woodStrikeFromAuto = false;
         let strikeEmojiParticles = [];
@@ -3285,6 +3365,12 @@
           easternGateMissCount = 0;
           easternGateExpiredTargetCount = 0;
           qingtuanSplashes = [];
+          lakeMonsterAttack = null;
+          lakeMonsterEncounterCount = 0;
+          lakeMonsterEatenCount = 0;
+          lakeMonsterLastReleaseCount = Number.NEGATIVE_INFINITY;
+          window.clearTimeout(lakeMonsterAnnouncementTimer);
+          lakeMonsterAnnouncementTimer = 0;
         }
 
         function registerSessionAction(time = performance.now(), fromAuto = false) {
@@ -4055,10 +4141,12 @@
           const config = MODES[mode];
           const styleSelectable = canChooseWoodfishStyle();
           const selectedWoodfishStyle = WOODFISH_STYLES[woodfishStyleIndex];
+          const gameStarted = sessionManualActionCount > 0;
           document.body.dataset.mode = mode;
           document.body.dataset.woodfishSelectable = String(styleSelectable);
           document.body.dataset.woodfishStyle = selectedWoodfishStyle.id;
           document.body.dataset.lightSwitch = lightSwitchOn ? "on" : "off";
+          document.body.dataset.gameStarted = String(gameStarted);
           document.body.style.setProperty("--rhythmPeriod", `${config.autoDelay}ms`);
           meritTab.setAttribute("aria-selected", String(mode === "merit"));
           meritTab.tabIndex = mode === "merit" ? 0 : -1;
@@ -4131,22 +4219,33 @@
                 : incenseOfferingSelected
                   ? `敬上一柱香，香炉中已有 ${incenseSticks.length} 柱香`
                   : "敲击木鱼，积攒一份功德";
-          meritAction.setAttribute("aria-label", meritActionLabel);
-          meritSrLabel.textContent = meritActionLabel;
+          const meritAccessibleLabel = gameStarted
+            ? meritActionLabel
+            : `开始游戏；${meritActionLabel}`;
+          meritAction.setAttribute("aria-label", meritAccessibleLabel);
+          meritSrLabel.textContent = meritAccessibleLabel;
           if (lightSwitchSelected) {
             meritAction.setAttribute("aria-pressed", String(lightSwitchOn));
           } else {
             meritAction.removeAttribute("aria-pressed");
           }
-          meritHcLabel.textContent = easternGateSelected
-            ? "点中亲吻情侣"
-            : prayerBeadsSelected
-              ? "转动佛珠"
-            : lightSwitchSelected
-              ? `按动开关 · 当前灯${lightSwitchOn ? "亮" : "暗"}`
-              : incenseOfferingSelected
-                ? "敬上一柱香"
-                : "敲击木鱼";
+          meritHcLabel.textContent = gameStarted
+            ? easternGateSelected
+              ? "点中亲吻情侣"
+              : prayerBeadsSelected
+                ? "转动佛珠"
+                : lightSwitchSelected
+                  ? `按动开关 · 当前灯${lightSwitchOn ? "亮" : "暗"}`
+                  : incenseOfferingSelected
+                    ? "敬上一柱香"
+                    : "敲击木鱼"
+            : "START";
+          const releaseActionLabel = gameStarted
+            ? "向阳澄湖水怪主题放生一尾鱼；放生记录始终计入"
+            : "开始游戏；向阳澄湖水怪主题放生一尾鱼";
+          releaseAction.setAttribute("aria-label", releaseActionLabel);
+          releaseSrLabel.textContent = releaseActionLabel;
+          releaseHcLabel.textContent = gameStarted ? "放生一尾鱼" : "START";
 
           globalLabel.textContent = config.globalLabel;
           const globalTotal = getGlobalTotal();
@@ -4518,6 +4617,42 @@
           bubbleGain.connect(audio.destination);
           bubble.start(now);
           bubble.stop(now + 0.22);
+        }
+
+        async function playLakeMonsterSound() {
+          const audio = await ensureAudio();
+          if (!audio) return;
+          audioEventCounts.lakeMonster += 1;
+          const now = audio.currentTime;
+
+          const growl = audio.createOscillator();
+          const growlGain = audio.createGain();
+          growl.type = "sawtooth";
+          growl.frequency.setValueAtTime(96, now);
+          growl.frequency.exponentialRampToValueAtTime(42, now + 0.46);
+          growlGain.gain.setValueAtTime(0.0001, now);
+          growlGain.gain.exponentialRampToValueAtTime(0.18, now + 0.04);
+          growlGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.52);
+          growl.connect(growlGain);
+          growlGain.connect(audio.destination);
+          growl.start(now);
+          growl.stop(now + 0.54);
+
+          const chomp = audio.createBufferSource();
+          const chompFilter = audio.createBiquadFilter();
+          const chompGain = audio.createGain();
+          chomp.buffer = noiseBuffer;
+          chompFilter.type = "bandpass";
+          chompFilter.frequency.setValueAtTime(460, now + 0.38);
+          chompFilter.Q.setValueAtTime(0.8, now + 0.38);
+          chompGain.gain.setValueAtTime(0.0001, now + 0.36);
+          chompGain.gain.exponentialRampToValueAtTime(0.24, now + 0.4);
+          chompGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.49);
+          chomp.connect(chompFilter);
+          chompFilter.connect(chompGain);
+          chompGain.connect(audio.destination);
+          chomp.start(now + 0.36);
+          chomp.stop(now + 0.5);
         }
 
         async function playFortuneSound(tone) {
@@ -5320,7 +5455,17 @@
           releaseTotal += 1;
           sessionReleaseCount += 1;
           enqueueRitualAction("release");
-          releaseDetail.textContent = `${timing.label} · 刚刚放生：${item.name}`;
+          const monsterTriggered = !reducedMotion
+            && !countIn
+            && !lakeMonsterAttack
+            && sessionReleaseCount >= 2
+            && sessionReleaseCount - lakeMonsterLastReleaseCount
+              >= LAKE_MONSTER_RELEASE_COOLDOWN
+            && Math.random() < LAKE_MONSTER_ATTACK_CHANCE
+            && startLakeMonsterAttack(fish, actionTime);
+          releaseDetail.textContent = monsterTriggered
+            ? `水怪警报 · ${LAKE_MONSTER_NAME} 正在逼近${item.name}`
+            : `${timing.label} · 刚刚放生：${item.name}`;
           const entry = projectSea(
             geometry.x,
             geometry.y,
@@ -5379,7 +5524,7 @@
             rhythmEpoch = actionTime;
           }
           const bgmReady = startBgm();
-          performCurrentAction(false, countIn, actionPoint);
+          performCurrentAction(false, countIn, countIn ? null : actionPoint);
           if (!countIn) {
             if (isMeritDuetActive() && !autoTimer) scheduleAuto();
             return;
@@ -5707,35 +5852,101 @@
 
           context.save();
           if (styleId === "resonance") {
-            paintWash(colors.washiLight, colors.purple, 0.28);
-            const halo = context.createRadialGradient(
-              geometry.x,
-              geometry.y,
-              minSide * 0.04,
-              geometry.x,
-              geometry.y,
-              minSide * 0.66
-            );
-            halo.addColorStop(0, colors.washiDeep);
-            halo.addColorStop(0.54, colors.rust);
-            halo.addColorStop(1, colors.purple);
-            context.globalAlpha = alpha * 0.2;
-            context.fillStyle = halo;
+            context.globalAlpha = alpha;
+            context.fillStyle = colors.kashayaSaffron;
             context.fillRect(0, 0, canvasWidth, canvasHeight);
-            context.strokeStyle = colors.purple;
-            context.lineWidth = Math.max(2, minSide * 0.007);
-            for (let ring = 1; ring <= 6; ring += 1) {
-              context.globalAlpha = alpha * (0.16 - ring * 0.014);
+
+            const patchWidth = Math.max(78, minSide * 0.235);
+            const patchHeight = patchWidth * 0.7;
+            const patchGap = Math.max(4, minSide * 0.012);
+            const patchColors = [
+              colors.kashayaOchre,
+              colors.kashayaMaroon,
+              colors.kashayaGold,
+              colors.rustDeep
+            ];
+            const rowCount = Math.ceil(canvasHeight / patchHeight) + 2;
+            const columnCount = Math.ceil(canvasWidth / patchWidth) + 2;
+            context.lineJoin = "miter";
+            for (let row = -1; row < rowCount; row += 1) {
+              for (let column = -1; column < columnCount; column += 1) {
+                const stagger = row % 2 === 0 ? 0 : patchWidth * 0.34;
+                const patchX = column * patchWidth - stagger;
+                const patchY = row * patchHeight;
+                const colorIndex = Math.abs(row * 5 + column * 3) % patchColors.length;
+                context.globalAlpha = alpha * (0.48 + (colorIndex % 2) * 0.08);
+                context.fillStyle = patchColors[colorIndex];
+                context.fillRect(
+                  patchX + patchGap,
+                  patchY + patchGap,
+                  patchWidth - patchGap * 2,
+                  patchHeight - patchGap * 2
+                );
+                context.globalAlpha = alpha * 0.34;
+                context.strokeStyle = colors.ink;
+                context.lineWidth = Math.max(1.5, minSide * 0.004);
+                context.strokeRect(
+                  patchX + patchGap,
+                  patchY + patchGap,
+                  patchWidth - patchGap * 2,
+                  patchHeight - patchGap * 2
+                );
+                context.globalAlpha = alpha * 0.28;
+                context.strokeStyle = colors.kashayaGold;
+                context.setLineDash([
+                  Math.max(3, minSide * 0.01),
+                  Math.max(3, minSide * 0.012)
+                ]);
+                context.strokeRect(
+                  patchX + patchGap * 1.75,
+                  patchY + patchGap * 1.75,
+                  patchWidth - patchGap * 3.5,
+                  patchHeight - patchGap * 3.5
+                );
+              }
+            }
+            context.setLineDash([]);
+
+            const fieldWidth = Math.min(canvasWidth * 0.9, minSide * 1.18);
+            const fieldHeight = Math.min(canvasHeight * 0.72, minSide * 1.36);
+            const fieldLeft = geometry.x - fieldWidth * 0.5;
+            const fieldTop = geometry.y - fieldHeight * 0.48;
+            context.globalAlpha = alpha * 0.42;
+            context.strokeStyle = colors.ink;
+            context.lineWidth = Math.max(3, minSide * 0.009);
+            context.strokeRect(fieldLeft, fieldTop, fieldWidth, fieldHeight);
+            context.globalAlpha = alpha * 0.38;
+            context.strokeStyle = colors.kashayaGold;
+            context.lineWidth = Math.max(2, minSide * 0.006);
+            for (let column = 1; column < 5; column += 1) {
+              const fieldX = fieldLeft + fieldWidth * (column / 5);
               context.beginPath();
-              context.arc(
-                geometry.x,
-                geometry.y,
-                minSide * (0.18 + ring * 0.095) + drift,
-                0,
-                Math.PI * 2
-              );
+              context.moveTo(fieldX, fieldTop);
+              context.lineTo(fieldX, fieldTop + fieldHeight);
               context.stroke();
             }
+            for (let row = 1; row < 7; row += 1) {
+              const fieldY = fieldTop + fieldHeight * (row / 7);
+              context.beginPath();
+              context.moveTo(fieldLeft, fieldY);
+              context.lineTo(fieldLeft + fieldWidth, fieldY);
+              context.stroke();
+            }
+
+            context.globalAlpha = alpha * 0.16;
+            context.fillStyle = colors.washiDeep;
+            context.beginPath();
+            context.ellipse(
+              geometry.x,
+              geometry.y,
+              minSide * 0.36,
+              minSide * 0.29,
+              0,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+
             const inkTitleSize = Math.max(48, Math.min(108, minSide * 0.19));
             const topbarBottom =
               document.querySelector(".topbar")?.getBoundingClientRect().bottom
@@ -5750,7 +5961,7 @@
               inkTitleY,
               inkTitleSize,
               canvasWidth * 0.84,
-              alpha * 0.14
+              alpha * 0.18
             );
           } else if (styleId === "qingtuan-pounding") {
             paintWash(colors.washiLight, colors.lime, 0.25);
@@ -9496,6 +9707,7 @@
             ? 0.13 + Math.random() * 0.055
             : 0.115 + Math.random() * 0.05;
           return {
+            id: ++fishSerial,
             kind,
             species: item,
             lane: 0,
@@ -9516,11 +9728,76 @@
               ? 0.18 + Math.random() * 0.16
               : 0.11 + Math.random() * 0.14,
             age: 0,
-            arrivedAt: null
+            arrivedAt: null,
+            monsterTarget: false,
+            eaten: false,
+            eatenAt: null
           };
         }
 
+        function getLakeMonsterAttackProgress(time = performance.now()) {
+          if (!lakeMonsterAttack) return null;
+          return Math.min(
+            1,
+            Math.max(
+              0,
+              (time - lakeMonsterAttack.startedAt) / LAKE_MONSTER_ATTACK_DURATION_MS
+            )
+          );
+        }
+
+        function startLakeMonsterAttack(fish, time = performance.now(), forced = false) {
+          if (!fish || lakeMonsterAttack) return false;
+          lakeMonsterAttack = {
+            fishId: fish.id,
+            speciesName: fish.species.name,
+            startedAt: time,
+            lane: Math.max(-0.62, Math.min(0.62, fish.targetLane * 0.58)),
+            depth: 0.15,
+            eaten: false,
+            forced
+          };
+          fish.monsterTarget = true;
+          fish.targetLane = lakeMonsterAttack.lane;
+          lakeMonsterEncounterCount += 1;
+          lakeMonsterLastReleaseCount = sessionReleaseCount;
+          window.clearTimeout(lakeMonsterAnnouncementTimer);
+          lakeMonsterAnnouncementTimer = window.setTimeout(() => {
+            if (!lakeMonsterAttack || lakeMonsterAttack.fishId !== fish.id) return;
+            releaseDetail.textContent =
+              `${LAKE_MONSTER_NAME} 吃掉了${fish.species.name} · 放生仍已计入`;
+            announce(
+              `${LAKE_MONSTER_NAME} 从水下冲出，吃掉了刚放生的${fish.species.name}；放生记录仍已计入`
+            );
+          }, reducedMotion ? 20 : LAKE_MONSTER_ATTACK_DURATION_MS * LAKE_MONSTER_CHOMP_PROGRESS);
+          void playLakeMonsterSound();
+          return true;
+        }
+
+        function updateLakeMonster(time = performance.now()) {
+          const progress = getLakeMonsterAttackProgress(time);
+          if (progress === null) return;
+          const targetFish = fishSchool.find(
+            (fish) => fish.id === lakeMonsterAttack.fishId
+          );
+          if (targetFish && !lakeMonsterAttack.eaten) {
+            targetFish.targetLane = lakeMonsterAttack.lane;
+            targetFish.speed = Math.min(targetFish.speed, 0.095);
+            if (progress >= LAKE_MONSTER_CHOMP_PROGRESS) {
+              targetFish.eaten = true;
+              targetFish.eatenAt = targetFish.age;
+              targetFish.monsterTarget = false;
+              lakeMonsterAttack.eaten = true;
+              lakeMonsterEatenCount += 1;
+            }
+          }
+          if (progress >= 1) {
+            lakeMonsterAttack = null;
+          }
+        }
+
         function updateFish(delta) {
+          updateLakeMonster();
           if (reducedMotion) return;
           for (const fish of fishSchool) {
             const spicyCrab = fish.kind === "spicy-crab";
@@ -9564,6 +9841,11 @@
           fishSchool = fishSchool.filter(
             (fish) =>
               fish.age < 18
+              && (
+                !fish.eaten
+                || fish.eatenAt === null
+                || fish.age - fish.eatenAt < 0.18
+              )
               && (
                 fish.arrivedAt === null
                 || fish.age - fish.arrivedAt < 1.8
@@ -9889,6 +10171,281 @@
           context.restore();
         }
 
+        function traceLakeMonsterHead(size, mouth = 0) {
+          const jawDrop = size * 0.12 * mouth;
+          context.beginPath();
+          context.moveTo(-size * 0.34, size * 0.52);
+          context.bezierCurveTo(
+            -size * 0.42,
+            size * 0.18,
+            -size * 0.38,
+            -size * 0.18,
+            -size * 0.14,
+            -size * 0.35
+          );
+          context.bezierCurveTo(
+            size * 0.02,
+            -size * 0.48,
+            size * 0.2,
+            -size * 0.38,
+            size * 0.25,
+            -size * 0.22
+          );
+          context.lineTo(size * 0.64, -size * 0.08);
+          context.lineTo(size * 0.28, size * 0.035);
+          context.lineTo(size * 0.61, size * 0.14 + jawDrop);
+          context.lineTo(size * 0.2, size * 0.19 + jawDrop * 0.28);
+          context.bezierCurveTo(
+            size * 0.08,
+            size * 0.38,
+            -size * 0.04,
+            size * 0.5,
+            -size * 0.12,
+            size * 0.62
+          );
+          context.lineTo(-size * 0.34, size * 0.52);
+          context.closePath();
+        }
+
+        function drawLakeMonsterHead(x, y, size, alpha, mouth = 0, detailed = false) {
+          context.save();
+          context.translate(x, y);
+          context.globalAlpha = alpha;
+          context.fillStyle = colors.ink;
+          context.strokeStyle = colors.ink;
+          context.lineWidth = Math.max(2, size * 0.035);
+          traceLakeMonsterHead(size, mouth);
+          context.fill();
+          context.stroke();
+
+          const combLobes = [
+            { x: -0.17, y: -0.4, rx: 0.11, ry: 0.18, rotation: -0.42 },
+            { x: -0.01, y: -0.47, rx: 0.12, ry: 0.2, rotation: -0.08 },
+            { x: 0.15, y: -0.4, rx: 0.1, ry: 0.17, rotation: 0.34 }
+          ];
+          for (const lobe of combLobes) {
+            context.beginPath();
+            context.ellipse(
+              size * lobe.x,
+              size * lobe.y,
+              size * lobe.rx,
+              size * lobe.ry,
+              lobe.rotation,
+              0,
+              Math.PI * 2
+            );
+            context.fill();
+          }
+
+          if (detailed) {
+            context.fillStyle = colors.kashayaGold;
+            context.beginPath();
+            context.moveTo(size * 0.25, -size * 0.2);
+            context.lineTo(size * 0.64, -size * 0.08);
+            context.lineTo(size * 0.28, size * 0.035);
+            context.closePath();
+            context.fill();
+            context.beginPath();
+            context.moveTo(size * 0.28, size * 0.035);
+            context.lineTo(size * 0.61, size * 0.14 + size * 0.12 * mouth);
+            context.lineTo(size * 0.2, size * 0.19 + size * 0.034 * mouth);
+            context.closePath();
+            context.fill();
+
+            context.fillStyle = colors.washiLight;
+            context.beginPath();
+            context.arc(size * 0.09, -size * 0.18, size * 0.055, 0, Math.PI * 2);
+            context.fill();
+            context.fillStyle = colors.pink;
+            context.beginPath();
+            context.arc(size * 0.112, -size * 0.17, size * 0.024, 0, Math.PI * 2);
+            context.fill();
+            context.strokeStyle = colors.washiLight;
+            context.lineWidth = Math.max(2, size * 0.034);
+            context.beginPath();
+            context.moveTo(-size * 0.01, -size * 0.29);
+            context.lineTo(size * 0.17, -size * 0.23);
+            context.stroke();
+          }
+          context.restore();
+        }
+
+        function drawLakeMonsterNameplate(x, y, size, alpha) {
+          const fontSize = Math.max(11, Math.min(19, size * 0.14));
+          context.save();
+          context.font =
+            `${cssValue("--fontWeightBold")} ${fontSize}px ${cssValue("--fontFamilyMonospace")}`;
+          const labelWidth = Math.min(
+            canvasWidth * 0.78,
+            context.measureText(LAKE_MONSTER_NAME).width + fontSize * 2
+          );
+          const labelHeight = fontSize * 2.2;
+          context.translate(x, y);
+          context.globalAlpha = alpha * 0.48;
+          context.fillStyle = colors.pink;
+          context.fillRect(
+            -labelWidth * 0.5 + Math.max(3, fontSize * 0.25),
+            -labelHeight * 0.5 + Math.max(3, fontSize * 0.25),
+            labelWidth,
+            labelHeight
+          );
+          context.globalAlpha = alpha;
+          context.fillStyle = colors.ink;
+          context.strokeStyle = colors.washiLight;
+          context.lineWidth = Math.max(2, fontSize * 0.16);
+          context.fillRect(-labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight);
+          context.strokeRect(-labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight);
+          context.fillStyle = colors.washiLight;
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillText(LAKE_MONSTER_NAME, 0, -fontSize * 0.12);
+          context.fillStyle = colors.rustDeep;
+          context.fillRect(
+            -labelWidth * 0.4,
+            labelHeight * 0.27,
+            labelWidth * 0.8,
+            Math.max(2, fontSize * 0.13)
+          );
+          context.fillStyle = colors.lime;
+          context.fillRect(
+            -labelWidth * 0.4,
+            labelHeight * 0.27,
+            labelWidth * 0.7,
+            Math.max(2, fontSize * 0.13)
+          );
+          context.restore();
+        }
+
+        function drawLakeMonsterShadow(x, y, width, height, scale, time) {
+          const lurkPhase = reducedMotion
+            ? 0.58
+            : 0.5 + Math.sin(time * 0.00072) * 0.5;
+          const lane = reducedMotion
+            ? -0.18
+            : Math.sin(time * 0.00024) * 0.34;
+          const projection = projectSea(x, y, width, height, lane, 0.52);
+          const headSize = scale * (0.29 + lurkPhase * 0.055);
+          const activeFade = lakeMonsterAttack ? 0.32 : 1;
+          const shadowAlpha = (0.085 + lurkPhase * 0.075) * activeFade;
+          context.save();
+          context.translate(projection.x, projection.y);
+          context.scale(1, 0.74);
+          context.translate(-projection.x, -projection.y);
+          drawLakeMonsterHead(
+            projection.x,
+            projection.y + headSize * 0.12,
+            headSize,
+            shadowAlpha,
+            0,
+            false
+          );
+          context.restore();
+          drawLakeMonsterNameplate(
+            projection.x,
+            projection.y - headSize * 0.54,
+            headSize,
+            shadowAlpha * 0.9
+          );
+        }
+
+        function drawLakeMonsterAttack(x, y, width, height, scale, time) {
+          const progress = getLakeMonsterAttackProgress(time);
+          if (progress === null || !lakeMonsterAttack) return;
+          const targetFish = fishSchool.find(
+            (fish) => fish.id === lakeMonsterAttack.fishId
+          );
+          const anchor = targetFish
+            ? projectSea(x, y, width, height, targetFish.lane, targetFish.depth)
+            : projectSea(
+                x,
+                y,
+                width,
+                height,
+                lakeMonsterAttack.lane,
+                lakeMonsterAttack.depth
+              );
+          const enter = Math.min(1, progress / 0.28);
+          const exit = Math.min(1, (1 - progress) / 0.24);
+          const rise = Math.min(
+            1 - Math.pow(1 - enter, 3),
+            1 - Math.pow(1 - Math.max(0, exit), 3)
+          );
+          const headSize = scale * 0.34;
+          const headY = anchor.y + headSize * (0.52 - rise * 0.86);
+          const mouth = Math.max(
+            0,
+            1 - Math.abs(progress - LAKE_MONSTER_CHOMP_PROGRESS) / 0.14
+          );
+
+          context.save();
+          context.strokeStyle = colors.washiLight;
+          context.lineWidth = Math.max(2, scale * 0.012);
+          context.globalAlpha = rise * 0.82;
+          context.beginPath();
+          context.ellipse(
+            anchor.x,
+            anchor.y + scale * 0.045,
+            scale * (0.13 + rise * 0.12),
+            scale * (0.035 + rise * 0.026),
+            0,
+            0,
+            Math.PI * 2
+          );
+          context.stroke();
+          context.strokeStyle = colors.lakeDeep;
+          for (let splash = 0; splash < 7; splash += 1) {
+            const direction = -1 + splash / 3;
+            const splashHeight = scale * (0.045 + (splash % 3) * 0.022) * rise;
+            context.beginPath();
+            context.moveTo(
+              anchor.x + direction * scale * 0.085,
+              anchor.y + scale * 0.035
+            );
+            context.quadraticCurveTo(
+              anchor.x + direction * scale * 0.12,
+              anchor.y - splashHeight,
+              anchor.x + direction * scale * 0.16,
+              anchor.y - splashHeight * 0.2
+            );
+            context.stroke();
+          }
+          context.restore();
+
+          drawLakeMonsterHead(anchor.x, headY, headSize, rise, mouth, true);
+          drawLakeMonsterNameplate(
+            anchor.x,
+            headY - headSize * 0.72,
+            headSize,
+            rise
+          );
+
+          const chompFlash = Math.max(
+            0,
+            1 - Math.abs(progress - LAKE_MONSTER_CHOMP_PROGRESS) / 0.075
+          );
+          if (chompFlash > 0) {
+            context.save();
+            context.translate(anchor.x + headSize * 0.48, headY + headSize * 0.04);
+            context.strokeStyle = colors.washiDeep;
+            context.lineWidth = Math.max(3, scale * 0.013);
+            context.globalAlpha = chompFlash;
+            for (let ray = 0; ray < 8; ray += 1) {
+              const angle = (ray / 8) * Math.PI * 2;
+              context.beginPath();
+              context.moveTo(
+                Math.cos(angle) * headSize * 0.22,
+                Math.sin(angle) * headSize * 0.22
+              );
+              context.lineTo(
+                Math.cos(angle) * headSize * 0.42,
+                Math.sin(angle) * headSize * 0.42
+              );
+              context.stroke();
+            }
+            context.restore();
+          }
+        }
+
         function getLakeInkProgress(time = performance.now()) {
           if (reducedMotion || !isReleaseStyle(woodfishStyleIndex)) return 1;
           return Math.min(
@@ -9903,7 +10460,7 @@
         function drawLakeInkTitle(x, y, titleSize, time) {
           const progress = getLakeInkProgress(time);
           if (progress <= 0) return;
-          const characters = [..."阳澄湖"];
+          const characters = [...LAKE_TITLE_TEXT];
           const advance = titleSize * 0.82;
           const totalWidth = advance * characters.length;
           const startX = -totalWidth * 0.5 + advance * 0.5;
@@ -9948,7 +10505,14 @@
           context.closePath();
           context.fill();
 
-          const lakeTitleSize = Math.max(56, Math.min(148, scale * LAKE_TITLE_SCALE));
+          const lakeTitleSize = Math.max(
+            44,
+            Math.min(
+              132,
+              scale * LAKE_TITLE_SCALE,
+              (canvasWidth * 0.88) / (LAKE_TITLE_TEXT.length * 0.82)
+            )
+          );
           const topbarBottom =
             document.querySelector(".topbar")?.getBoundingClientRect().bottom
             || y - height * 0.5;
@@ -10075,6 +10639,7 @@
           context.fillText("🫳", entry.x, entry.y + scale * 0.004);
 
           updateFish(delta);
+          drawLakeMonsterShadow(x, y, width, height, scale, time);
           const projectedFish = fishSchool.map((fish) => {
             const projection = projectSea(x, y, width, height, fish.lane, fish.depth);
             const steer = fish.targetLane - fish.lane;
@@ -10086,6 +10651,7 @@
             };
           }).sort((first, second) => second.fish.depth - first.fish.depth);
           for (const item of projectedFish) {
+            if (item.fish.eaten) continue;
             if (item.fish.kind === "spicy-crab") {
               drawSpicyCrab(
                 item.fish,
@@ -10098,6 +10664,7 @@
               drawFish(item.fish, item.projection, scale, item.angle, item.depthScale);
             }
           }
+          drawLakeMonsterAttack(x, y, width, height, scale, time);
 
           context.restore();
         }
@@ -11051,6 +11618,9 @@
           prayerBeadLastFrame = performance.now();
           ripples = [];
           bursts = [];
+          lakeMonsterAttack = null;
+          window.clearTimeout(lakeMonsterAnnouncementTimer);
+          lakeMonsterAnnouncementTimer = 0;
         };
         if (reducedMotionQuery.addEventListener) {
           reducedMotionQuery.addEventListener("change", handleReducedMotion);
@@ -11153,6 +11723,26 @@
               y: region.y + region.height * 0.5
             });
           },
+          triggerLakeMonster: () => {
+            const releaseIndex = WOODFISH_STYLES.findIndex(
+              (style) => style.id === "release"
+            );
+            if (!isReleaseStyle()) {
+              setWoodfishStyle(releaseIndex, false, true);
+            }
+            if (lakeMonsterAttack) {
+              const previousTarget = fishSchool.find(
+                (fish) => fish.id === lakeMonsterAttack.fishId
+              );
+              if (previousTarget) previousTarget.monsterTarget = false;
+              lakeMonsterAttack = null;
+            }
+            const fish = [...fishSchool].reverse().find(
+              (item) => !item.eaten && item.kind === "fish"
+            ) || createReleasedFish(species[0]);
+            if (!fishSchool.includes(fish)) fishSchool.push(fish);
+            return startLakeMonsterAttack(fish, performance.now(), true);
+          },
           previousWoodfishStyle: () => cycleWoodfishStyle(-1, false),
           nextWoodfishStyle: () => cycleWoodfishStyle(1, false),
           toggleAuto,
@@ -11224,8 +11814,9 @@
                 },
                 resonance: {
                   backdropText: "爱在西园寺",
-                  treatment: "low-opacity-pixel",
-                  opacity: 0.14
+                  treatment: "kashaya-rice-field-patchwork-with-pixel-title",
+                  titleOpacity: 0.18,
+                  pattern: "five-column-seven-row-stitched-fields"
                 },
                 ancientDoor: {
                   plaque: "天香里45号",
@@ -11313,10 +11904,19 @@
                 ? Math.round(getCyberOffbeatPhaseMs())
                 : null,
               fish: fishSchool.length,
+              gameStart: {
+                visible: sessionManualActionCount === 0,
+                shape: "circle",
+                label: "START"
+              },
+              fortuneAction: {
+                shape: "circle"
+              },
               spicyCrabs: fishSchool.filter(
                 (creature) => creature.kind === "spicy-crab"
               ).length,
               lakeInk: {
+                text: LAKE_TITLE_TEXT,
                 progress: Number(getLakeInkProgress().toFixed(3)),
                 durationMs: reducedMotion ? 0 : LAKE_INK_REVEAL_DURATION,
                 style: "staggered-low-opacity-pixel",
@@ -11326,7 +11926,21 @@
               releaseVisuals: {
                 background: "full-viewport-water",
                 crabShellScale: SPICY_CRAB_SHELL_SCALE,
-                shellDecoration: "vector-fire-mark"
+                shellDecoration: "vector-fire-mark",
+                lakeMonster: {
+                  name: LAKE_MONSTER_NAME,
+                  treatment: "lurking-chicken-head-shadow-and-surface-chomp",
+                  attackChance: LAKE_MONSTER_ATTACK_CHANCE,
+                  cooldownReleases: LAKE_MONSTER_RELEASE_COOLDOWN,
+                  durationMs: reducedMotion ? 0 : LAKE_MONSTER_ATTACK_DURATION_MS,
+                  active: Boolean(lakeMonsterAttack),
+                  progress: getLakeMonsterAttackProgress() === null
+                    ? null
+                    : Number(getLakeMonsterAttackProgress().toFixed(3)),
+                  encounters: lakeMonsterEncounterCount,
+                  eaten: lakeMonsterEatenCount,
+                  countBehavior: "release-always-counts"
+                }
               },
               fishDirections: fishSchool.slice(-8).map((fish) => ({
                 kind: fish.kind,
