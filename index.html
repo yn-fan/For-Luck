@@ -1687,6 +1687,9 @@
 
       .catch-lyric-current {
         position: relative;
+        justify-self: center;
+        width: max-content;
+        max-width: 100%;
         min-width: 0;
         color: var(--colorWashiLight);
         font-family: var(--fontFamilyMonospace);
@@ -1706,12 +1709,12 @@
         position: absolute;
         inset: 0;
         overflow: hidden;
-        color: transparent;
-        background: var(--colorLakeDeep);
-        background-clip: text;
-        -webkit-background-clip: text;
+        color: var(--colorLakeDeep);
+        -webkit-text-fill-color: var(--colorLakeDeep);
+        background: none;
         clip-path: inset(0 calc(100% - var(--lyric-progress)) 0 0);
-        -webkit-text-stroke: 2px var(--colorInk);
+        -webkit-text-stroke: 0;
+        text-shadow: 1px 1px 0 var(--colorInk);
         transition: clip-path 80ms linear;
       }
 
@@ -4367,6 +4370,7 @@
         .catch-lyric-progress,
         .catch-lyric-next {
           color: CanvasText !important;
+          -webkit-text-fill-color: CanvasText !important;
           background: none;
           -webkit-text-stroke: 0;
           text-shadow: none;
@@ -4374,6 +4378,7 @@
 
         .catch-lyric-progress {
           color: Highlight !important;
+          -webkit-text-fill-color: Highlight !important;
         }
 
         .catch-lyric-current {
