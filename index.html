@@ -1090,6 +1090,8 @@
 
       .stage {
         position: relative;
+        grid-row: 2;
+        grid-column: 1;
         align-self: center;
         justify-self: center;
         width: var(--stageSize);
@@ -1508,9 +1510,7 @@
         min-width: 0;
         min-height: var(--controlMinSize);
         display: none;
-        grid-template-columns: auto minmax(0, 1fr);
-        align-items: center;
-        gap: var(--spacingHorizontalS);
+        place-items: center;
         padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
         color: var(--colorWashiLight);
         background: var(--colorInk);
@@ -1537,15 +1537,6 @@
         white-space: nowrap;
       }
 
-      .cyber-catch-button small {
-        color: var(--colorWashiDeep);
-        font-size: var(--fontSizeBase100);
-        line-height: var(--lineHeightBase100);
-        font-weight: var(--fontWeightBold);
-        text-align: end;
-        white-space: nowrap;
-      }
-
       .cyber-catch-button:hover:not([aria-disabled="true"]) {
         color: var(--colorInk);
         background: var(--colorAccentLime);
@@ -1553,8 +1544,7 @@
         transform: translateY(var(--hoverOffset)) rotate(0.4deg) skewX(-2deg);
       }
 
-      .cyber-catch-button:hover:not([aria-disabled="true"]) strong,
-      .cyber-catch-button:hover:not([aria-disabled="true"]) small {
+      .cyber-catch-button:hover:not([aria-disabled="true"]) strong {
         color: var(--colorInk);
       }
 
@@ -1643,10 +1633,12 @@
 
       .catch-lyrics {
         --lyric-progress: 0%;
-        position: absolute;
+        position: relative;
         z-index: 9;
-        left: 50%;
-        bottom: max(var(--spacingVerticalXS), env(safe-area-inset-bottom));
+        grid-row: 2;
+        grid-column: 1;
+        align-self: end;
+        justify-self: center;
         width: min(calc(100% - var(--spacingHorizontalL)), 620px);
         min-height: 58px;
         display: grid;
@@ -1654,7 +1646,6 @@
         gap: 2px;
         padding: var(--spacingVerticalXXS) var(--spacingHorizontalS);
         text-align: center;
-        transform: translateX(-50%);
         pointer-events: none;
         isolation: isolate;
       }
@@ -1716,12 +1707,7 @@
         inset: 0;
         overflow: hidden;
         color: transparent;
-        background: linear-gradient(
-          90deg,
-          var(--colorAccentLime) 0 42%,
-          var(--colorAccentPink) 68%,
-          var(--colorAccentPurple) 100%
-        );
+        background: var(--colorLakeDeep);
         background-clip: text;
         -webkit-background-clip: text;
         clip-path: inset(0 calc(100% - var(--lyric-progress)) 0 0);
@@ -3702,7 +3688,6 @@
         }
 
         .catch-lyrics {
-          bottom: max(2px, env(safe-area-inset-bottom));
           width: calc(100% - var(--spacingHorizontalS));
           min-height: 50px;
           padding-inline: var(--spacingHorizontalXS);
@@ -4363,8 +4348,7 @@
           box-shadow: none;
         }
 
-        .cyber-catch-button strong,
-        .cyber-catch-button small {
+        .cyber-catch-button strong {
           color: ButtonText;
         }
 
@@ -4388,6 +4372,10 @@
           text-shadow: none;
         }
 
+        .catch-lyric-progress {
+          color: Highlight !important;
+        }
+
         .catch-lyric-current {
           font-weight: var(--fontWeightBold);
           text-decoration: underline;
@@ -4399,8 +4387,7 @@
         }
 
         .cyber-catch-button[aria-disabled="true"],
-        .cyber-catch-button[aria-disabled="true"] strong,
-        .cyber-catch-button[aria-disabled="true"] small {
+        .cyber-catch-button[aria-disabled="true"] strong {
           color: GrayText;
           border-color: GrayText;
         }
@@ -4633,17 +4620,6 @@
               <span>准备抓啵</span>
             </span>
           </button>
-          <div
-            class="catch-lyrics"
-            id="catchLyrics"
-            role="group"
-            aria-label="当前 KTV 歌词与下一句"
-            aria-live="off"
-            hidden
-          >
-            <div class="catch-lyric-current" id="catchLyricCurrent"><span id="catchLyricCurrentText"></span><span class="catch-lyric-progress" id="catchLyricProgressText" aria-hidden="true"></span></div>
-            <div class="catch-lyric-next" id="catchLyricNext"></div>
-          </div>
         </section>
 
         <section
@@ -4689,6 +4665,18 @@
         <span id="idleHint" class="idle-hint" aria-hidden="true" hidden></span>
       </div>
 
+      <div
+        class="catch-lyrics"
+        id="catchLyrics"
+        role="group"
+        aria-label="当前 KTV 歌词与下一句"
+        aria-live="off"
+        hidden
+      >
+        <div class="catch-lyric-current" id="catchLyricCurrent"><span id="catchLyricCurrentText"></span><span class="catch-lyric-progress" id="catchLyricProgressText" aria-hidden="true"></span></div>
+        <div class="catch-lyric-next" id="catchLyricNext"></div>
+      </div>
+
       <aside class="stats" aria-labelledby="statsTitle">
         <p class="stats-title" id="statsTitle">功德记录</p>
         <div class="tools" role="group" aria-label="游戏辅助与体验设置">
@@ -4700,8 +4688,7 @@
             data-active="false"
             hidden
           >
-            <strong>赛博代抓 <span id="cyberCatchUses">×3</span></strong>
-            <small id="cyberCatchHint">−10 功德 · 冻结亲嘴 3S</small>
+            <strong id="cyberCatchLabel">赛博代抓 · 10功德 ×3</strong>
           </button>
           <button
             class="tool-button"
@@ -5012,45 +4999,30 @@
         const CATCH_DURATION_FALLBACK_SECONDS = 60.072;
         const CATCH_COUNTDOWN_SECONDS = 2;
         const CATCH_LYRIC_CUES = Object.freeze([
-          ["佛了 for love", 4, 8],
-          ["不要　Kiss", 10, 12],
-          ["不要在苏州园区亲嘴", 12, 16],
-          ["不要　Kiss", 16, 18],
-          ["不要在苏州园区亲嘴", 18, 22],
-          ["他不是不爱你", 24, 28],
-          ["他是要赶回上海的高铁", 28, 32],
-          ["不　要", 34, 36],
-          ["不要在", 36, 38],
-          ["苏　　州", 38, 40],
-          ["园区亲嘴", 40, 42],
-          ["金鸡湖边聊房价", 44, 48],
-          ["基数不配只能抱一下", 48, 52],
-          ["独墅湖边做对照组", 52, 56],
-          ["亲一下也要发论文吗", 56, 60],
-          ["苏式绿豆汤", 60, 64],
-          ["绿豆是绿豆　汤是汤", 64, 68],
-          ["你是你", 68, 70],
-          ["我是忙", 70, 72],
-          ["不要　Kiss", 74, 76],
-          ["不要在苏州园区亲嘴", 76, 80],
-          ["不要　Kiss", 80, 82],
-          ["不要在苏州园区亲嘴", 82, 86],
-          ["他不是不爱你", 88, 92],
-          ["他是要赶回上海的高铁", 92, 96],
-          ["不要　Kiss", 98, 100],
-          ["不要在苏州园区亲嘴", 100, 104],
-          ["不要　Kiss", 104, 106],
-          ["不要在苏州园区亲嘴", 106, 110],
-          ["不要　Kiss", 112, 114],
-          ["园区　亲嘴", 114, 118],
-          ["佛了", 118, 120],
-          ["for love", 120, 124]
-        ].map(([text, startBeat, endBeat]) => Object.freeze({
+          ["佛了 for love", 0.36, 2.18, 0],
+          ["不要　Kiss", 2.3, 3.34, 4.25],
+          ["不要在苏州园区亲嘴", 3.76, 6.82, 7.5],
+          ["不要　Kiss", 9.78, 10.64, 20.75],
+          ["不要在苏州园区亲嘴", 10.86, 14.46, 23],
+          ["他不是不爱你", 15.84, 18.58, 34],
+          ["他是要赶回上海的高铁", 19.46, 23.94, 42],
+          ["不　要", 26.72, 28, 58],
+          ["不要在", 28.44, 28.76, 61.75],
+          ["苏　　州", 28.76, 29.38, 62.5],
+          ["园区亲嘴", 29.38, 31.56, 64],
+          ["金鸡湖边聊房价", 37.84, 40.26, 82.5],
+          ["基数不配只能抱一下", 40.7, 43.82, 88.75],
+          ["独墅湖边做对照组", 44.42, 47.56, 97],
+          ["亲一下也要发论文吗", 47.86, 51.4, 104.5],
+          ["苏式绿豆汤", 52.12, 53.34, 114],
+          ["绿豆是绿豆　汤是汤", 53.7, 57.06, 117.25],
+          ["你是你", 57.62, 58.54, 126],
+          ["我是忙", 58.72, 59.4, 128.5]
+        ].map(([text, start, end, anchorBeat]) => Object.freeze({
           text,
-          start: BGM_PROFILES.catch.beatOffsetSeconds
-            + startBeat * BGM_PROFILES.catch.quarterMs / 1000,
-          end: BGM_PROFILES.catch.beatOffsetSeconds
-            + endBeat * BGM_PROFILES.catch.quarterMs / 1000
+          start,
+          end,
+          anchorBeat
         })));
         const CATCH_MERIT_COST = 10;
         const CATCH_MAX_PAIRS = 20;
@@ -5533,8 +5505,7 @@
         const catchLyricProgressText = document.getElementById("catchLyricProgressText");
         const catchLyricNext = document.getElementById("catchLyricNext");
         const cyberCatchButton = document.getElementById("cyberCatchButton");
-        const cyberCatchUses = document.getElementById("cyberCatchUses");
-        const cyberCatchHint = document.getElementById("cyberCatchHint");
+        const cyberCatchLabel = document.getElementById("cyberCatchLabel");
         const releaseAction = document.getElementById("releaseAction");
         const releaseSrLabel = releaseAction.querySelector(".visually-hidden");
         const releaseHcLabel = releaseAction.querySelector(".hc-label");
@@ -5982,7 +5953,13 @@
           const active = isCyberCatchActive();
           const hasTarget = easternGateTargetIndices.size > 0;
           const hasMerit = getAvailableMerit() >= CYBER_CATCH_COST;
-          cyberCatchUses.textContent = `×${cyberCatchUsesRemaining}`;
+          cyberCatchLabel.textContent = active
+            ? `赛博代抓 · 冻结 ${getCyberCatchTimeLabel()}`
+            : cyberCatchUsesRemaining <= 0
+              ? "赛博代抓 · 已用完"
+              : !hasMerit
+                ? "赛博代抓 · 功德不足"
+                : `赛博代抓 · 10功德 ×${cyberCatchUsesRemaining}`;
           cyberCatchButton.dataset.active = String(active);
           cyberCatchButton.dataset.ready = String(
             !active && hasTarget && hasMerit && cyberCatchUsesRemaining > 0
@@ -5992,15 +5969,6 @@
             "aria-disabled",
             String(active || !hasMerit || cyberCatchUsesRemaining <= 0)
           );
-          cyberCatchHint.textContent = active
-            ? `探照冰冻 · ${getCyberCatchTimeLabel()}`
-            : cyberCatchUsesRemaining <= 0
-              ? "本局次数已用完"
-              : !hasMerit
-                ? "功德不足 10"
-                : hasTarget
-                  ? "−10 功德 · 冻结亲嘴 3S"
-                  : "等情侣亲上再按";
           cyberCatchButton.setAttribute(
             "aria-label",
             active
