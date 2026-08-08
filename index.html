@@ -1709,18 +1709,21 @@
         position: absolute;
         inset: 0;
         overflow: hidden;
-        color: var(--colorLakeDeep);
-        -webkit-text-fill-color: var(--colorLakeDeep);
+        color: #168cff;
+        -webkit-text-fill-color: #168cff;
         background: none;
         clip-path: inset(0 calc(100% - var(--lyric-progress)) 0 0);
-        -webkit-text-stroke: 0;
-        text-shadow: 1px 1px 0 var(--colorInk);
+        paint-order: stroke fill;
+        -webkit-text-stroke: 1.2px var(--colorWashiLight);
+        text-shadow:
+          0 0 1px var(--colorWashiLight),
+          1px 1px 0 var(--colorInk);
         transition: clip-path 80ms linear;
       }
 
       .catch-lyric-next {
         min-height: 1em;
-        color: var(--colorWashiDeep);
+        color: var(--colorWashiLight);
         font-family: var(--fontFamilyMonospace);
         font-size: clamp(10px, 3vw, 13px);
         line-height: 1.1;
@@ -1886,6 +1889,19 @@
         gap: var(--spacingHorizontalXXL);
         width: 100%;
         margin: 0;
+      }
+
+      body[data-experience="catch"][data-game-started="true"] .stats-grid {
+        display: none;
+      }
+
+      body[data-experience="catch"][data-game-started="false"] .stats-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+      }
+
+      body[data-experience="catch"][data-game-started="false"] .stats-grid .stat:last-child {
+        display: none;
       }
 
       .stats > .tools {
@@ -2849,7 +2865,7 @@
         z-index: 6;
         inset: 0;
         display: grid;
-        place-items: center;
+        place-items: start center;
         overflow-x: hidden;
         overflow-y: auto;
         padding:
@@ -2868,7 +2884,7 @@
         position: relative;
         isolation: isolate;
         width: min(94vw, 580px);
-        height: auto;
+        min-height: clamp(700px, 84vh, 790px);
         display: grid;
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto auto auto auto auto auto auto auto;
@@ -2898,6 +2914,7 @@
         clip-path: polygon(3% 0, 98% 2%, 100% 93%, 94% 100%, 2% 97%, 0 6%);
         transform: rotate(-0.5deg);
         animation: fortune-draw var(--durationFortuneMotion) var(--curveDecelerateMax);
+        margin-block: auto;
       }
 
       .catch-result-card::before,
@@ -2958,6 +2975,62 @@
       .catch-result-aura span:nth-child(3) { right: 2%; bottom: 28%; animation-delay: 240ms; transform: rotate(-4deg); }
       .catch-result-aura span:nth-child(4) { bottom: 4%; left: 3%; animation-delay: 360ms; transform: rotate(5deg); }
 
+      .catch-result-celebration {
+        position: absolute;
+        z-index: 0;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .catch-result-emoji {
+        position: absolute;
+        font-size: clamp(18px, 5vw, 30px);
+        filter: drop-shadow(2px 2px 0 var(--colorWashiLight));
+        opacity: 0.76;
+        animation: catch-result-emoji-float 2200ms var(--curveEasyEase) infinite alternate;
+      }
+
+      .catch-result-emoji:nth-child(1) { top: 8%; left: 4%; }
+      .catch-result-emoji:nth-child(2) { top: 34%; right: 3%; animation-delay: 260ms; }
+      .catch-result-emoji:nth-child(3) { bottom: 21%; left: 3%; animation-delay: 520ms; }
+      .catch-result-emoji:nth-child(4) { bottom: 7%; right: 24%; animation-delay: 780ms; }
+
+      .catch-result-firework {
+        position: absolute;
+        width: 70px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        opacity: 0.68;
+        background:
+          repeating-conic-gradient(
+            from 0deg,
+            var(--colorAccentPink) 0 4deg,
+            transparent 4deg 24deg
+          );
+        mask-image: radial-gradient(circle, transparent 0 24%, #000 26% 42%, transparent 44%);
+        -webkit-mask-image: radial-gradient(circle, transparent 0 24%, #000 26% 42%, transparent 44%);
+        animation: catch-result-firework-pop 1900ms steps(5, end) infinite;
+      }
+
+      .catch-result-firework:nth-of-type(1) {
+        top: 2%;
+        right: 4%;
+      }
+
+      .catch-result-firework:nth-of-type(2) {
+        bottom: 30%;
+        left: 1%;
+        width: 54px;
+        background:
+          repeating-conic-gradient(
+            from 12deg,
+            var(--colorLake) 0 5deg,
+            transparent 5deg 30deg
+          );
+        animation-delay: 480ms;
+      }
+
       .catch-result-scene {
         grid-area: scene;
         position: relative;
@@ -2965,12 +3038,7 @@
         width: 100%;
         height: clamp(82px, 17vw, 112px);
         display: block;
-        background: var(--colorLakeDeep);
-        border: var(--strokeThick) solid var(--colorInk);
-        box-shadow:
-          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentLime),
-          calc(0px - var(--spacingHorizontalXXS)) calc(0px - var(--spacingVerticalXXS)) 0 var(--colorAccentPink);
-        clip-path: polygon(2% 0, 100% 6%, 97% 100%, 0 91%);
+        background: transparent;
       }
 
       .catch-result-eyebrow {
@@ -3251,7 +3319,7 @@
       .catch-result-actions {
         grid-area: actions;
         display: grid;
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         align-items: center;
         gap: var(--spacingHorizontalL);
       }
@@ -3260,7 +3328,7 @@
         min-height: calc(var(--controlMinSize) + var(--spacingVerticalM));
         padding: var(--spacingVerticalM) var(--spacingHorizontalL);
         color: var(--colorInk);
-        background: var(--colorWashiDeep);
+        background: var(--colorLake);
         border: var(--strokeThick) solid var(--colorInk);
         border-radius: var(--borderRadiusNone);
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorLake);
@@ -3273,12 +3341,22 @@
       }
 
       .catch-result-button:hover {
-        background: var(--colorMoss);
-        transform: translateY(var(--hoverOffset));
+        filter: brightness(1.08);
+        transform: translate(-2px, -2px);
+        box-shadow: var(--spacingHorizontalM) var(--spacingVerticalM) 0 var(--colorInk);
       }
 
       .catch-result-button:active {
-        transform: scale(var(--pressScale));
+        transform: translate(var(--spacingHorizontalXS), var(--spacingVerticalXS));
+        box-shadow: 0 0 0 var(--colorInk);
+      }
+
+      .catch-result-button:focus-visible {
+        outline: var(--focusRingWidth) solid var(--colorWashiLight);
+        outline-offset: var(--focusRingOffset);
+        box-shadow:
+          0 0 0 calc(var(--focusRingWidth) + var(--focusRingWidth)) var(--colorInk),
+          var(--spacingHorizontalM) var(--spacingVerticalM) 0 var(--colorAccentPink);
       }
 
       .catch-result-button-primary {
@@ -3295,6 +3373,18 @@
 
       .catch-result-button-merit {
         background: var(--colorAccentLime);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk);
+      }
+
+      @keyframes catch-result-emoji-float {
+        from { transform: translateY(0) rotate(-8deg) scale(0.94); }
+        to { transform: translateY(-14px) rotate(9deg) scale(1.08); }
+      }
+
+      @keyframes catch-result-firework-pop {
+        0% { transform: scale(0.32) rotate(0); opacity: 0; }
+        35% { opacity: 0.72; }
+        100% { transform: scale(1.1) rotate(18deg); opacity: 0; }
       }
 
       @keyframes catch-result-title-pulse {
@@ -3836,7 +3926,7 @@
             - var(--spacingHorizontalXL)
             - var(--spacingHorizontalS)
           );
-          height: auto;
+          min-height: 710px;
           gap: var(--spacingVerticalXS);
           padding:
             var(--spacingVerticalS)
@@ -3918,8 +4008,8 @@
         }
 
         .catch-result-actions {
-          grid-template-columns: minmax(0, 1fr);
-          gap: 0;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: var(--spacingHorizontalS);
         }
 
         .catch-result-button-primary {
@@ -3927,7 +4017,7 @@
         }
 
         .catch-result-button {
-          min-height: var(--controlMinSize);
+          min-height: calc(var(--controlMinSize) + var(--spacingVerticalXS));
           padding: var(--spacingVerticalS) var(--spacingHorizontalS);
           font-size: var(--fontSizeBase200);
           line-height: var(--lineHeightBase200);
@@ -3937,6 +4027,10 @@
           min-height: calc(var(--controlMinSize) + var(--spacingVerticalM));
           font-size: var(--fontSizeBase400);
           line-height: var(--lineHeightBase400);
+        }
+
+        .catch-result-button-merit {
+          min-height: calc(var(--controlMinSize) + var(--spacingVerticalXS));
         }
 
         .catch-result-stat {
@@ -4074,6 +4168,12 @@
         }
       }
 
+      @media (max-height: 760px) {
+        .catch-result-card {
+          margin-block: 0;
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -4091,6 +4191,8 @@
         .catch-start-guide::before,
         .catch-countdown strong,
         .catch-result-aura span,
+        .catch-result-emoji,
+        .catch-result-firework,
         .catch-score-rhythm i,
         .catch-result-count-block,
         .catch-result-heading {
@@ -4122,6 +4224,22 @@
 
         .catch-result-aura span {
           translate: 0 0;
+        }
+
+        .catch-result-celebration .catch-result-emoji:nth-child(n + 3),
+        .catch-result-celebration .catch-result-firework:nth-of-type(n + 2) {
+          display: none;
+        }
+
+        .catch-result-emoji {
+          animation: none !important;
+          opacity: 0.5;
+        }
+
+        .catch-result-firework {
+          animation: none !important;
+          opacity: 0.34;
+          transform: scale(0.72);
         }
       }
 
@@ -4305,6 +4423,7 @@
 
         .fortune-aura,
         .catch-result-aura,
+        .catch-result-celebration,
         .fortune-special-celebration,
         .fortune-fire,
         .stats-title::before,
@@ -4502,12 +4621,12 @@
             class="catch-score-hud"
             id="catchScoreHud"
             role="group"
-            aria-label="本局成绩，PERFECT 0 次，MISS 0 次"
+            aria-label="本局成绩，抓到 0 对，MISS 0 次"
             hidden
           >
             <div class="catch-score-primary">
-              <span class="catch-score-label">PERFECT</span>
-              <strong id="catchPerfectCount">0</strong>
+              <span class="catch-score-label">本局抓到</span>
+              <strong id="catchCaughtCount">0 对</strong>
             </div>
             <div class="catch-score-secondary">
               <span class="catch-score-label">MISS</span>
@@ -4744,14 +4863,14 @@
         <span class="visually-hidden" id="woodfishPhotoHelp">
           照片仅存于本地使用，永不上传
         </span>
-        <dl class="stats-grid">
+        <dl class="stats-grid" id="statsGrid">
           <div class="stat">
             <dt id="globalLabel">本局抓到</dt>
             <dd id="globalCount">0 对</dd>
           </div>
-          <div class="stat">
-            <dt id="personalLabel">当前人群</dt>
-            <dd id="personalCount">1 对</dd>
+          <div class="stat" id="secondaryStat">
+            <dt id="personalLabel">可用功德</dt>
+            <dd id="personalCount">100</dd>
           </div>
         </dl>
       </aside>
@@ -4780,6 +4899,14 @@
         <span class="catch-result-aura" aria-hidden="true">
           <span>CATCH!</span><span>NO KISS</span><span>FOR LOVE</span><span>SUZHOU</span>
         </span>
+        <span class="catch-result-celebration" aria-hidden="true">
+          <span class="catch-result-emoji">💥</span>
+          <span class="catch-result-emoji">🎉</span>
+          <span class="catch-result-emoji">✨</span>
+          <span class="catch-result-emoji">🫶</span>
+          <i class="catch-result-firework"></i>
+          <i class="catch-result-firework"></i>
+        </span>
         <canvas
           class="catch-result-scene"
           id="catchResultSceneCanvas"
@@ -4802,7 +4929,7 @@
           园区巡逻员
         </h2>
         <p class="visually-hidden" id="catchResultDescription">
-          本局称号与成绩。可继续游戏，或扫描二维码邀请朋友挑战。
+          本局称号与成绩。可继续抓啵、积攒功德，或扫描二维码邀请朋友挑战。
         </p>
         <dl class="catch-result-summary">
           <div class="catch-result-stat">
@@ -4820,7 +4947,14 @@
             id="catchReplay"
             type="button"
           >
-            继续游戏
+            继续抓啵
+          </button>
+          <button
+            class="catch-result-button catch-result-button-merit"
+            id="catchEarnMerit"
+            type="button"
+          >
+            积攒功德
           </button>
         </div>
         <p class="catch-result-challenge">
@@ -5041,12 +5175,16 @@
         const CATCH_PIXEL_MESSAGE_DURATION_MS = 1800;
         const CATCH_TITLE_LEVELS = Object.freeze([
           Object.freeze({ min: 18, title: "当代法海" }),
-          Object.freeze({ min: 13, title: "苏州中心灭啵队长" }),
+          Object.freeze({ min: 13, title: "苏州中心灭啵霸" }),
           Object.freeze({ min: 8, title: "单身狗王" }),
           Object.freeze({ min: 4, title: "月老拆线师" }),
           Object.freeze({ min: 1, title: "金鸡湖巡逻员" }),
           Object.freeze({ min: 0, title: "园区路人甲" })
         ]);
+        const CATCH_FLAWLESS_TITLE = Object.freeze({
+          title: "零MISS法海",
+          minCaught: 1
+        });
         const ritualApiEndpoint =
           document.documentElement.dataset.ritualApi?.trim() || "";
         const RITUAL_API_ENDPOINT = ["localhost", "127.0.0.1", "::1"].includes(
@@ -5131,6 +5269,32 @@
             offsetMs: 2600,
             phase: 3.1,
             zone: "terrace"
+          }),
+          Object.freeze({
+            id: "foreground-left",
+            centerX: -0.42,
+            centerY: 0.42,
+            spread: 0.065,
+            travelX: 0.012,
+            travelY: 0.009,
+            scale: 0.86,
+            cycleMs: 13800,
+            offsetMs: 5600,
+            phase: 4.6,
+            zone: "foreground"
+          }),
+          Object.freeze({
+            id: "foreground-right",
+            centerX: 0.42,
+            centerY: 0.4,
+            spread: 0.065,
+            travelX: 0.012,
+            travelY: 0.009,
+            scale: 0.84,
+            cycleMs: 15100,
+            offsetMs: 10200,
+            phase: 5.2,
+            zone: "foreground"
           })
         ]);
         const EASTERN_GATE_AMBIENT_SOLO_ROUTES = Object.freeze([
@@ -5178,26 +5342,26 @@
           })
         ]);
         const EASTERN_GATE_PAIR_LAYOUT = Object.freeze([
-          Object.freeze({ x: -0.03, y: 0.2, scale: 0.98, rotation: -0.018, spacing: 0.96, zone: "river-front" }),
-          Object.freeze({ x: -0.31, y: 0.22, scale: 0.78, rotation: 0.02, spacing: 1.08, zone: "river-front" }),
-          Object.freeze({ x: 0.29, y: 0.05, scale: 0.74, rotation: -0.015, spacing: 0.92, zone: "river-back" }),
-          Object.freeze({ x: -0.285, y: -0.055, scale: 0.5, rotation: 0.01, spacing: 0.88, zone: "terrace" }),
-          Object.freeze({ x: 0.01, y: 0.02, scale: 0.64, rotation: 0, spacing: 1.02, zone: "river-back" }),
-          Object.freeze({ x: -0.18, y: 0.18, scale: 0.9, rotation: -0.02, spacing: 1.05, zone: "river-front" }),
-          Object.freeze({ x: 0.28, y: -0.11, scale: 0.46, rotation: -0.012, spacing: 0.96, zone: "terrace" }),
-          Object.freeze({ x: 0.39, y: 0.21, scale: 0.75, rotation: 0.018, spacing: 1.12, zone: "river-front" }),
-          Object.freeze({ x: -0.41, y: 0.17, scale: 0.72, rotation: 0.012, spacing: 0.9, zone: "river-front" }),
-          Object.freeze({ x: 0.19, y: 0.23, scale: 0.88, rotation: -0.018, spacing: 1.02, zone: "river-front" }),
-          Object.freeze({ x: -0.305, y: -0.31, scale: 0.38, rotation: 0.008, spacing: 1, zone: "terrace" }),
-          Object.freeze({ x: -0.145, y: 0.07, scale: 0.68, rotation: 0.014, spacing: 0.95, zone: "river-back" }),
-          Object.freeze({ x: 0.415, y: 0.015, scale: 0.61, rotation: -0.01, spacing: 1.1, zone: "river-back" }),
-          Object.freeze({ x: 0.31, y: -0.345, scale: 0.36, rotation: -0.01, spacing: 0.94, zone: "terrace" }),
-          Object.freeze({ x: -0.425, y: -0.015, scale: 0.6, rotation: 0.018, spacing: 1.04, zone: "river-back" }),
-          Object.freeze({ x: 0.395, y: 0.19, scale: 0.76, rotation: 0.012, spacing: 0.9, zone: "river-front" }),
-          Object.freeze({ x: -0.34, y: 0.24, scale: 0.8, rotation: -0.015, spacing: 1.06, zone: "river-front" }),
-          Object.freeze({ x: -0.105, y: 0.08, scale: 0.74, rotation: 0.01, spacing: 0.94, zone: "river-back" }),
-          Object.freeze({ x: 0.125, y: 0.035, scale: 0.71, rotation: -0.012, spacing: 1.08, zone: "river-back" }),
-          Object.freeze({ x: -0.225, y: -0.17, scale: 0.42, rotation: 0.008, spacing: 1, zone: "terrace" })
+          Object.freeze({ x: -0.1, y: 0.19, scale: 0.9, rotation: -0.018, spacing: 0.96, zone: "river-front" }),
+          Object.freeze({ x: 0.28, y: 0.22, scale: 0.82, rotation: 0.02, spacing: 1.08, zone: "river-front" }),
+          Object.freeze({ x: -0.35, y: 0.04, scale: 0.68, rotation: -0.015, spacing: 0.92, zone: "river-back" }),
+          Object.freeze({ x: 0.34, y: -0.13, scale: 0.48, rotation: 0.01, spacing: 0.88, zone: "terrace" }),
+          Object.freeze({ x: 0.08, y: -0.01, scale: 0.62, rotation: 0, spacing: 1.02, zone: "river-back" }),
+          Object.freeze({ x: -0.42, y: 0.38, scale: 0.84, rotation: -0.02, spacing: 1.05, zone: "foreground" }),
+          Object.freeze({ x: -0.29, y: -0.18, scale: 0.45, rotation: -0.012, spacing: 0.96, zone: "terrace" }),
+          Object.freeze({ x: 0.43, y: 0.11, scale: 0.72, rotation: 0.018, spacing: 1.12, zone: "river-front" }),
+          Object.freeze({ x: -0.43, y: 0.18, scale: 0.7, rotation: 0.012, spacing: 0.9, zone: "river-front" }),
+          Object.freeze({ x: 0.42, y: 0.39, scale: 0.82, rotation: -0.018, spacing: 1.02, zone: "foreground" }),
+          Object.freeze({ x: -0.38, y: -0.34, scale: 0.38, rotation: 0.008, spacing: 1, zone: "terrace" }),
+          Object.freeze({ x: -0.18, y: 0.09, scale: 0.64, rotation: 0.014, spacing: 0.95, zone: "river-back" }),
+          Object.freeze({ x: 0.4, y: -0.02, scale: 0.57, rotation: -0.01, spacing: 1.1, zone: "river-back" }),
+          Object.freeze({ x: 0.2, y: -0.34, scale: 0.36, rotation: -0.01, spacing: 0.94, zone: "terrace" }),
+          Object.freeze({ x: -0.46, y: -0.05, scale: 0.55, rotation: 0.018, spacing: 1.04, zone: "river-back" }),
+          Object.freeze({ x: 0.23, y: 0.1, scale: 0.69, rotation: 0.012, spacing: 0.9, zone: "river-front" }),
+          Object.freeze({ x: -0.24, y: 0.35, scale: 0.78, rotation: -0.015, spacing: 1.06, zone: "foreground" }),
+          Object.freeze({ x: -0.05, y: -0.16, scale: 0.46, rotation: 0.01, spacing: 0.94, zone: "terrace" }),
+          Object.freeze({ x: 0.46, y: 0.27, scale: 0.72, rotation: -0.012, spacing: 1.08, zone: "foreground" }),
+          Object.freeze({ x: -0.46, y: 0.29, scale: 0.71, rotation: 0.008, spacing: 1, zone: "foreground" })
         ]);
         const PRAYER_BEAD_COUNT = 14;
         const PRAYER_BEAD_LOOP_DURATION_MS = 8000;
@@ -5528,7 +5692,7 @@
         const experienceUseMeta = document.getElementById("experienceUseMeta");
         const experienceEarnMeta = document.getElementById("experienceEarnMeta");
         const catchScoreHud = document.getElementById("catchScoreHud");
-        const catchPerfectCount = document.getElementById("catchPerfectCount");
+        const catchCaughtCount = document.getElementById("catchCaughtCount");
         const catchMissCount = document.getElementById("catchMissCount");
         const woodfishPhotoUpload = document.getElementById("woodfishPhotoUpload");
         const woodfishPhotoUploadLabel = document.getElementById("woodfishPhotoUploadLabel");
@@ -5543,6 +5707,8 @@
         const globalCount = document.getElementById("globalCount");
         const personalLabel = document.getElementById("personalLabel");
         const personalCount = document.getElementById("personalCount");
+        const statsGrid = document.getElementById("statsGrid");
+        const secondaryStat = document.getElementById("secondaryStat");
         const statsTitle = document.getElementById("statsTitle");
         const releaseDetail = document.getElementById("releaseDetail");
         const storageNote = document.getElementById("storagePolicy");
@@ -5563,7 +5729,7 @@
         const catchResultOverlay = document.getElementById("catchResultOverlay");
         const catchResultCard = catchResultOverlay.querySelector(".catch-result-card");
         const catchResultSceneCanvas = document.getElementById("catchResultSceneCanvas");
-        const catchResultSceneContext = catchResultSceneCanvas.getContext("2d", { alpha: false });
+        const catchResultSceneContext = catchResultSceneCanvas.getContext("2d", { alpha: true });
         const catchResultLocation = document.getElementById("catchResultLocation");
         const catchResultEyebrow = document.getElementById("catchResultEyebrow");
         const catchResultTitle = document.getElementById("catchResultTitle");
@@ -5579,6 +5745,7 @@
         const catchResultMeritFill = document.getElementById("catchResultMeritFill");
         const catchResultMeritValue = document.getElementById("catchResultMeritValue");
         const catchReplay = document.getElementById("catchReplay");
+        const catchEarnMerit = document.getElementById("catchEarnMerit");
         const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
         const formatter = new Intl.NumberFormat("zh-CN");
@@ -5719,6 +5886,7 @@
         let lastCatchAccuracy = 0;
         let bestCatchCount = 0;
         let bestCatchScore = 0;
+        let bestCatchTitle = "尚未出道";
         let resolvedLocation = "苏州";
         let catchRoundActive = false;
         let catchRoundStartedAt = 0;
@@ -5731,6 +5899,7 @@
         let lastCatchUiPairCount = 1;
         let catchCountdownVisualStep = "";
         let catchLyricVisualIndex = -2;
+        let catchLyricPreviewTime = null;
         let previousWoodfishStyleIndex = 0;
         let woodfishTransitionDirection = 1;
         let woodfishStyleChangedAt = performance.now();
@@ -6056,6 +6225,18 @@
             || CATCH_TITLE_LEVELS[CATCH_TITLE_LEVELS.length - 1];
         }
 
+        function isFlawlessCatchResult(count, missCount, completed = false) {
+          return completed
+            && count >= CATCH_FLAWLESS_TITLE.minCaught
+            && missCount === 0;
+        }
+
+        function catchTitleForResult(count, missCount, completed = false) {
+          return isFlawlessCatchResult(count, missCount, completed)
+            ? CATCH_FLAWLESS_TITLE
+            : catchTitleForCount(count);
+        }
+
         function nextCatchTitleForCount(count) {
           const lockedLevels = CATCH_TITLE_LEVELS.filter((level) => level.min > count);
           return lockedLevels[lockedLevels.length - 1] || null;
@@ -6126,9 +6307,6 @@
           const targetContext = catchResultSceneContext;
           targetContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
           targetContext.clearRect(0, 0, width, height);
-          targetContext.fillStyle = colors.lakeDeep;
-          targetContext.fillRect(0, 0, width, height);
-
           const cycle = staticPose
             ? 0.12
             : positiveModulo(time - catchResultSceneStartedAt, 3200) / 3200;
@@ -6158,7 +6336,8 @@
           targetContext.fill();
           targetContext.stroke();
 
-          targetContext.fillStyle = colors.lakeDeep;
+          targetContext.save();
+          targetContext.globalCompositeOperation = "destination-out";
           targetContext.beginPath();
           targetContext.moveTo(gateX - gateWidth * 0.18, gateBottom);
           targetContext.quadraticCurveTo(
@@ -6175,6 +6354,22 @@
           );
           targetContext.closePath();
           targetContext.fill();
+          targetContext.restore();
+          targetContext.strokeStyle = colors.ink;
+          targetContext.beginPath();
+          targetContext.moveTo(gateX - gateWidth * 0.18, gateBottom);
+          targetContext.quadraticCurveTo(
+            gateX - gateWidth * 0.17,
+            gateTop + height * 0.2,
+            gateX,
+            gateTop + height * 0.13
+          );
+          targetContext.quadraticCurveTo(
+            gateX + gateWidth * 0.17,
+            gateTop + height * 0.2,
+            gateX + gateWidth * 0.18,
+            gateBottom
+          );
           targetContext.stroke();
 
           targetContext.strokeStyle = colors.lime;
@@ -6331,8 +6526,11 @@
         }
 
         function updateCatchLyrics(time = performance.now()) {
-          const lyricState = getCatchLyricState(getCatchSongTime(time));
-          const mediaPaused = hasCatchMediaClock() && bgmAudio.paused;
+          const previewActive = Number.isFinite(catchLyricPreviewTime);
+          const lyricState = getCatchLyricState(
+            previewActive ? catchLyricPreviewTime : getCatchSongTime(time)
+          );
+          const mediaPaused = !previewActive && hasCatchMediaClock() && bgmAudio.paused;
           const visible = experienceMode === "catch"
             && catchRoundActive
             && !catchResultOpen
@@ -6443,6 +6641,7 @@
           catchRoundMeritSpent = 0;
           lastCatchUiPairCount = 1;
           catchCountdownVisualStep = "";
+          catchLyricPreviewTime = null;
           catchLyricVisualIndex = -2;
           updateCatchLyrics(time);
           easternGateTargetIndices.clear();
@@ -6503,13 +6702,23 @@
           window.clearTimeout(idleHintTimer);
           idleHint.hidden = true;
 
-          const title = catchTitleForCount(easternGateHitCount);
+          const flawless = isFlawlessCatchResult(
+            easternGateHitCount,
+            easternGateMissCount,
+            true
+          );
+          const title = catchTitleForResult(
+            easternGateHitCount,
+            easternGateMissCount,
+            true
+          );
           const nextTitle = nextCatchTitleForCount(easternGateHitCount);
           const metrics = getCatchResultMetrics();
           const isNewRecord =
             easternGateHitCount > bestCatchCount || metrics.score > bestCatchScore;
           bestCatchCount = Math.max(bestCatchCount, easternGateHitCount);
           bestCatchScore = Math.max(bestCatchScore, metrics.score);
+          if (flawless || metrics.score >= bestCatchScore) bestCatchTitle = title.title;
           lastCatchTitle = title.title;
           lastCatchCount = easternGateHitCount;
           lastCatchAccuracy = metrics.accuracy;
@@ -6528,11 +6737,11 @@
           catchResultAccuracy.textContent = `${Math.round(metrics.accuracy * 100)}%`;
           catchResultBest.textContent =
             `本机最佳 ${bestCatchCount} 对`;
-          catchResultChallenge.textContent = nextTitle
+          catchResultChallenge.textContent = flawless
+            ? "零 MISS 特别称号已解锁，叫朋友来破纪录"
+            : nextTitle
             ? `再抓 ${nextTitle.min - easternGateHitCount} 对，解锁「${nextTitle.title}」`
-            : metrics.accuracy < 1
-              ? "顶级称号已解锁，下一局挑战零 MISS"
-              : "顶级称号与零 MISS 达成，叫朋友来破纪录";
+            : `下一局至少抓 ${CATCH_FLAWLESS_TITLE.minCaught} 对并保持零 MISS，解锁「${CATCH_FLAWLESS_TITLE.title}」`;
           const availableMerit = getAvailableMerit();
           const meritBarMax = Math.max(MERIT_BAR_STEP, meritTotal);
           const meritBarPercent = Math.min(100, availableMerit / meritBarMax * 100);
@@ -6541,13 +6750,9 @@
           catchResultMeritBar.setAttribute("aria-valuemax", String(meritBarMax));
           catchResultMeritBar.setAttribute("aria-valuetext", `当前功德 ${availableMerit}`);
           catchResultMeritFill.style.width = `${meritBarPercent}%`;
-          catchReplay.textContent = availableMerit > 0
-            ? nextTitle
-              ? `继续游戏 · 冲 ${nextTitle.min} 对`
-              : "继续游戏 · 守擂"
-            : "继续游戏 · 先积德";
+          catchReplay.textContent = "继续抓啵";
           catchResultDescription.textContent =
-            `本局称号${title.title}，地点${resolvedLocation}，抓到 ${easternGateHitCount} 对情侣，PERFECT ${catchRoundPerfectCount} 次，MISS ${easternGateMissCount} 次，命中率 ${Math.round(metrics.accuracy * 100)}%。可继续游戏，或打开二维码贴纸邀请朋友挑战。`;
+            `本局称号${title.title}，地点${resolvedLocation}，抓到 ${easternGateHitCount} 对情侣，PERFECT ${catchRoundPerfectCount} 次，MISS ${easternGateMissCount} 次，命中率 ${Math.round(metrics.accuracy * 100)}%。可继续抓啵、积攒功德，或打开二维码贴纸邀请朋友挑战。`;
           saveState();
           renderUi();
 
@@ -7254,6 +7459,9 @@
                 && saved.lastCatchTitle.trim()
                 ? saved.lastCatchTitle.trim()
                 : "尚未出道";
+              if (lastCatchTitle === "苏州中心灭啵队长") {
+                lastCatchTitle = "苏州中心灭啵霸";
+              }
               lastCatchCount = Number.isFinite(saved.lastCatchCount)
                 ? Math.max(0, Math.round(saved.lastCatchCount))
                 : 0;
@@ -7266,6 +7474,13 @@
               bestCatchScore = Number.isFinite(saved.bestCatchScore)
                 ? Math.max(0, Math.round(saved.bestCatchScore))
                 : 0;
+              bestCatchTitle = typeof saved.bestCatchTitle === "string"
+                && saved.bestCatchTitle.trim()
+                ? saved.bestCatchTitle.trim()
+                : lastCatchTitle;
+              if (bestCatchTitle === "苏州中心灭啵队长") {
+                bestCatchTitle = "苏州中心灭啵霸";
+              }
               cyberCatchUntil = 0;
               const savedStyleIndex = Number.isInteger(saved.woodfishStyle)
                 ? saved.woodfishStyle
@@ -7315,6 +7530,7 @@
                 lastCatchAccuracy,
                 bestCatchCount,
                 bestCatchScore,
+                bestCatchTitle,
                 themeSchemaVersion: THEME_SCHEMA_VERSION,
                 woodfishStyle: lastMeritStyleIndex,
                 woodfishStyleId: WOODFISH_STYLES[lastMeritStyleIndex].id,
@@ -7657,11 +7873,13 @@
           experienceTabs.setAttribute("aria-hidden", String(catchGameInProgress));
           catchScoreHud.hidden = !catchGameInProgress;
           catchScoreHud.setAttribute("aria-hidden", String(!catchGameInProgress));
-          catchPerfectCount.textContent = formatter.format(catchRoundPerfectCount);
+          statsGrid.hidden = catchGameInProgress;
+          secondaryStat.hidden = catchExperience;
+          catchCaughtCount.textContent = `${formatter.format(easternGateHitCount)} 对`;
           catchMissCount.textContent = formatter.format(easternGateMissCount);
           catchScoreHud.setAttribute(
             "aria-label",
-            `本局成绩，PERFECT ${catchRoundPerfectCount} 次，MISS ${easternGateMissCount} 次`
+            `本局成绩，抓到 ${easternGateHitCount} 对，MISS ${easternGateMissCount} 次`
           );
           syncCyberCatchButton();
           experienceUseTab.setAttribute("aria-selected", String(catchExperience));
@@ -7811,16 +8029,10 @@
               statsTitle.textContent = isCyberCatchActive()
                 ? "赛博代抓 · 探照冰冻"
                 : "抓啵进行中";
-              globalLabel.textContent = "本局抓到";
-              globalCount.textContent = `${formatter.format(easternGateHitCount)} 对`;
-              personalLabel.textContent = "当前人群";
-              personalCount.textContent = `${getEasternGatePairCount()} 对`;
             } else {
               statsTitle.textContent = "游戏规则";
               globalLabel.textContent = "目标";
               globalCount.textContent = "亲嘴就点";
-              personalLabel.textContent = "人群";
-              personalCount.textContent = "1 → 20 对";
             }
           } else {
             statsTitle.textContent = "积攒功德";
@@ -16543,6 +16755,7 @@
         experienceUseTab.addEventListener("keydown", handleExperienceTabKeydown);
         experienceEarnTab.addEventListener("keydown", handleExperienceTabKeydown);
         catchReplay.addEventListener("click", () => closeCatchResult("catch"));
+        catchEarnMerit.addEventListener("click", () => closeCatchResult("merit"));
         fortuneContinue.addEventListener("click", () => closeFortuneSummary());
 
         meritAction.addEventListener("pointerenter", () => {
@@ -16573,6 +16786,7 @@
             } else if (event.key === "Tab") {
               const focusable = [
                 catchReplay,
+                catchEarnMerit,
                 catchResultOverlay.querySelector("a[href]")
               ].filter((element) => element && !element.hidden);
               if (focusable.length === 0) return;
@@ -16934,10 +17148,53 @@
           sampleEasternGatePregameAmbience: (time = performance.now()) =>
             getEasternGatePregameAmbience(Number(time) || 0),
           finishCatch: showCatchResult,
+          previewCatchResult: ({
+            caught = 1,
+            misses = 0,
+            perfect = caught
+          } = {}) => {
+            if (experienceMode !== "catch") setExperienceMode("catch", false);
+            if (!catchRoundActive) startCatchRound(performance.now());
+            easternGateHitCount = Math.max(0, Math.round(Number(caught) || 0));
+            easternGateMissCount = Math.max(0, Math.round(Number(misses) || 0));
+            catchRoundPerfectCount = Math.max(0, Math.round(Number(perfect) || 0));
+            return showCatchResult();
+          },
+          getCatchTitle: ({
+            caught = 0,
+            misses = 0,
+            completed = true
+          } = {}) => catchTitleForResult(
+            Math.max(0, Math.round(Number(caught) || 0)),
+            Math.max(0, Math.round(Number(misses) || 0)),
+            Boolean(completed)
+          ).title,
           sampleCatchLyrics: (songTime = getCatchSongTime()) => ({
             ...getCatchLyricState(songTime),
             visible: catchLyrics.hidden === false
           }),
+          seekCatchSong: (songTime = 0) => {
+            const normalizedTime = Math.max(0, Number(songTime) || 0);
+            const now = performance.now();
+            catchRoundStartedAt = now - normalizedTime * 1000;
+            if (bgmAudio.readyState > 0) bgmAudio.currentTime = normalizedTime;
+            catchLyricVisualIndex = -2;
+            return updateCatchLyrics(now);
+          },
+          previewCatchLyricCue: (songTime = 0) => {
+            catchLyricPreviewTime = Math.max(0, Number(songTime) || 0);
+            const lyricState = getCatchLyricState(catchLyricPreviewTime);
+            catchLyrics.style.setProperty(
+              "--lyric-progress",
+              `${(lyricState.progress * 100).toFixed(2)}%`
+            );
+            catchLyricVisualIndex = lyricState.index;
+            catchLyricCurrentText.textContent = lyricState.text;
+            catchLyricProgressText.textContent = lyricState.text;
+            catchLyricNext.textContent = lyricState.nextText;
+            catchLyrics.hidden = lyricState.index < 0;
+            return { ...lyricState, visible: catchLyrics.hidden === false };
+          },
           getCatchLyricCues: () => CATCH_LYRIC_CUES.map((cue) => ({ ...cue })),
           closeCatchResult,
           setMode,
@@ -17338,6 +17595,14 @@
                   && easternGateTargetUntil > performance.now(),
                 targetCount: easternGateTargetIndices.size,
                 targetBehavior: "one-beat-synced-target-per-four-beat-cycle",
+                hitRegions: easternGatePairHitRegions.map((region) => ({
+                  index: region.index,
+                  x: Number(region.x.toFixed(2)),
+                  y: Number(region.y.toFixed(2)),
+                  width: Number(region.width.toFixed(2)),
+                  height: Number(region.height.toFixed(2)),
+                  zone: region.zone
+                })),
                 hits: easternGateHitCount,
                 wrongTaps: easternGateMissCount,
                 meritCostPerHit: CATCH_MERIT_COST,
@@ -17345,6 +17610,7 @@
                 currentPairs: getEasternGatePairCount(),
                 maxPairs: CATCH_MAX_PAIRS,
                 lastTitle: lastCatchTitle,
+                bestTitle: bestCatchTitle,
                 lastCount: lastCatchCount,
                 shareUrl: "https://babblelab.cn/"
               },
