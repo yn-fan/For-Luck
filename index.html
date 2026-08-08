@@ -1641,6 +1641,108 @@
         letter-spacing: -0.06em;
       }
 
+      .catch-lyrics {
+        --lyric-progress: 0%;
+        position: absolute;
+        z-index: 9;
+        left: 50%;
+        bottom: max(var(--spacingVerticalXS), env(safe-area-inset-bottom));
+        width: min(calc(100% - var(--spacingHorizontalL)), 620px);
+        min-height: 58px;
+        display: grid;
+        align-content: end;
+        gap: 2px;
+        padding: var(--spacingVerticalXXS) var(--spacingHorizontalS);
+        text-align: center;
+        transform: translateX(-50%);
+        pointer-events: none;
+        isolation: isolate;
+      }
+
+      .catch-lyrics[hidden] {
+        display: none;
+      }
+
+      .catch-lyrics::before,
+      .catch-lyrics::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .catch-lyrics::before {
+        inset: 10% 0 0;
+        background:
+          linear-gradient(
+            90deg,
+            transparent,
+            color-mix(in srgb, var(--colorInk) 76%, transparent) 14%,
+            color-mix(in srgb, var(--colorInk) 76%, transparent) 86%,
+            transparent
+          );
+        clip-path: polygon(3% 14%, 98% 0, 100% 82%, 0 100%);
+      }
+
+      .catch-lyrics::after {
+        right: 2%;
+        bottom: 5px;
+        width: 18%;
+        height: 4px;
+        background: var(--colorAccentPink);
+        box-shadow: calc(0px - var(--spacingHorizontalXXL)) 0 0 var(--colorAccentPurple);
+        transform: skewX(-24deg);
+      }
+
+      .catch-lyric-current {
+        position: relative;
+        min-width: 0;
+        color: var(--colorWashiLight);
+        font-family: var(--fontFamilyMonospace);
+        font-size: clamp(14px, 4.5vw, 22px);
+        line-height: 1.12;
+        font-weight: var(--fontWeightBold);
+        letter-spacing: 0.02em;
+        white-space: pre;
+        paint-order: stroke fill;
+        -webkit-text-stroke: 2px var(--colorInk);
+        text-shadow:
+          2px 2px 0 var(--colorInk),
+          -1px -1px 0 var(--colorInk);
+      }
+
+      .catch-lyric-progress {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        color: transparent;
+        background: linear-gradient(
+          90deg,
+          var(--colorAccentLime) 0 42%,
+          var(--colorAccentPink) 68%,
+          var(--colorAccentPurple) 100%
+        );
+        background-clip: text;
+        -webkit-background-clip: text;
+        clip-path: inset(0 calc(100% - var(--lyric-progress)) 0 0);
+        -webkit-text-stroke: 2px var(--colorInk);
+        transition: clip-path 80ms linear;
+      }
+
+      .catch-lyric-next {
+        min-height: 1em;
+        color: var(--colorWashiDeep);
+        font-family: var(--fontFamilyMonospace);
+        font-size: clamp(10px, 3vw, 13px);
+        line-height: 1.1;
+        font-weight: var(--fontWeightSemibold);
+        letter-spacing: 0.02em;
+        white-space: pre;
+        text-shadow:
+          1px 1px 0 var(--colorInk),
+          -1px -1px 0 var(--colorInk);
+      }
+
       body[data-catch-countdown="true"] .stage-action {
         cursor: wait;
       }
@@ -3599,6 +3701,22 @@
           padding: var(--spacingVerticalXS) var(--spacingHorizontalS);
         }
 
+        .catch-lyrics {
+          bottom: max(2px, env(safe-area-inset-bottom));
+          width: calc(100% - var(--spacingHorizontalS));
+          min-height: 50px;
+          padding-inline: var(--spacingHorizontalXS);
+        }
+
+        .catch-lyric-current {
+          font-size: clamp(13px, 4.4vw, 18px);
+          -webkit-text-stroke-width: 1.5px;
+        }
+
+        .catch-lyric-next {
+          font-size: clamp(9px, 2.8vw, 12px);
+        }
+
         .experience-tab {
           padding-inline: var(--spacingHorizontalS);
         }
@@ -3991,6 +4109,11 @@
           animation: none !important;
         }
 
+        .catch-lyric-progress {
+          clip-path: none !important;
+          transition: none !important;
+        }
+
         .catch-start-guide::before {
           opacity: 1;
           transform: scale(0.92);
@@ -4062,6 +4185,9 @@
         .catch-score-primary,
         .catch-score-secondary,
         .cyber-catch-button,
+        .catch-lyrics,
+        .catch-lyric-current,
+        .catch-lyric-next,
         .experience-switch,
         .catch-start-guide,
         .catch-start-core,
@@ -4240,6 +4366,36 @@
         .cyber-catch-button strong,
         .cyber-catch-button small {
           color: ButtonText;
+        }
+
+        .catch-lyrics {
+          color: CanvasText;
+          background: Canvas;
+          border: var(--strokeThin) solid CanvasText;
+        }
+
+        .catch-lyrics::before,
+        .catch-lyrics::after {
+          display: none;
+        }
+
+        .catch-lyric-current,
+        .catch-lyric-progress,
+        .catch-lyric-next {
+          color: CanvasText !important;
+          background: none;
+          -webkit-text-stroke: 0;
+          text-shadow: none;
+        }
+
+        .catch-lyric-current {
+          font-weight: var(--fontWeightBold);
+          text-decoration: underline;
+          text-decoration-thickness: var(--strokeThin);
+        }
+
+        .catch-lyric-next {
+          font-weight: normal;
         }
 
         .cyber-catch-button[aria-disabled="true"],
@@ -4477,6 +4633,17 @@
               <span>准备抓啵</span>
             </span>
           </button>
+          <div
+            class="catch-lyrics"
+            id="catchLyrics"
+            role="group"
+            aria-label="当前 KTV 歌词与下一句"
+            aria-live="off"
+            hidden
+          >
+            <div class="catch-lyric-current" id="catchLyricCurrent"><span id="catchLyricCurrentText"></span><span class="catch-lyric-progress" id="catchLyricProgressText" aria-hidden="true"></span></div>
+            <div class="catch-lyric-next" id="catchLyricNext"></div>
+          </div>
         </section>
 
         <section
@@ -4844,6 +5011,47 @@
         const BGM_VOLUME = 0.24;
         const CATCH_DURATION_FALLBACK_SECONDS = 60.072;
         const CATCH_COUNTDOWN_SECONDS = 2;
+        const CATCH_LYRIC_CUES = Object.freeze([
+          ["佛了 for love", 4, 8],
+          ["不要　Kiss", 10, 12],
+          ["不要在苏州园区亲嘴", 12, 16],
+          ["不要　Kiss", 16, 18],
+          ["不要在苏州园区亲嘴", 18, 22],
+          ["他不是不爱你", 24, 28],
+          ["他是要赶回上海的高铁", 28, 32],
+          ["不　要", 34, 36],
+          ["不要在", 36, 38],
+          ["苏　　州", 38, 40],
+          ["园区亲嘴", 40, 42],
+          ["金鸡湖边聊房价", 44, 48],
+          ["基数不配只能抱一下", 48, 52],
+          ["独墅湖边做对照组", 52, 56],
+          ["亲一下也要发论文吗", 56, 60],
+          ["苏式绿豆汤", 60, 64],
+          ["绿豆是绿豆　汤是汤", 64, 68],
+          ["你是你", 68, 70],
+          ["我是忙", 70, 72],
+          ["不要　Kiss", 74, 76],
+          ["不要在苏州园区亲嘴", 76, 80],
+          ["不要　Kiss", 80, 82],
+          ["不要在苏州园区亲嘴", 82, 86],
+          ["他不是不爱你", 88, 92],
+          ["他是要赶回上海的高铁", 92, 96],
+          ["不要　Kiss", 98, 100],
+          ["不要在苏州园区亲嘴", 100, 104],
+          ["不要　Kiss", 104, 106],
+          ["不要在苏州园区亲嘴", 106, 110],
+          ["不要　Kiss", 112, 114],
+          ["园区　亲嘴", 114, 118],
+          ["佛了", 118, 120],
+          ["for love", 120, 124]
+        ].map(([text, startBeat, endBeat]) => Object.freeze({
+          text,
+          start: BGM_PROFILES.catch.beatOffsetSeconds
+            + startBeat * BGM_PROFILES.catch.quarterMs / 1000,
+          end: BGM_PROFILES.catch.beatOffsetSeconds
+            + endBeat * BGM_PROFILES.catch.quarterMs / 1000
+        })));
         const CATCH_MERIT_COST = 10;
         const CATCH_MAX_PAIRS = 20;
         const CATCH_PAIR_MIN_TARGET_SIZE = 44;
@@ -4993,25 +5201,25 @@
           })
         ]);
         const EASTERN_GATE_PAIR_LAYOUT = Object.freeze([
-          Object.freeze({ x: -0.03, y: 0.55, scale: 0.98, rotation: -0.018, spacing: 0.96, zone: "river-front" }),
-          Object.freeze({ x: -0.31, y: 0.58, scale: 0.78, rotation: 0.02, spacing: 1.08, zone: "river-front" }),
-          Object.freeze({ x: 0.29, y: 0.17, scale: 0.74, rotation: -0.015, spacing: 0.92, zone: "river-back" }),
+          Object.freeze({ x: -0.03, y: 0.2, scale: 0.98, rotation: -0.018, spacing: 0.96, zone: "river-front" }),
+          Object.freeze({ x: -0.31, y: 0.22, scale: 0.78, rotation: 0.02, spacing: 1.08, zone: "river-front" }),
+          Object.freeze({ x: 0.29, y: 0.05, scale: 0.74, rotation: -0.015, spacing: 0.92, zone: "river-back" }),
           Object.freeze({ x: -0.285, y: -0.055, scale: 0.5, rotation: 0.01, spacing: 0.88, zone: "terrace" }),
-          Object.freeze({ x: 0.01, y: 0.145, scale: 0.64, rotation: 0, spacing: 1.02, zone: "river-back" }),
-          Object.freeze({ x: -0.18, y: 0.6, scale: 0.9, rotation: -0.02, spacing: 1.05, zone: "river-front" }),
+          Object.freeze({ x: 0.01, y: 0.02, scale: 0.64, rotation: 0, spacing: 1.02, zone: "river-back" }),
+          Object.freeze({ x: -0.18, y: 0.18, scale: 0.9, rotation: -0.02, spacing: 1.05, zone: "river-front" }),
           Object.freeze({ x: 0.28, y: -0.11, scale: 0.46, rotation: -0.012, spacing: 0.96, zone: "terrace" }),
-          Object.freeze({ x: 0.39, y: 0.56, scale: 0.75, rotation: 0.018, spacing: 1.12, zone: "river-front" }),
-          Object.freeze({ x: -0.41, y: 0.53, scale: 0.72, rotation: 0.012, spacing: 0.9, zone: "river-front" }),
-          Object.freeze({ x: 0.19, y: 0.62, scale: 0.88, rotation: -0.018, spacing: 1.02, zone: "river-front" }),
+          Object.freeze({ x: 0.39, y: 0.21, scale: 0.75, rotation: 0.018, spacing: 1.12, zone: "river-front" }),
+          Object.freeze({ x: -0.41, y: 0.17, scale: 0.72, rotation: 0.012, spacing: 0.9, zone: "river-front" }),
+          Object.freeze({ x: 0.19, y: 0.23, scale: 0.88, rotation: -0.018, spacing: 1.02, zone: "river-front" }),
           Object.freeze({ x: -0.305, y: -0.31, scale: 0.38, rotation: 0.008, spacing: 1, zone: "terrace" }),
-          Object.freeze({ x: -0.145, y: 0.175, scale: 0.68, rotation: 0.014, spacing: 0.95, zone: "river-back" }),
-          Object.freeze({ x: 0.415, y: 0.15, scale: 0.61, rotation: -0.01, spacing: 1.1, zone: "river-back" }),
+          Object.freeze({ x: -0.145, y: 0.07, scale: 0.68, rotation: 0.014, spacing: 0.95, zone: "river-back" }),
+          Object.freeze({ x: 0.415, y: 0.015, scale: 0.61, rotation: -0.01, spacing: 1.1, zone: "river-back" }),
           Object.freeze({ x: 0.31, y: -0.345, scale: 0.36, rotation: -0.01, spacing: 0.94, zone: "terrace" }),
-          Object.freeze({ x: -0.425, y: 0.135, scale: 0.6, rotation: 0.018, spacing: 1.04, zone: "river-back" }),
-          Object.freeze({ x: 0.395, y: 0.63, scale: 0.76, rotation: 0.012, spacing: 0.9, zone: "river-front" }),
-          Object.freeze({ x: -0.34, y: 0.65, scale: 0.8, rotation: -0.015, spacing: 1.06, zone: "river-front" }),
-          Object.freeze({ x: -0.105, y: 0.185, scale: 0.74, rotation: 0.01, spacing: 0.94, zone: "river-back" }),
-          Object.freeze({ x: 0.125, y: 0.16, scale: 0.71, rotation: -0.012, spacing: 1.08, zone: "river-back" }),
+          Object.freeze({ x: -0.425, y: -0.015, scale: 0.6, rotation: 0.018, spacing: 1.04, zone: "river-back" }),
+          Object.freeze({ x: 0.395, y: 0.19, scale: 0.76, rotation: 0.012, spacing: 0.9, zone: "river-front" }),
+          Object.freeze({ x: -0.34, y: 0.24, scale: 0.8, rotation: -0.015, spacing: 1.06, zone: "river-front" }),
+          Object.freeze({ x: -0.105, y: 0.08, scale: 0.74, rotation: 0.01, spacing: 0.94, zone: "river-back" }),
+          Object.freeze({ x: 0.125, y: 0.035, scale: 0.71, rotation: -0.012, spacing: 1.08, zone: "river-back" }),
           Object.freeze({ x: -0.225, y: -0.17, scale: 0.42, rotation: 0.008, spacing: 1, zone: "terrace" })
         ]);
         const PRAYER_BEAD_COUNT = 14;
@@ -5320,6 +5528,10 @@
         const catchStartGuide = document.getElementById("catchStartGuide");
         const catchCountdown = document.getElementById("catchCountdown");
         const catchCountdownValue = document.getElementById("catchCountdownValue");
+        const catchLyrics = document.getElementById("catchLyrics");
+        const catchLyricCurrentText = document.getElementById("catchLyricCurrentText");
+        const catchLyricProgressText = document.getElementById("catchLyricProgressText");
+        const catchLyricNext = document.getElementById("catchLyricNext");
         const cyberCatchButton = document.getElementById("cyberCatchButton");
         const cyberCatchUses = document.getElementById("cyberCatchUses");
         const cyberCatchHint = document.getElementById("cyberCatchHint");
@@ -5542,6 +5754,7 @@
         let focusBeforeCatchResult = null;
         let lastCatchUiPairCount = 1;
         let catchCountdownVisualStep = "";
+        let catchLyricVisualIndex = -2;
         let previousWoodfishStyleIndex = 0;
         let woodfishTransitionDirection = 1;
         let woodfishStyleChangedAt = performance.now();
@@ -6111,6 +6324,63 @@
           return Math.max(0, (effectiveTime - catchRoundStartedAt) / 1000);
         }
 
+        function hasCatchMediaClock() {
+          return bgmAudio.readyState >= HTMLMediaElement.HAVE_METADATA
+            && Number.isFinite(bgmAudio.currentTime);
+        }
+
+        function getCatchSongTime(time = performance.now()) {
+          return hasCatchMediaClock()
+            ? Math.max(0, bgmAudio.currentTime)
+            : getCatchElapsedSeconds(time);
+        }
+
+        function getCatchLyricState(songTime = getCatchSongTime()) {
+          const normalizedTime = Math.max(0, Number(songTime) || 0);
+          const index = CATCH_LYRIC_CUES.findIndex(
+            (cue) => normalizedTime >= cue.start && normalizedTime < cue.end
+          );
+          const cue = index >= 0 ? CATCH_LYRIC_CUES[index] : null;
+          const nextIndex = cue
+            ? index + 1
+            : CATCH_LYRIC_CUES.findIndex((candidate) => candidate.start > normalizedTime);
+          const nextCue = nextIndex >= 0 ? CATCH_LYRIC_CUES[nextIndex] : null;
+          const progress = cue
+            ? Math.min(1, Math.max(0, (normalizedTime - cue.start) / (cue.end - cue.start)))
+            : 0;
+          return {
+            index,
+            text: cue?.text || "",
+            nextText: nextCue?.text || "",
+            progress,
+            songTime: normalizedTime
+          };
+        }
+
+        function updateCatchLyrics(time = performance.now()) {
+          const lyricState = getCatchLyricState(getCatchSongTime(time));
+          const mediaPaused = hasCatchMediaClock() && bgmAudio.paused;
+          const visible = experienceMode === "catch"
+            && catchRoundActive
+            && !catchResultOpen
+            && !isCatchCountdownActive(time)
+            && !document.hidden
+            && !mediaPaused
+            && lyricState.index >= 0;
+          catchLyrics.hidden = !visible;
+          catchLyrics.style.setProperty(
+            "--lyric-progress",
+            `${(lyricState.progress * 100).toFixed(2)}%`
+          );
+          if (lyricState.index !== catchLyricVisualIndex) {
+            catchLyricVisualIndex = lyricState.index;
+            catchLyricCurrentText.textContent = lyricState.text;
+            catchLyricProgressText.textContent = lyricState.text;
+            catchLyricNext.textContent = lyricState.nextText;
+          }
+          return { ...lyricState, visible };
+        }
+
         function getCatchDurationSeconds() {
           return Number.isFinite(bgmAudio.duration) && bgmAudio.duration > 0
             ? bgmAudio.duration
@@ -6200,6 +6470,8 @@
           catchRoundMeritSpent = 0;
           lastCatchUiPairCount = 1;
           catchCountdownVisualStep = "";
+          catchLyricVisualIndex = -2;
+          updateCatchLyrics(time);
           easternGateTargetIndices.clear();
           easternGateTargetIndex = -1;
           easternGateTargetSince = 0;
@@ -6248,6 +6520,7 @@
           catchRoundPausedAt = 0;
           catchCountdownVisualStep = "";
           document.body.dataset.catchCountdown = "false";
+          updateCatchLyrics();
           easternGateDanceActive = false;
           easternGateDanceCycle = -1;
           document.body.dataset.catchDance = "false";
@@ -6338,6 +6611,7 @@
           catchRoundMeritSpent = 0;
           catchCountdownVisualStep = "";
           document.body.dataset.catchCountdown = "false";
+          updateCatchLyrics();
           comboCount = 0;
           perfectStreak = 0;
           feverStarted = 0;
@@ -16158,6 +16432,7 @@
         function frame(time) {
           maybeFinishCatchRound(time);
           updateCatchCountdownUi(time);
+          updateCatchLyrics(time);
           if (experienceMode === "catch" && catchRoundActive) {
             const pairCount = getEasternGatePairCount(time);
             if (pairCount !== lastCatchUiPairCount) {
@@ -16475,6 +16750,7 @@
           }
         });
         bgmAudio.addEventListener("seeked", () => {
+          updateCatchLyrics();
           if (shouldScheduleAuto()) scheduleAuto();
         });
 
@@ -16587,6 +16863,9 @@
             catchRoundStartedAt =
               now - normalizedProgress * catchDurationSeconds * 1000;
             catchRoundPausedAt = 0;
+            if (bgmAudio.readyState > 0) {
+              bgmAudio.currentTime = normalizedProgress * catchDurationSeconds;
+            }
             if (
               normalizedProgress * catchDurationSeconds
               < CATCH_COUNTDOWN_SECONDS
@@ -16604,6 +16883,7 @@
               updateEasternGateTarget(now);
             }
             updateCatchCountdownUi(now);
+            updateCatchLyrics(now);
             if (normalizedProgress >= 1) showCatchResult();
             else maybeFinishCatchRound(now);
             return getCatchProgress();
@@ -16622,6 +16902,11 @@
             return { ...getEasternGateDanceState(now) };
           },
           finishCatch: showCatchResult,
+          sampleCatchLyrics: (songTime = getCatchSongTime()) => ({
+            ...getCatchLyricState(songTime),
+            visible: catchLyrics.hidden === false
+          }),
+          getCatchLyricCues: () => CATCH_LYRIC_CUES.map((cue) => ({ ...cue })),
           closeCatchResult,
           setMode,
           setWoodfishStyle: (index) => setWoodfishStyle(index, false),
@@ -16998,6 +17283,18 @@
                 countdownStep: getCatchCountdownStep(),
                 elapsedSeconds: Number(getCatchElapsedSeconds().toFixed(3)),
                 progress: Number(getCatchProgress().toFixed(3)),
+                lyrics: (() => {
+                  const lyricState = getCatchLyricState();
+                  return {
+                    cueIndex: lyricState.index,
+                    currentText: lyricState.text,
+                    nextText: lyricState.nextText,
+                    progress: Number(lyricState.progress.toFixed(3)),
+                    songTime: Number(lyricState.songTime.toFixed(3)),
+                    visible: catchLyrics.hidden === false,
+                    clock: hasCatchMediaClock() ? "media" : "elapsed-fallback"
+                  };
+                })(),
                 targetActive:
                   easternGateTargetIndices.size > 0
                   && easternGateTargetUntil > performance.now(),
