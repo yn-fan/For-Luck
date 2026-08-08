@@ -8389,6 +8389,55 @@
           return wave * wave;
         }
 
+        function getScubaDanceLegGeometry(size, beat = 0, staticPose = reducedMotion) {
+          const kneeWobble = staticPose
+            ? 0
+            : Math.sin(positiveModulo(beat, 1) * Math.PI * 4);
+          const hipY = 0;
+          const kneeY = size * 0.02;
+          const footY = size * 0.041;
+          return [-1, 1].map((side) => {
+            const footX = side * size * 0.038;
+            return {
+              side,
+              hip: { x: side * size * 0.018, y: hipY },
+              knee: {
+                x: side * size * (0.012 + kneeWobble * 0.006),
+                y: kneeY
+              },
+              foot: { x: footX, y: footY },
+              toe: {
+                x: footX + side * size * 0.018,
+                y: footY + size * 0.003
+              }
+            };
+          });
+        }
+
+        function getScubaDanceLegAssertions() {
+          const samples = [0, 0.125, 0.25, 0.375].map((beat) => ({
+            beat,
+            legs: getScubaDanceLegGeometry(1, beat, false)
+          }));
+          const baselineFeet = samples[0].legs.map((leg) => leg.foot.x);
+          return {
+            samples,
+            feetPlanted: samples.every((sample) =>
+              sample.legs.every((leg, index) => leg.foot.x === baselineFeet[index])
+            ),
+            noCrossing: samples.every((sample) =>
+              sample.legs[0].foot.x < 0
+              && sample.legs[1].foot.x > 0
+              && Math.abs(sample.legs[0].toe.x) > Math.abs(sample.legs[0].foot.x)
+              && Math.abs(sample.legs[1].toe.x) > Math.abs(sample.legs[1].foot.x)
+            ),
+            kneesOscillate: new Set(
+              samples.map((sample) => sample.legs[1].knee.x)
+            ).size > 1,
+            staticPose: getScubaDanceLegGeometry(1, 0, true)
+          };
+        }
+
         function isActionQuarterBeat(quarterIndex) {
           return positiveModulo(quarterIndex, MODES[mode].beatStep) === 0;
         }
@@ -12744,10 +12793,12 @@
             const progress = staticPose
               ? positiveModulo(route.phase / (Math.PI * 2), 1)
               : positiveModulo(time + route.offsetMs, route.cycleMs) / route.cycleMs;
-            const routeAngle = progress * Math.PI * 2 + route.phase;
-            const dancing = !staticPose
-              && progress >= route.danceStart
-              && progress < route.danceEnd;
+            const dancing = staticPose || (
+              progress >= route.danceStart
+              && progress < route.danceEnd
+            );
+            const plantedProgress = dancing ? route.danceStart : progress;
+            const routeAngle = plantedProgress * Math.PI * 2 + route.phase;
             return {
               ...route,
               progress,
@@ -13342,6 +13393,7 @@
             rhythmLean = 0,
             danceArmDirection = 1,
             danceAmount = 0,
+            danceBeat = 0,
             walking = false,
             walkPhase = 0,
             walkDirection = 1
@@ -13380,12 +13432,24 @@
               colors.rust
             ];
             const hairColor = hairPalette[positiveModulo(personSerial * 3, hairPalette.length)];
-            const scubaGlide = dancing && !reducedMotion
-              ? danceArmDirection * size * 0.024 * danceAmount
-              : 0;
+            if (dancing) {
+              context.save();
+              context.translate(personX + shake, baseY);
+              context.strokeStyle = colors.ink;
+              context.lineWidth = Math.max(1.2, size * 0.0032);
+              for (const leg of getScubaDanceLegGeometry(size, danceBeat)) {
+                context.beginPath();
+                context.moveTo(leg.hip.x, leg.hip.y - rhythmLift);
+                context.lineTo(leg.knee.x, leg.knee.y - rhythmLift * 0.38);
+                context.lineTo(leg.foot.x, leg.foot.y);
+                context.lineTo(leg.toe.x, leg.toe.y);
+                context.stroke();
+              }
+              context.restore();
+            }
             context.save();
             context.translate(
-              personX + shake + scubaGlide,
+              personX + shake,
               baseY - bounce - rhythmLift - walkBounce
             );
             context.rotate(lean + rhythmLean);
@@ -13642,24 +13706,7 @@
 
             context.strokeStyle = colors.ink;
             context.lineWidth = Math.max(1.2, size * 0.0032);
-            if (dancing) {
-              const jukeShift = reducedMotion
-                ? 0
-                : danceArmDirection * size * (0.01 + danceAmount * 0.014);
-              for (const legSide of [-1, 1]) {
-                context.beginPath();
-                context.moveTo(legSide * size * 0.018, 0);
-                context.lineTo(
-                  legSide * size * 0.012 - jukeShift * legSide,
-                  size * 0.019
-                );
-                context.lineTo(
-                  legSide * size * 0.03 + jukeShift,
-                  size * 0.041
-                );
-                context.stroke();
-              }
-            } else if (walking) {
+            if (!dancing && walking) {
               for (const legSide of [-1, 1]) {
                 const step = walkPulse * walkDirection * legSide;
                 context.beginPath();
@@ -13674,7 +13721,7 @@
                 );
                 context.stroke();
               }
-            } else {
+            } else if (!dancing) {
               context.beginPath();
               context.moveTo(-size * 0.018, 0);
               context.lineTo(-size * 0.025, size * 0.038);
@@ -13716,8 +13763,10 @@
                 const palette = pairColors[ambient.colorIndex % pairColors.length];
                 const dancing = ambient.kind === "solo" && ambient.route.dancing;
                 const danceProgress = dancing
-                  ? (ambient.route.progress - ambient.route.danceStart)
-                    / Math.max(0.01, ambient.route.danceEnd - ambient.route.danceStart)
+                  ? reducedMotion
+                    ? 0.5
+                    : (ambient.route.progress - ambient.route.danceStart)
+                      / Math.max(0.01, ambient.route.danceEnd - ambient.route.danceStart)
                   : 0;
                 const danceAmount = dancing
                   ? Math.sin(danceProgress * Math.PI) ** 2
@@ -13759,6 +13808,7 @@
                     : 0,
                   danceArmDirection: ambient.person.walkDirection,
                   danceAmount,
+                  danceBeat: reducedMotion ? 0 : ambient.route.progress * 4,
                   walking: ambient.person.walking,
                   walkPhase: ambient.person.walkPhase,
                   walkDirection: ambient.person.walkDirection
@@ -13819,7 +13869,7 @@
                 * coupleBeat.pulse
                 * (kissing ? 0.04 : 0.075);
             const rhythmSeparation = dancing
-              ? size * (0.01 + dancePulse * 0.012)
+              ? 0
               : kissing
                 ? coupleBeat.pulse * size * -0.009
                 : coupleBeat.pulse * size * 0.004;
@@ -13900,7 +13950,8 @@
               rhythmScale,
               rhythmLean,
               danceArmDirection: danceDirection,
-              danceAmount: reducedMotion ? 1 : dancePulse
+              danceAmount: reducedMotion ? 1 : dancePulse,
+              danceBeat: danceState.beat
             });
             drawPerson({
               personX: pairCenterX + separation,
@@ -13916,7 +13967,8 @@
               rhythmScale,
               rhythmLean,
               danceArmDirection: danceDirection,
-              danceAmount: reducedMotion ? 1 : dancePulse
+              danceAmount: reducedMotion ? 1 : dancePulse,
+              danceBeat: danceState.beat
             });
 
             if (coupleBeat.pulse > 0.08) {
@@ -16874,6 +16926,13 @@
             updateEasternGateTarget(now);
             return { ...getEasternGateDanceState(now) };
           },
+          sampleScubaDanceLegGeometry: (beat = 0, staticPose = false) =>
+            getScubaDanceLegGeometry(1, Number(beat) || 0, Boolean(staticPose)),
+          sampleScubaDanceBounce: (beat = 0) =>
+            getScubaDanceBounce(Number(beat) || 0),
+          assertScubaDanceLegGeometry: getScubaDanceLegAssertions,
+          sampleEasternGatePregameAmbience: (time = performance.now()) =>
+            getEasternGatePregameAmbience(Number(time) || 0),
           finishCatch: showCatchResult,
           sampleCatchLyrics: (songTime = getCatchSongTime()) => ({
             ...getCatchLyricState(songTime),
@@ -17131,6 +17190,12 @@
                     bouncePulse: Number(
                       getScubaDanceBounce(getEasternGateDanceState().beat).toFixed(3)
                     ),
+                    legGeometry: {
+                      stance: "o-legged-outward-feet",
+                      feet: "planted",
+                      knees: "inward-outward-wobble",
+                      ...getScubaDanceLegAssertions()
+                    },
                     faceCoveringHand: "foreground-overlap",
                     sweepArm: "horizontal"
                   },
