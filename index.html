@@ -4894,6 +4894,104 @@
         const EASTERN_GATE_DANCE_START_BEAT = 28;
         const EASTERN_GATE_DANCE_DURATION_BEATS = 4;
         const CAMERA_IMPACT_DURATION_MS = 520;
+        const EASTERN_GATE_AMBIENT_PAIR_ROUTES = Object.freeze([
+          Object.freeze({
+            id: "riverfront-left",
+            centerX: -0.37,
+            centerY: 0.59,
+            spread: 0.075,
+            travelX: 0.015,
+            travelY: 0.012,
+            scale: 0.76,
+            cycleMs: 11800,
+            offsetMs: 900,
+            phase: 0.2,
+            zone: "river-front"
+          }),
+          Object.freeze({
+            id: "riverfront-right",
+            centerX: 0.37,
+            centerY: 0.565,
+            spread: 0.075,
+            travelX: 0.015,
+            travelY: 0.014,
+            scale: 0.72,
+            cycleMs: 13200,
+            offsetMs: 4700,
+            phase: 1.7,
+            zone: "river-front"
+          }),
+          Object.freeze({
+            id: "riverbank-left",
+            centerX: -0.34,
+            centerY: 0.205,
+            spread: 0.05,
+            travelX: 0.01,
+            travelY: 0.01,
+            scale: 0.58,
+            cycleMs: 14600,
+            offsetMs: 7800,
+            phase: 2.4,
+            zone: "river-back"
+          }),
+          Object.freeze({
+            id: "terrace-right",
+            centerX: 0.34,
+            centerY: -0.095,
+            spread: 0.05,
+            travelX: 0.01,
+            travelY: 0.006,
+            scale: 0.44,
+            cycleMs: 12600,
+            offsetMs: 2600,
+            phase: 3.1,
+            zone: "terrace"
+          })
+        ]);
+        const EASTERN_GATE_AMBIENT_SOLO_ROUTES = Object.freeze([
+          Object.freeze({
+            id: "plaza-left-dancer",
+            centerX: -0.32,
+            centerY: 0.105,
+            travelX: 0.025,
+            travelY: 0.012,
+            scale: 0.62,
+            cycleMs: 9400,
+            offsetMs: 1400,
+            phase: 0.8,
+            danceStart: 0.5,
+            danceEnd: 0.66,
+            zone: "plaza"
+          }),
+          Object.freeze({
+            id: "riverfront-right-dancer",
+            centerX: 0.32,
+            centerY: 0.625,
+            travelX: 0.025,
+            travelY: 0.014,
+            scale: 0.8,
+            cycleMs: 10800,
+            offsetMs: 6200,
+            phase: 2.2,
+            danceStart: 0.58,
+            danceEnd: 0.74,
+            zone: "river-front"
+          }),
+          Object.freeze({
+            id: "terrace-left-dancer",
+            centerX: -0.33,
+            centerY: -0.06,
+            travelX: 0.02,
+            travelY: 0.008,
+            scale: 0.46,
+            cycleMs: 12200,
+            offsetMs: 8800,
+            phase: 4.1,
+            danceStart: 0.46,
+            danceEnd: 0.6,
+            zone: "terrace"
+          })
+        ]);
         const EASTERN_GATE_PAIR_LAYOUT = Object.freeze([
           Object.freeze({ x: -0.03, y: 0.55, scale: 0.98, rotation: -0.018, spacing: 0.96, zone: "river-front" }),
           Object.freeze({ x: -0.31, y: 0.58, scale: 0.78, rotation: 0.02, spacing: 1.08, zone: "river-front" }),
@@ -6107,6 +6205,10 @@
           easternGateTargetSince = 0;
           easternGateTargetUntil = 0;
           easternGateTargetWindowId = -1;
+          easternGatePairHitRegions = [];
+          easternGateLaserIndex = -1;
+          easternGateLaserStarted = Number.NEGATIVE_INFINITY;
+          easternGateLaserFromCyber = false;
           easternGateDanceActive = false;
           easternGateDanceCycle = -1;
           catchRoundStreak = 0;
@@ -6396,6 +6498,10 @@
           easternGateTargetSince = 0;
           easternGateTargetUntil = 0;
           easternGateNextTargetAt = 0;
+          easternGatePairHitRegions = [];
+          easternGateLaserIndex = -1;
+          easternGateLaserStarted = Number.NEGATIVE_INFINITY;
+          easternGateLaserFromCyber = false;
           easternGateHitCount = 0;
           easternGateMissCount = 0;
           easternGateExpiredTargetCount = 0;
@@ -12328,6 +12434,98 @@
           };
         }
 
+        function getEasternGatePregameAmbience(time = performance.now()) {
+          const staticPose = reducedMotion;
+          const ease = (value) => {
+            const clamped = Math.max(0, Math.min(1, value));
+            return clamped * clamped * (3 - 2 * clamped);
+          };
+          const pairs = EASTERN_GATE_AMBIENT_PAIR_ROUTES.map((route, routeIndex) => {
+            const progress = staticPose
+              ? positiveModulo(route.phase / (Math.PI * 2), 1)
+              : positiveModulo(time + route.offsetMs, route.cycleMs) / route.cycleMs;
+            const kissSpread = Math.min(0.026, route.spread * 0.28);
+            let state = "roaming";
+            let spread = route.spread;
+            if (!staticPose && progress < 0.3) {
+              state = "approaching";
+              spread = route.spread - (route.spread - kissSpread * 1.45) * ease(progress / 0.3);
+            } else if (!staticPose && progress < 0.4) {
+              state = "meeting";
+              spread = kissSpread * 1.45;
+            } else if (!staticPose && progress < 0.54) {
+              state = "kissing";
+              spread = kissSpread;
+            } else if (!staticPose && progress < 0.78) {
+              state = "separating";
+              spread = kissSpread + (route.spread - kissSpread) * ease((progress - 0.54) / 0.24);
+            }
+            const driftX = staticPose
+              ? 0
+              : Math.sin(progress * Math.PI * 2 + route.phase) * route.travelX;
+            const driftY = staticPose
+              ? 0
+              : Math.sin(progress * Math.PI * 4 + route.phase) * route.travelY;
+            const directionSign = state === "approaching"
+              ? 1
+              : state === "separating"
+                ? -1
+                : Math.cos(progress * Math.PI * 2 + route.phase) >= 0
+                  ? 1
+                  : -1;
+            return {
+              ...route,
+              progress,
+              state: staticPose ? "static" : state,
+              kissing: !staticPose && state === "kissing",
+              people: [-1, 1].map((side, personIndex) => ({
+                id: `${route.id}-${personIndex + 1}`,
+                side,
+                x: route.centerX + driftX + side * spread,
+                y: route.centerY + driftY + side * route.travelY * 0.22,
+                walking: !staticPose && (
+                  state === "approaching"
+                  || state === "separating"
+                  || state === "roaming"
+                ),
+                walkDirection: side < 0 ? directionSign : -directionSign,
+                walkPhase: progress * 6 + routeIndex * 0.7 + personIndex * 0.5
+              }))
+            };
+          });
+          const solos = EASTERN_GATE_AMBIENT_SOLO_ROUTES.map((route, routeIndex) => {
+            const progress = staticPose
+              ? positiveModulo(route.phase / (Math.PI * 2), 1)
+              : positiveModulo(time + route.offsetMs, route.cycleMs) / route.cycleMs;
+            const routeAngle = progress * Math.PI * 2 + route.phase;
+            const dancing = !staticPose
+              && progress >= route.danceStart
+              && progress < route.danceEnd;
+            return {
+              ...route,
+              progress,
+              state: staticPose ? "static" : dancing ? "dancing" : "walking",
+              x: route.centerX + (staticPose ? 0 : Math.sin(routeAngle) * route.travelX),
+              y: route.centerY + (staticPose ? 0 : Math.sin(routeAngle * 2) * route.travelY),
+              walking: !staticPose && !dancing,
+              dancing,
+              walkDirection: Math.cos(routeAngle) >= 0 ? 1 : -1,
+              walkPhase: progress * 7 + routeIndex * 0.65
+            };
+          });
+          return {
+            active: experienceMode === "catch" && !catchRoundActive && !catchResultOpen,
+            interactive: false,
+            deterministic: true,
+            reducedMotionStatic: staticPose,
+            characterCount: pairs.length * 2 + solos.length,
+            kissingPairs: pairs.filter((pair) => pair.kissing).length,
+            dancingPeople: solos.filter((solo) => solo.dancing).length,
+            pairs,
+            solos
+          };
+        }
+
         function drawEasternGateWhack(
           x,
           y,
@@ -12337,10 +12535,14 @@
           styleOnly = false
         ) {
           if (!styleOnly) updateEasternGateTarget(time);
+          const pregameAmbience = getEasternGatePregameAmbience(time);
           const regions = easternGatePairRegionsForGeometry({ x, y, size }, time);
-          if (!styleOnly) easternGatePairHitRegions = regions;
+          if (!styleOnly) {
+            easternGatePairHitRegions = pregameAmbience.active ? [] : regions;
+          }
           const laserElapsed = time - easternGateLaserStarted;
-          const laserActive = easternGateLaserIndex >= 0
+          const laserActive = !pregameAmbience.active
+            && easternGateLaserIndex >= 0
             && laserElapsed >= 0
             && laserElapsed <= EASTERN_GATE_LASER_DURATION_MS;
           const laserProgress = laserActive
@@ -12892,7 +13094,10 @@
             rhythmScale = 1,
             rhythmLean = 0,
             danceArmDirection = 1,
-            danceAmount = 0
+            danceAmount = 0,
+            walking = false,
+            walkPhase = 0,
+            walkDirection = 1
           }) => {
             const shake = shocked && !reducedMotion
               ? Math.sin(time * 0.085 + pairIndex * 2.2 + side) * size * 0.006 * (1 - laserProgress)
@@ -12900,7 +13105,19 @@
             const bounce = shocked && !reducedMotion
               ? Math.sin(Math.min(1, laserProgress) * Math.PI) * size * 0.055
               : 0;
-            const lean = kissing ? -side * 0.17 : shocked ? side * 0.14 : 0;
+            const walkPulse = walking && !reducedMotion
+              ? Math.sin(walkPhase * Math.PI * 2)
+              : 0;
+            const walkBounce = walking && !reducedMotion
+              ? Math.abs(walkPulse) * size * 0.012
+              : 0;
+            const lean = kissing
+              ? -side * 0.17
+              : shocked
+                ? side * 0.14
+                : walking
+                  ? walkDirection * walkPulse * 0.028
+                  : 0;
             const headRadius = size * 0.023;
             const headY = -size * 0.125;
             const personSerial = pairIndex * 2 + (side > 0 ? 1 : 0);
@@ -12920,7 +13137,10 @@
               ? danceArmDirection * size * 0.024 * danceAmount
               : 0;
             context.save();
-            context.translate(personX + shake + scubaGlide, baseY - bounce - rhythmLift);
+            context.translate(
+              personX + shake + scubaGlide,
+              baseY - bounce - rhythmLift - walkBounce
+            );
             context.rotate(lean + rhythmLean);
             context.scale(rhythmScale, rhythmScale);
             if (shocked) {
@@ -13056,6 +13276,17 @@
                 context.lineTo(wristX, wristY);
                 context.stroke();
               }
+            } else if (walking) {
+              for (const armSide of [-1, 1]) {
+                const armSwing = walkPulse * walkDirection * -armSide;
+                context.beginPath();
+                context.moveTo(armSide * size * 0.014, -size * 0.074);
+                context.lineTo(
+                  armSide * size * 0.045 + armSwing * size * 0.018,
+                  -size * 0.057
+                );
+                context.stroke();
+              }
             } else {
               context.beginPath();
               context.moveTo(side * -size * 0.012, -size * 0.074);
@@ -13181,6 +13412,21 @@
                 );
                 context.stroke();
               }
+            } else if (walking) {
+              for (const legSide of [-1, 1]) {
+                const step = walkPulse * walkDirection * legSide;
+                context.beginPath();
+                context.moveTo(legSide * size * 0.018, 0);
+                context.lineTo(
+                  legSide * size * 0.021 + step * size * 0.014,
+                  size * 0.02
+                );
+                context.lineTo(
+                  legSide * size * 0.028 + step * size * 0.022,
+                  size * 0.04
+                );
+                context.stroke();
+              }
             } else {
               context.beginPath();
               context.moveTo(-size * 0.018, 0);
@@ -13192,7 +13438,100 @@
             context.restore();
           };
 
-          [...regions]
+          if (pregameAmbience.active) {
+            const ambientCharacters = [];
+            pregameAmbience.pairs.forEach((pair, pairIndex) => {
+              pair.people.forEach((person, personIndex) => {
+                ambientCharacters.push({
+                  kind: "pair",
+                  route: pair,
+                  person,
+                  serial: pairIndex * 2 + personIndex,
+                  colorIndex: pairIndex
+                });
+              });
+            });
+            pregameAmbience.solos.forEach((solo, soloIndex) => {
+              ambientCharacters.push({
+                kind: "solo",
+                route: solo,
+                person: solo,
+                serial: pregameAmbience.pairs.length * 2 + soloIndex,
+                colorIndex: soloIndex + pregameAmbience.pairs.length
+              });
+            });
+            ambientCharacters
+              .sort((left, right) => left.person.y - right.person.y)
+              .forEach((ambient) => {
+                const personX = x + size * ambient.person.x;
+                const baseY = y + size * ambient.person.y;
+                const ambientScale = ambient.route.scale;
+                const palette = pairColors[ambient.colorIndex % pairColors.length];
+                const dancing = ambient.kind === "solo" && ambient.route.dancing;
+                const danceProgress = dancing
+                  ? (ambient.route.progress - ambient.route.danceStart)
+                    / Math.max(0.01, ambient.route.danceEnd - ambient.route.danceStart)
+                  : 0;
+                const danceAmount = dancing
+                  ? Math.sin(danceProgress * Math.PI) ** 2
+                  : 0;
+                context.save();
+                context.translate(personX, baseY);
+                context.scale(ambientScale, ambientScale);
+                context.translate(-personX, -baseY);
+                context.fillStyle = ambient.route.kissing ? colors.pink : colors.washiLight;
+                context.globalAlpha = ambient.route.kissing ? 0.2 : 0.12;
+                context.beginPath();
+                context.ellipse(
+                  personX,
+                  baseY + size * 0.034,
+                  size * 0.052,
+                  size * 0.014,
+                  0,
+                  0,
+                  Math.PI * 2
+                );
+                context.fill();
+                context.globalAlpha = 1;
+                drawPerson({
+                  personX,
+                  baseY,
+                  side: ambient.person.side ?? ambient.person.walkDirection,
+                  kissing: ambient.kind === "pair" && ambient.route.kissing,
+                  shocked: false,
+                  dancing,
+                  coatColor: palette[ambient.serial % 2],
+                  partnerColor: palette[(ambient.serial + 1) % 2],
+                  pairIndex: 20 + ambient.serial,
+                  rhythmLift: dancing
+                    ? getScubaDanceBounce(ambient.route.progress * 4) * size * 0.032
+                    : 0,
+                  rhythmScale: 1 + danceAmount * 0.028,
+                  rhythmLean: dancing
+                    ? ambient.person.walkDirection * danceAmount * 0.045
+                    : 0,
+                  danceArmDirection: ambient.person.walkDirection,
+                  danceAmount,
+                  walking: ambient.person.walking,
+                  walkPhase: ambient.person.walkPhase,
+                  walkDirection: ambient.person.walkDirection
+                });
+                context.restore();
+              });
+            pregameAmbience.pairs
+              .filter((pair) => pair.kissing)
+              .forEach((pair) => {
+                drawEasternGateHeart(
+                  x + size * ((pair.people[0].x + pair.people[1].x) * 0.5),
+                  y + size * (pair.centerY - 0.16),
+                  size * 0.018 * pair.scale,
+                  0.76,
+                  colors.pink
+                );
+              });
+          }
+
+          [...(pregameAmbience.active ? [] : regions)]
             .sort((left, right) => left.baseY - right.baseY)
             .forEach((region) => {
             const pairIndex = region.index;
@@ -16353,6 +16692,8 @@
           connectRitualStats: () => connectRitualStats(false),
           flushRitualStats: flushPendingRitualEvents,
           draw: () => draw(performance.now()),
+          samplePregameAmbience: (time = performance.now()) =>
+            getEasternGatePregameAmbience(time),
           get state() {
             const debugGeometry = stageGeometry();
             const cueLayout = getQuarterBeatCueLayout(debugGeometry);
@@ -16364,6 +16705,7 @@
               || isEasternGateStyle();
             const latestIncenseStick =
               incenseSticks[incenseSticks.length - 1] || null;
+            const pregameAmbience = getEasternGatePregameAmbience();
             return {
               experienceMode,
               mode,
@@ -16474,6 +16816,50 @@
                   rhythmPulse: Number(
                     getEasternGateCoupleBeat(performance.now()).pulse.toFixed(3)
                   ),
+                  pregameAmbience: {
+                    active: pregameAmbience.active,
+                    interactive: pregameAmbience.interactive,
+                    deterministic: pregameAmbience.deterministic,
+                    reducedMotionStatic: pregameAmbience.reducedMotionStatic,
+                    characterCount: pregameAmbience.characterCount,
+                    walkerCount: pregameAmbience.pairs.reduce(
+                      (count, pair) =>
+                        count + pair.people.filter((person) => person.walking).length,
+                      0
+                    ) + pregameAmbience.solos.filter((solo) => solo.walking).length,
+                    kissingPairs: pregameAmbience.kissingPairs,
+                    dancingPeople: pregameAmbience.dancingPeople,
+                    targetCount: pregameAmbience.active
+                      ? easternGateTargetIndices.size
+                      : null,
+                    hitRegionCount: pregameAmbience.active
+                      ? easternGatePairHitRegions.length
+                      : null,
+                    centerSafeZoneReserved: [
+                      ...pregameAmbience.pairs.flatMap((pair) => pair.people),
+                      ...pregameAmbience.solos
+                    ].every((person) => Math.abs(person.x) >= 0.27),
+                    routes: [
+                      ...pregameAmbience.pairs.map((pair) => ({
+                        id: pair.id,
+                        zone: pair.zone,
+                        state: pair.state,
+                        people: pair.people.map((person) => ({
+                          x: Number(person.x.toFixed(3)),
+                          y: Number(person.y.toFixed(3))
+                        }))
+                      })),
+                      ...pregameAmbience.solos.map((solo) => ({
+                        id: solo.id,
+                        zone: solo.zone,
+                        state: solo.state,
+                        people: [{
+                          x: Number(solo.x.toFixed(3)),
+                          y: Number(solo.y.toFixed(3))
+                        }]
+                      }))
+                    ]
+                  },
                   danceBreak: {
                     active: getEasternGateDanceState().active,
                     cycle: getEasternGateDanceState().cycle,
