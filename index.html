@@ -541,6 +541,15 @@
         transform: rotate(-0.3deg) skewX(-2deg);
       }
 
+      .experience-tabs[hidden] {
+        display: none;
+      }
+
+      .experience-tabs[hidden]::before,
+      .experience-tabs[hidden]::after {
+        content: none;
+      }
+
       .experience-tabs::before,
       .experience-tabs::after {
         content: "";
@@ -963,6 +972,10 @@
         grid-template-columns: minmax(0, auto) var(--controlMinSize);
         align-items: center;
         gap: var(--spacingHorizontalXS);
+      }
+
+      .sound-setting[hidden] {
+        display: none;
       }
 
       .sound-note {
@@ -1491,47 +1504,53 @@
       }
 
       .cyber-catch-button {
-        position: absolute;
-        z-index: 9;
-        right: var(--spacingHorizontalL);
-        bottom: var(--spacingVerticalXXL);
-        min-width: 178px;
-        min-height: calc(var(--controlMinSize) + var(--spacingVerticalM));
+        position: relative;
+        min-width: 0;
+        min-height: var(--controlMinSize);
         display: none;
-        grid-template-columns: 1fr;
-        gap: var(--spacingVerticalXXS);
-        padding: var(--spacingVerticalS) var(--spacingHorizontalL);
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: var(--spacingHorizontalS);
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
         color: var(--colorWashiLight);
         background: var(--colorInk);
-        border: var(--strokeThick) solid var(--colorWashiLight);
+        border: var(--strokeMedium) solid var(--colorInk);
         border-radius: var(--borderRadiusNone);
         box-shadow:
-          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPink),
-          calc(0px - var(--spacingHorizontalXS)) calc(0px - var(--spacingVerticalXS)) 0 var(--colorAccentLime);
-        clip-path: polygon(8% 0, 100% 7%, 94% 100%, 0 88%);
+          var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorAccentPink),
+          calc(0px - var(--spacingHorizontalXXS)) calc(0px - var(--spacingVerticalXXS)) 0 var(--colorAccentLime);
+        clip-path: polygon(4% 0, 100% 7%, 96% 100%, 0 90%);
         text-align: left;
         cursor: pointer;
-        transform: rotate(-1.5deg) skewX(-4deg);
+        transform: rotate(-0.8deg) skewX(-2deg);
+      }
+
+      .cyber-catch-button[hidden] {
+        display: none;
       }
 
       .cyber-catch-button strong {
         color: var(--colorAccentLime);
-        font-size: var(--fontSizeBase400);
-        line-height: var(--lineHeightBase400);
-        letter-spacing: var(--labelTracking);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
+        letter-spacing: var(--microTracking);
+        white-space: nowrap;
       }
 
       .cyber-catch-button small {
         color: var(--colorWashiDeep);
         font-size: var(--fontSizeBase100);
         line-height: var(--lineHeightBase100);
+        font-weight: var(--fontWeightBold);
+        text-align: end;
+        white-space: nowrap;
       }
 
       .cyber-catch-button:hover:not([aria-disabled="true"]) {
         color: var(--colorInk);
         background: var(--colorAccentLime);
         border-color: var(--colorInk);
-        transform: translateY(var(--hoverOffset)) rotate(1deg) skewX(-4deg);
+        transform: translateY(var(--hoverOffset)) rotate(0.4deg) skewX(-2deg);
       }
 
       .cyber-catch-button:hover:not([aria-disabled="true"]) strong,
@@ -3576,10 +3595,8 @@
         }
 
         .cyber-catch-button {
-          right: var(--spacingHorizontalS);
-          bottom: var(--spacingVerticalXL);
-          min-width: 162px;
-          padding: var(--spacingVerticalS) var(--spacingHorizontalM);
+          width: min(100%, 252px);
+          padding: var(--spacingVerticalXS) var(--spacingHorizontalS);
         }
 
         .experience-tab {
@@ -4458,17 +4475,6 @@
               <span>准备抓啵</span>
             </span>
           </button>
-          <button
-            class="cyber-catch-button"
-            id="cyberCatchButton"
-            type="button"
-            data-ready="false"
-            data-active="false"
-            hidden
-          >
-            <strong>赛博代抓 <span id="cyberCatchUses">×3</span></strong>
-            <small id="cyberCatchHint">−10 功德 · 冻结亲嘴 3S</small>
-          </button>
         </section>
 
         <section
@@ -4516,7 +4522,18 @@
 
       <aside class="stats" aria-labelledby="statsTitle">
         <p class="stats-title" id="statsTitle">功德记录</p>
-        <div class="tools" role="group" aria-label="体验设置">
+        <div class="tools" role="group" aria-label="游戏辅助与体验设置">
+          <button
+            class="cyber-catch-button"
+            id="cyberCatchButton"
+            type="button"
+            data-ready="false"
+            data-active="false"
+            hidden
+          >
+            <strong>赛博代抓 <span id="cyberCatchUses">×3</span></strong>
+            <small id="cyberCatchHint">−10 功德 · 冻结亲嘴 3S</small>
+          </button>
           <button
             class="tool-button"
             id="autoToggle"
@@ -4526,7 +4543,7 @@
           >
             <span class="tool-label" id="autoLabel">赛博对敲</span>
           </button>
-          <div class="sound-setting">
+          <div class="sound-setting" id="soundSetting">
             <span class="sound-note" aria-hidden="true">
               打开声音
               <small>for 最佳游戏体验</small>
@@ -4546,7 +4563,7 @@
           </div>
         </div>
         <span class="visually-hidden" id="soundExperienceNote">
-          打开声音可获得最佳游戏体验
+          积攒功德模式可选择开关背景音乐；享用功德模式的游戏音乐始终开启
         </span>
         <span class="visually-hidden" id="autoDescription">
           开启后你敲正拍，赛博鼓槌敲反拍；功德时刻会自动加入
@@ -4555,7 +4572,7 @@
           歌曲播放时，背景颜色会像沙漏一样向下退场，表示剩余进度
         </span>
         <span class="visually-hidden" id="catchGameHelp">
-          点击 START 开始。倒计时结束后，每个节拍窗口只出现一对亲吻情侣；使用键盘时，按空格会锁定当前亲吻目标。
+          点击 START 开始并播放游戏音乐。倒计时结束后，每个节拍窗口只出现一对亲吻情侣；使用键盘时，按空格会锁定当前亲吻目标。
         </span>
         <span class="visually-hidden" id="woodfishStyleHelp">
           游戏开始前可左右滑动屏幕，或在舞台上按左右方向键切换主题
@@ -5231,6 +5248,7 @@
         const autoToggle = document.getElementById("autoToggle");
         const autoLabel = document.getElementById("autoLabel");
         const autoDescription = document.getElementById("autoDescription");
+        const soundSetting = document.getElementById("soundSetting");
         const soundToggle = document.getElementById("soundToggle");
         const bgmAudio = document.getElementById("bgmAudio");
         const globalLabel = document.getElementById("globalLabel");
@@ -6066,6 +6084,7 @@
           ) {
             return false;
           }
+          soundEnabled = true;
           if (getAvailableMerit() <= 0) {
             setSystemMessage("功德为 0，先积攒至少 1 点功德再抓啵。");
             setExperienceMode("merit");
@@ -6198,6 +6217,7 @@
           const catchLocked =
             nextExperience !== "merit" && getAvailableMerit() <= 0;
           const next = nextExperience === "merit" || catchLocked ? "merit" : "catch";
+          if (next === "catch") soundEnabled = true;
           if (
             experienceMode === "merit"
             && !isEasternGateStyle()
@@ -7279,7 +7299,9 @@
           );
           meritHudFill.style.width = `${meritBarPercent}%`;
           experienceTabs.hidden = catchGameInProgress;
+          experienceTabs.setAttribute("aria-hidden", String(catchGameInProgress));
           catchScoreHud.hidden = !catchGameInProgress;
+          catchScoreHud.setAttribute("aria-hidden", String(!catchGameInProgress));
           catchPerfectCount.textContent = formatter.format(catchRoundPerfectCount);
           catchMissCount.textContent = formatter.format(easternGateMissCount);
           catchScoreHud.setAttribute(
@@ -7291,8 +7313,8 @@
           experienceUseTab.dataset.locked =
             String(!catchExperience && availableMerit <= 0);
           experienceEarnTab.setAttribute("aria-selected", String(!catchExperience));
-          experienceUseTab.tabIndex = catchExperience ? 0 : -1;
-          experienceEarnTab.tabIndex = catchExperience ? -1 : 0;
+          experienceUseTab.tabIndex = catchGameInProgress ? -1 : catchExperience ? 0 : -1;
+          experienceEarnTab.tabIndex = catchGameInProgress ? -1 : catchExperience ? -1 : 0;
           if (catchGameInProgress) {
             experiencePanel.removeAttribute("aria-labelledby");
             experiencePanel.setAttribute("aria-label", "不要在苏州园区亲嘴游戏区域");
@@ -7310,6 +7332,8 @@
             ? "敲木鱼 · 放生 · 上香"
             : "当前模式";
           autoToggle.hidden = catchExperience;
+          soundSetting.hidden = catchExperience;
+          soundToggle.tabIndex = catchExperience ? -1 : 0;
           meritTab.setAttribute("aria-selected", String(mode === "merit"));
           meritTab.tabIndex = mode === "merit" ? 0 : -1;
           releaseTab.setAttribute("aria-selected", String(mode === "release"));
@@ -9157,7 +9181,14 @@
         }
 
         function toggleSound() {
-          if (fortuneOpen || fortunePending || catchResultOpen) return;
+          if (
+            experienceMode === "catch"
+            || fortuneOpen
+            || fortunePending
+            || catchResultOpen
+          ) {
+            return;
+          }
           resetIdleHint();
           soundEnabled = !soundEnabled;
           if (!soundEnabled) {
