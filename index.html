@@ -311,10 +311,21 @@
 
       .topbar {
         display: grid;
-        grid-template-columns: minmax(230px, 1fr) minmax(360px, 520px) 252px;
-        grid-template-areas: "brand nav modes";
-        align-items: center;
+        grid-template-columns: minmax(460px, 720px) 252px;
+        grid-template-areas: "brand modes";
+        align-items: start;
+        justify-content: space-between;
         gap: var(--spacingHorizontalXL);
+      }
+
+      .brand-cluster {
+        grid-area: brand;
+        position: relative;
+        isolation: isolate;
+        width: min(100%, 720px);
+        display: grid;
+        grid-template-rows: auto auto;
+        justify-self: start;
       }
 
       .topbar-controls {
@@ -510,20 +521,24 @@
       }
 
       .experience-tabs {
-        grid-area: nav;
         position: relative;
         isolation: isolate;
-        justify-self: center;
-        width: min(100%, 520px);
+        z-index: 2;
+        width: 100%;
         min-height: calc(var(--controlMinSize) + var(--spacingVerticalL));
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 0;
+        margin-top: calc(0px - var(--strokeMedium));
         padding: var(--spacingVerticalXXS);
         background: var(--colorInk);
         border: var(--strokeMedium) solid var(--colorInk);
-        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorWashiLight);
-        transform: rotate(-0.45deg) skewX(-3deg);
+        border-top-width: var(--strokeThin);
+        box-shadow:
+          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorWashiLight),
+          calc(0px - var(--spacingHorizontalXS)) var(--spacingVerticalXS) 0 var(--colorAccentPink);
+        clip-path: polygon(2% 0, 100% 0, 97% 100%, 0 90%);
+        transform: rotate(-0.3deg) skewX(-2deg);
       }
 
       .experience-tabs::before,
@@ -689,17 +704,22 @@
       }
 
       .catch-score-hud {
-        grid-area: nav;
         position: relative;
         isolation: isolate;
-        justify-self: center;
-        width: min(100%, 520px);
+        z-index: 2;
+        width: 100%;
         min-height: 72px;
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(108px, 0.42fr);
         align-items: stretch;
         gap: var(--spacingHorizontalS);
+        margin-top: calc(0px - var(--strokeMedium));
         padding: var(--spacingVerticalXXS) var(--spacingHorizontalS);
+        background: var(--colorInk);
+        border: var(--strokeMedium) solid var(--colorInk);
+        border-top-width: var(--strokeThin);
+        box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorWashiLight);
+        clip-path: polygon(2% 0, 100% 0, 97% 100%, 0 90%);
       }
 
       .catch-score-hud[hidden] {
@@ -796,7 +816,6 @@
       }
 
       body[data-experience="catch"] .brand {
-        max-width: min(52vw, 520px);
         background: var(--colorAccentPurple);
         box-shadow: var(--spacingHorizontalL) var(--spacingVerticalSNudge) 0 var(--colorRust);
       }
@@ -817,7 +836,9 @@
       }
 
       .brand {
-        grid-area: brand;
+        position: relative;
+        z-index: 3;
+        width: 100%;
         display: grid;
         grid-template-areas:
           "title"
@@ -831,7 +852,7 @@
         box-shadow: var(--spacingHorizontalL) var(--spacingVerticalSNudge) 0 var(--colorRust);
         clip-path: polygon(0 8%, 94% 0, 100% 74%, 92% 100%, 4% 92%);
         transform: rotate(-1.3deg) skewX(-3deg);
-        max-width: min(40vw, 420px);
+        max-width: none;
       }
 
       .brand h1 {
@@ -2724,7 +2745,7 @@
         padding:
           calc(var(--spacingVerticalM) + env(safe-area-inset-top))
           calc(var(--spacingHorizontalM) + env(safe-area-inset-right))
-          calc(var(--spacingVerticalM) + env(safe-area-inset-bottom))
+          calc(var(--spacingVerticalXXL) + env(safe-area-inset-bottom))
           calc(var(--spacingHorizontalM) + env(safe-area-inset-left));
         background: var(--colorModalBackdrop);
       }
@@ -2736,26 +2757,27 @@
       .catch-result-card {
         position: relative;
         isolation: isolate;
-        width: min(94vw, 640px);
+        width: min(94vw, 580px);
         height: auto;
-        min-height: min(620px, calc(100dvh - var(--spacingVerticalXXL)));
-        max-height: calc(100dvh - var(--spacingVerticalXXL));
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 96px;
+        grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto auto auto auto auto auto auto auto;
         grid-template-areas:
-          "eyebrow eyebrow"
-          "location location"
-          "title title"
-          "count count"
-          "actions qr"
-          "summary summary"
-          "challenge challenge"
-          "merit merit";
+          "scene"
+          "eyebrow"
+          "location"
+          "title"
+          "summary"
+          "actions"
+          "challenge"
+          "merit";
         align-items: center;
-        gap: var(--spacingVerticalS) var(--spacingHorizontalL);
-        overflow: auto;
-        padding: clamp(var(--spacingVerticalL), 3vw, var(--spacingVerticalXXL));
+        gap: var(--spacingVerticalS);
+        overflow: visible;
+        padding:
+          clamp(var(--spacingVerticalM), 2.5vw, var(--spacingVerticalXL))
+          clamp(var(--spacingHorizontalM), 3vw, var(--spacingHorizontalXL))
+          calc(var(--spacingVerticalXXL) + var(--spacingVerticalL));
         color: var(--colorInk);
         background-color: var(--colorWashi);
         border: calc(var(--strokeThick) + var(--strokeThin)) solid var(--colorInk);
@@ -2826,14 +2848,27 @@
       .catch-result-aura span:nth-child(3) { right: 2%; bottom: 28%; animation-delay: 240ms; transform: rotate(-4deg); }
       .catch-result-aura span:nth-child(4) { bottom: 4%; left: 3%; animation-delay: 360ms; transform: rotate(5deg); }
 
+      .catch-result-scene {
+        grid-area: scene;
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: clamp(82px, 17vw, 112px);
+        display: block;
+        background: var(--colorLakeDeep);
+        border: var(--strokeThick) solid var(--colorInk);
+        box-shadow:
+          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentLime),
+          calc(0px - var(--spacingHorizontalXXS)) calc(0px - var(--spacingVerticalXXS)) 0 var(--colorAccentPink);
+        clip-path: polygon(2% 0, 100% 6%, 97% 100%, 0 91%);
+      }
+
       .catch-result-eyebrow {
         grid-area: eyebrow;
         justify-self: start;
-        display: flex;
-        align-items: center;
-        gap: var(--spacingHorizontalM);
+        display: inline-grid;
         margin: 0;
-        padding: var(--spacingVerticalS) var(--spacingHorizontalL);
+        padding: var(--spacingVerticalXXS) var(--spacingHorizontalM);
         color: var(--colorWashiLight);
         background: var(--colorAccentPurple);
         border: var(--strokeMedium) solid var(--colorInk);
@@ -2861,24 +2896,21 @@
         transform: rotate(-0.6deg);
       }
 
-      .catch-result-grade {
-        color: var(--colorAccentLime);
-        font-family: var(--fontFamilyMonospace);
-        font-size: var(--fontSizeBase200);
-        line-height: var(--lineHeightBase200);
-        font-weight: var(--fontWeightBold);
-      }
-
       .catch-result-count-block {
-        grid-area: count;
-        position: relative;
-        justify-self: stretch;
-        min-height: 92px;
+        position: absolute;
+        z-index: 4;
+        top: clamp(64px, 12vw, 78px);
+        right: calc(0px - var(--spacingHorizontalM));
+        width: clamp(102px, 23vw, 126px);
+        min-height: 72px;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "label label"
+          "value unit";
         align-items: center;
-        gap: var(--spacingHorizontalS);
-        padding: var(--spacingVerticalS) var(--spacingHorizontalXL);
+        gap: 0 var(--spacingHorizontalXS);
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
         color: var(--colorWashiLight);
         background: var(--colorInk);
         border: var(--strokeThick) solid var(--colorInk);
@@ -2891,20 +2923,21 @@
       }
 
       .catch-result-count-label {
-        align-self: center;
+        grid-area: label;
         color: var(--colorAccentLime);
-        font-family: var(--fontFamilyInk);
-        font-size: clamp(var(--fontSizeBase400), 4vw, var(--fontSizeBase600));
-        line-height: 0.95;
+        font-family: var(--fontFamilyMonospace);
+        font-size: var(--fontSizeBase100);
+        line-height: var(--lineHeightBase100);
         font-weight: var(--fontWeightBold);
-        text-wrap: balance;
-        transform: rotate(-3deg);
+        letter-spacing: var(--microTracking);
       }
 
       .catch-result-count-value {
+        grid-area: value;
+        justify-self: end;
         color: var(--colorWashiLight);
         font-family: var(--fontFamilyMonospace);
-        font-size: clamp(56px, 12vw, 92px);
+        font-size: clamp(38px, 9vw, 54px);
         line-height: 0.8;
         font-weight: var(--fontWeightBold);
         font-variant-numeric: tabular-nums;
@@ -2915,11 +2948,13 @@
       }
 
       .catch-result-count-unit {
-        padding-bottom: 0;
+        grid-area: unit;
+        align-self: end;
+        padding-bottom: var(--spacingVerticalXXS);
         color: var(--colorAccentPink);
         font-family: var(--fontFamilyInk);
-        font-size: var(--fontSizeBase600);
-        line-height: var(--lineHeightBase600);
+        font-size: var(--fontSizeBase300);
+        line-height: var(--lineHeightBase300);
         font-weight: var(--fontWeightBold);
       }
 
@@ -2927,13 +2962,13 @@
         grid-area: title;
         margin: 0;
         justify-self: stretch;
-        padding: var(--spacingVerticalL) var(--spacingHorizontalXL);
+        padding: var(--spacingVerticalM) var(--spacingHorizontalL);
         color: var(--colorWashiLight);
         background: var(--colorAccentPurple);
         border: var(--strokeThick) solid var(--colorInk);
         box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorLake);
         font-family: var(--fontFamilyMonospace);
-        font-size: clamp(48px, 9vw, 82px);
+        font-size: clamp(44px, 9vw, 72px);
         line-height: 0.86;
         font-weight: var(--fontWeightBold);
         text-wrap: balance;
@@ -2953,16 +2988,15 @@
         grid-area: summary;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: var(--spacingHorizontalM);
+        gap: var(--spacingHorizontalXS);
         margin: 0;
       }
 
       .catch-result-stat {
         display: grid;
-        gap: var(--spacingVerticalXXS);
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
-        padding: var(--spacingVerticalS) var(--spacingHorizontalL);
+        padding: var(--spacingVerticalXS) var(--spacingHorizontalM);
         color: var(--colorInk);
         background: var(--colorAccentLime);
         border: var(--strokeMedium) solid var(--colorInk);
@@ -2986,7 +3020,7 @@
       .catch-result-stat dd {
         margin: 0;
         font-family: var(--fontFamilyMonospace);
-        font-size: var(--fontSizeHero800);
+        font-size: var(--fontSizeHero700);
         line-height: 0.82;
         font-weight: var(--fontWeightBold);
         font-variant-numeric: tabular-nums;
@@ -2994,7 +3028,8 @@
 
       .catch-result-stat:nth-child(2) dd {
         color: var(--colorAccentPink);
-        font-size: var(--fontSizeHero700);
+        font-size: var(--fontSizeBase600);
+        line-height: var(--lineHeightBase600);
       }
 
       .catch-result-challenge {
@@ -3004,7 +3039,7 @@
         align-items: center;
         gap: var(--spacingVerticalXS) var(--spacingHorizontalL);
         margin: 0;
-        padding: var(--spacingVerticalM) var(--spacingHorizontalL);
+        padding: var(--spacingVerticalS) var(--spacingHorizontalM);
         color: var(--colorWashiLight);
         background: var(--colorInk);
         border: var(--strokeMedium) solid var(--colorInk);
@@ -3013,8 +3048,8 @@
       }
 
       .catch-result-challenge strong {
-        font-size: var(--fontSizeBase400);
-        line-height: var(--lineHeightBase400);
+        font-size: var(--fontSizeBase200);
+        line-height: var(--lineHeightBase200);
         text-wrap: balance;
       }
 
@@ -3067,26 +3102,27 @@
       }
 
       .catch-result-qr {
-        grid-area: qr;
+        position: absolute;
+        z-index: 4;
+        right: var(--spacingHorizontalL);
+        bottom: calc(0px - var(--spacingVerticalXXL));
         display: grid;
         place-items: center;
-        align-self: center;
-        justify-self: end;
         gap: var(--spacingVerticalXXS);
-        width: 96px;
-        padding: var(--spacingVerticalXS);
+        width: 76px;
+        padding: var(--spacingVerticalXXS);
         color: var(--colorInk);
         background: var(--colorWashiDeep);
         border: var(--strokeMedium) solid var(--colorInk);
         box-shadow:
-          var(--spacingHorizontalXS) var(--spacingVerticalXS) 0 var(--colorAccentPurple);
+          var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorInk);
         text-align: center;
         text-decoration: none;
-        transform: rotate(2deg);
+        transform: rotate(3.5deg);
       }
 
       .catch-result-qr img {
-        width: 76px;
+        width: 58px;
         height: auto;
         display: block;
         image-rendering: pixelated;
@@ -3094,8 +3130,8 @@
       }
 
       .catch-result-qr strong {
-        font-size: 10px;
-        line-height: 12px;
+        font-size: 9px;
+        line-height: 10px;
       }
 
       .catch-result-qr span {
@@ -3105,7 +3141,7 @@
       .catch-result-actions {
         grid-area: actions;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr);
         align-items: center;
         gap: var(--spacingHorizontalL);
       }
@@ -3138,7 +3174,7 @@
       .catch-result-button-primary {
         color: var(--colorWashiLight);
         background: var(--colorAccentPurple);
-        min-height: calc(var(--controlMinSize) + var(--spacingVerticalXXL));
+        min-height: calc(var(--controlMinSize) + var(--spacingVerticalL));
         box-shadow:
           var(--spacingHorizontalM) var(--spacingVerticalM) 0 var(--colorAccentPink),
           calc(0px - var(--spacingHorizontalXS)) calc(0px - var(--spacingVerticalXXS)) 0 var(--colorAccentLime);
@@ -3156,35 +3192,35 @@
           transform: rotate(1deg) skewX(-4deg) scale(0.985);
           box-shadow: var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorLake);
         }
-
-        @keyframes fortune-cta-ready {
-          0%,
-          100% {
-            filter: brightness(1);
-          }
-          50% {
-            filter: brightness(1.12);
-          }
-        }
-
-        @keyframes cyber-catch-ready {
-          0%,
-          100% {
-            box-shadow:
-              var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPink),
-              calc(0px - var(--spacingHorizontalXS)) calc(0px - var(--spacingVerticalXS)) 0 var(--colorAccentLime);
-          }
-          50% {
-            box-shadow:
-              var(--spacingHorizontalM) var(--spacingVerticalM) 0 var(--colorAccentPink),
-              calc(0px - var(--spacingHorizontalS)) calc(0px - var(--spacingVerticalS)) 0 var(--colorAccentLime);
-          }
-        }
         to {
           transform: rotate(-0.7deg) skewX(-4deg) scale(1.015);
           box-shadow:
             var(--spacingHorizontalM) var(--spacingVerticalM) 0 var(--colorAccentPink),
             calc(0px - var(--spacingHorizontalXS)) calc(0px - var(--spacingVerticalXS)) 0 var(--colorAccentLime);
+        }
+      }
+
+      @keyframes fortune-cta-ready {
+        0%,
+        100% {
+          filter: brightness(1);
+        }
+        50% {
+          filter: brightness(1.12);
+        }
+      }
+
+      @keyframes cyber-catch-ready {
+        0%,
+        100% {
+          box-shadow:
+            var(--spacingHorizontalS) var(--spacingVerticalS) 0 var(--colorAccentPink),
+            calc(0px - var(--spacingHorizontalXS)) calc(0px - var(--spacingVerticalXS)) 0 var(--colorAccentLime);
+        }
+        50% {
+          box-shadow:
+            var(--spacingHorizontalM) var(--spacingVerticalM) 0 var(--colorAccentPink),
+            calc(0px - var(--spacingHorizontalS)) calc(0px - var(--spacingVerticalS)) 0 var(--colorAccentLime);
         }
       }
 
@@ -3208,60 +3244,6 @@
           opacity: 0;
           transform: translateX(13vw) scaleX(1.32) scaleY(0.84);
         }
-
-        @keyframes catch-score-rhythm {
-          0%,
-          100% {
-            background: var(--colorAccentPink);
-            transform: translateY(0);
-          }
-          50% {
-            background: var(--colorAccentLime);
-            transform: translateY(calc(0px - var(--spacingVerticalXXS)));
-          }
-        }
-
-        @keyframes catch-score-impact {
-          0%,
-          100% {
-            transform: rotate(-1deg) skewX(-5deg) scale(1);
-          }
-          45% {
-            transform: rotate(1deg) skewX(-5deg) scale(1.12);
-          }
-        }
-
-        @keyframes catch-result-count-slam {
-          0% {
-            opacity: 0;
-            transform: translateX(-12vw) rotate(-6deg) scale(1.3);
-          }
-          72% {
-            opacity: 1;
-            transform: translateX(1vw) rotate(1deg) scale(0.97);
-          }
-          100% {
-            opacity: 1;
-            transform: translateX(0) rotate(-1deg) scale(1);
-          }
-        }
-
-        @keyframes catch-result-sticker {
-          0% {
-            translate: 0 0;
-          }
-          100% {
-            translate: 0 calc(0px - var(--spacingVerticalXS));
-          }
-        }
-
-        body[data-hit="perfect"] .catch-score-primary {
-          animation: catch-score-impact 300ms var(--curveDecelerateMax);
-        }
-
-        body[data-hit="miss"] .catch-score-secondary {
-          animation: catch-score-impact 300ms var(--curveDecelerateMax);
-        }
         28% {
           opacity: 1;
         }
@@ -3269,6 +3251,60 @@
           opacity: 1;
           transform: translateX(0) scaleX(0.96) scaleY(1);
         }
+      }
+
+      @keyframes catch-score-rhythm {
+        0%,
+        100% {
+          background: var(--colorAccentPink);
+          transform: translateY(0);
+        }
+        50% {
+          background: var(--colorAccentLime);
+          transform: translateY(calc(0px - var(--spacingVerticalXXS)));
+        }
+      }
+
+      @keyframes catch-score-impact {
+        0%,
+        100% {
+          transform: rotate(-1deg) skewX(-5deg) scale(1);
+        }
+        45% {
+          transform: rotate(1deg) skewX(-5deg) scale(1.12);
+        }
+      }
+
+      @keyframes catch-result-count-slam {
+        0% {
+          opacity: 0;
+          transform: translateX(-12vw) rotate(-6deg) scale(1.3);
+        }
+        72% {
+          opacity: 1;
+          transform: translateX(1vw) rotate(1deg) scale(0.97);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0) rotate(-1deg) scale(1);
+        }
+      }
+
+      @keyframes catch-result-sticker {
+        0% {
+          translate: 0 0;
+        }
+        100% {
+          translate: 0 calc(0px - var(--spacingVerticalXS));
+        }
+      }
+
+      body[data-hit="perfect"] .catch-score-primary {
+        animation: catch-score-impact 300ms var(--curveDecelerateMax);
+      }
+
+      body[data-hit="miss"] .catch-score-secondary {
+        animation: catch-score-impact 300ms var(--curveDecelerateMax);
       }
 
       @keyframes merit-hud-impact {
@@ -3316,19 +3352,19 @@
         0% {
           transform: translateY(var(--spacingVerticalXS)) scale(1.018);
         }
-
-        @keyframes pregame-arrow-beat {
-          0%,
-          100% {
-            transform: translateX(0);
-          }
-          18% {
-            transform: translateX(var(--spacingHorizontalXS));
-          }
-        }
         18%,
         100% {
           transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes pregame-arrow-beat {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        18% {
+          transform: translateX(var(--spacingHorizontalXS));
         }
       }
 
@@ -3362,9 +3398,7 @@
 
         .topbar {
           grid-template-columns: minmax(0, 1fr) minmax(160px, 190px);
-          grid-template-areas:
-            "brand modes"
-            "nav nav";
+          grid-template-areas: "brand modes";
           gap: var(--spacingVerticalM) var(--spacingHorizontalM);
         }
 
@@ -3379,7 +3413,7 @@
 
         .brand {
           width: 100%;
-          max-width: min(50vw, 210px);
+          max-width: none;
           padding-inline: var(--spacingHorizontalM);
         }
 
@@ -3490,8 +3524,22 @@
         }
 
         .topbar {
-          grid-template-columns: minmax(0, 1fr) minmax(170px, 184px);
+          position: relative;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-areas: "brand";
           gap: var(--spacingVerticalS) var(--spacingHorizontalS);
+        }
+
+        .brand-cluster {
+          width: 100%;
+        }
+
+        .topbar-controls {
+          position: absolute;
+          z-index: 5;
+          top: var(--spacingVerticalXS);
+          right: 0;
+          width: min(47vw, 178px);
         }
 
         .experience-tabs {
@@ -3547,22 +3595,8 @@
           width: 100%;
         }
 
-        body[data-experience="catch"] .brand {
-          max-width: min(52vw, 204px);
-          padding-inline: var(--spacingHorizontalS);
-        }
-
-        body[data-experience="catch"] .brand h1 {
-          display: block;
-        }
-
         body[data-experience="catch"] .brand-name {
-          display: block;
-          font-size: clamp(17px, 5.5vw, 23px);
-        }
-
-        body[data-experience="catch"] .brand-english {
-          display: none;
+          font-size: clamp(19px, 6vw, 25px);
         }
 
         body[data-experience="catch"] .brand p {
@@ -3570,7 +3604,12 @@
         }
 
         .brand {
-          max-width: min(54vw, 210px);
+          min-height: 66px;
+          padding:
+            var(--spacingVerticalXS)
+            calc(min(47vw, 178px) + var(--spacingHorizontalS))
+            var(--spacingVerticalXS)
+            var(--spacingHorizontalM);
         }
 
         .brand-name {
@@ -3662,71 +3701,64 @@
           padding:
             calc(var(--spacingVerticalM) + env(safe-area-inset-top))
             calc(var(--spacingHorizontalS) + env(safe-area-inset-right))
-            calc(var(--spacingVerticalM) + env(safe-area-inset-bottom))
+            calc(var(--spacingVerticalXXL) + env(safe-area-inset-bottom))
             calc(var(--spacingHorizontalS) + env(safe-area-inset-left));
         }
 
         .catch-result-card {
-          width: calc(100vw - var(--spacingHorizontalM));
+          width: calc(
+            100vw
+            - var(--spacingHorizontalXL)
+            - var(--spacingHorizontalS)
+          );
           height: auto;
-          min-height: min(600px, calc(100dvh - var(--spacingVerticalXXL)));
-          grid-template-columns: minmax(0, 1fr) 82px;
-          grid-template-rows: auto auto auto auto auto auto auto auto;
-          grid-template-areas:
-            "eyebrow eyebrow"
-            "location location"
-            "title title"
-            "count count"
-            "actions qr"
-            "summary summary"
-            "challenge challenge"
-            "merit merit";
-          gap: var(--spacingVerticalS) var(--spacingHorizontalS);
-          padding: var(--spacingVerticalL) var(--spacingHorizontalM);
+          gap: var(--spacingVerticalXS);
+          padding:
+            var(--spacingVerticalS)
+            var(--spacingHorizontalM)
+            calc(var(--spacingVerticalXXL) + var(--spacingVerticalM));
+        }
+
+        .catch-result-scene {
+          height: 76px;
         }
 
         .catch-result-heading {
           min-height: 0;
-          padding: var(--spacingVerticalL) var(--spacingHorizontalM);
-          font-size: clamp(46px, 14vw, 64px);
+          padding: var(--spacingVerticalS) var(--spacingHorizontalS);
+          font-size: clamp(36px, 12vw, 52px);
         }
 
         .catch-result-count-block {
-          position: relative;
-          min-height: 76px;
-          grid-template-columns: minmax(0, 1fr) auto auto;
-          gap: var(--spacingHorizontalXS);
-          padding: var(--spacingVerticalS) var(--spacingHorizontalM);
+          top: 52px;
+          right: calc(0px - var(--spacingHorizontalM));
+          width: 96px;
+          min-height: 64px;
+          padding: var(--spacingVerticalXXS) var(--spacingHorizontalS);
         }
 
         .catch-result-count-label {
-          position: static;
-          font-size: clamp(var(--fontSizeBase300), 5vw, var(--fontSizeBase500));
+          font-size: 9px;
+          line-height: 11px;
         }
 
         .catch-result-count-value {
-          justify-self: end;
-          font-size: clamp(48px, 16vw, 72px);
+          font-size: clamp(34px, 12vw, 44px);
         }
 
         .catch-result-count-unit {
-          padding-bottom: var(--spacingVerticalXXS);
-          font-size: var(--fontSizeBase600);
-          line-height: var(--lineHeightBase600);
-        }
-
-        .catch-result-grade {
-          width: auto;
           font-size: var(--fontSizeBase100);
           line-height: var(--lineHeightBase100);
         }
 
         .catch-result-qr img {
-          width: 62px;
+          width: 50px;
         }
 
         .catch-result-qr {
-          width: 82px;
+          right: var(--spacingHorizontalM);
+          bottom: calc(0px - var(--spacingVerticalXL));
+          width: 66px;
           padding: var(--spacingVerticalXXS);
         }
 
@@ -3757,7 +3789,7 @@
 
         .catch-result-merit {
           gap: var(--spacingHorizontalS);
-          padding-inline: 0;
+          padding-inline: 0 78px;
         }
 
         .catch-result-actions {
@@ -3777,7 +3809,7 @@
         }
 
         .catch-result-button-primary {
-          min-height: calc(var(--controlMinSize) + var(--spacingVerticalXXL));
+          min-height: calc(var(--controlMinSize) + var(--spacingVerticalM));
           font-size: var(--fontSizeBase400);
           line-height: var(--lineHeightBase400);
         }
@@ -3800,15 +3832,13 @@
 
       @media (min-width: 390px) and (max-width: 460px) and (min-height: 830px) {
         .topbar {
-          grid-template-columns: minmax(0, 1fr) minmax(170px, 184px);
-          grid-template-areas:
-            "brand modes"
-            "nav nav";
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-areas: "brand";
           gap: var(--spacingVerticalS) var(--spacingHorizontalS);
         }
 
         .brand {
-          max-width: min(52vw, 214px);
+          max-width: none;
         }
 
         .mode-tabs {
@@ -3835,12 +3865,13 @@
         }
 
         .topbar {
-          grid-template-columns: minmax(0, 1fr) 170px;
+          grid-template-columns: minmax(0, 1fr);
           gap: var(--spacingVerticalXS) var(--spacingHorizontalXS);
         }
 
         .brand {
-          max-width: min(55vw, 200px);
+          min-height: 58px;
+          max-width: none;
           gap: 0;
           padding-block: var(--spacingVerticalXS);
         }
@@ -3987,7 +4018,8 @@
         }
 
         #sceneCanvas,
-        #feedbackCanvas {
+        #feedbackCanvas,
+        .catch-result-scene {
           display: none;
         }
 
@@ -4027,7 +4059,6 @@
         .catch-result-qr,
         .catch-result-button,
         .catch-result-location,
-        .catch-result-grade,
         .catch-start-caption,
         .catch-result-challenge,
         .catch-result-merit,
@@ -4077,7 +4108,6 @@
         .catch-result-location,
         .catch-result-eyebrow,
         .catch-result-stat,
-        .catch-result-grade,
         .catch-result-challenge,
         .catch-result-merit-bar,
         .catch-result-qr,
@@ -4131,7 +4161,6 @@
         .catch-countdown,
         .catch-result-card,
         .catch-result-stat,
-        .catch-result-grade,
         .catch-result-challenge,
         .catch-result-qr,
         .fortune-slip,
@@ -4267,12 +4296,60 @@
 
     <main class="screen" data-screen-label="01 佛了 for luck · 九主题仪式" data-active="true">
       <header class="topbar">
-        <div class="brand">
-          <h1>
-            <span class="brand-name" id="brandName">佛了</span>
-            <span class="brand-english" id="brandEnglish" lang="en">for luck</span>
-          </h1>
-          <p id="brandSubtitle">在<span id="locationName">苏州</span>，凡事只求半称心</p>
+        <div class="brand-cluster">
+          <div class="brand">
+            <h1>
+              <span class="brand-name" id="brandName">佛了</span>
+              <span class="brand-english" id="brandEnglish" lang="en">FOR LOVE</span>
+            </h1>
+            <p id="brandSubtitle">他不是不爱你，他是要赶去上海的高铁</p>
+          </div>
+
+          <nav class="experience-tabs" role="tablist" aria-label="功德使用模式">
+            <button
+              class="experience-tab"
+              id="experienceUseTab"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="experiencePanel"
+            >
+              <span class="experience-tab-index" aria-hidden="true">01</span>
+              <strong>享用功德</strong>
+              <small id="experienceUseMeta">不要在园区亲嘴</small>
+            </button>
+            <button
+              class="experience-tab"
+              id="experienceEarnTab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="experiencePanel"
+            >
+              <span class="experience-tab-index" aria-hidden="true">02</span>
+              <strong>积攒功德</strong>
+              <small id="experienceEarnMeta">八种苏州仪式</small>
+            </button>
+          </nav>
+          <div
+            class="catch-score-hud"
+            id="catchScoreHud"
+            role="group"
+            aria-label="本局成绩，PERFECT 0 次，MISS 0 次"
+            hidden
+          >
+            <div class="catch-score-primary">
+              <span class="catch-score-label">PERFECT</span>
+              <strong id="catchPerfectCount">0</strong>
+            </div>
+            <div class="catch-score-secondary">
+              <span class="catch-score-label">MISS</span>
+              <strong id="catchMissCount">0</strong>
+            </div>
+            <span class="catch-score-rhythm" aria-hidden="true">
+              <i></i><i></i><i></i><i></i>
+            </span>
+          </div>
         </div>
 
         <div class="topbar-controls">
@@ -4331,52 +4408,6 @@
               放生
             </button>
           </div>
-        </div>
-
-        <nav class="experience-tabs" role="tablist" aria-label="功德使用模式">
-          <button
-            class="experience-tab"
-            id="experienceUseTab"
-            type="button"
-            role="tab"
-            aria-selected="true"
-            aria-controls="experiencePanel"
-          >
-            <span class="experience-tab-index" aria-hidden="true">01</span>
-            <strong>享用功德</strong>
-            <small id="experienceUseMeta">不要在园区亲嘴</small>
-          </button>
-          <button
-            class="experience-tab"
-            id="experienceEarnTab"
-            type="button"
-            role="tab"
-            aria-selected="false"
-            aria-controls="experiencePanel"
-          >
-            <span class="experience-tab-index" aria-hidden="true">02</span>
-            <strong>积攒功德</strong>
-            <small id="experienceEarnMeta">八种苏州仪式</small>
-          </button>
-        </nav>
-        <div
-          class="catch-score-hud"
-          id="catchScoreHud"
-          role="group"
-          aria-label="本局成绩，PERFECT 0 次，MISS 0 次"
-          hidden
-        >
-          <div class="catch-score-primary">
-            <span class="catch-score-label">PERFECT</span>
-            <strong id="catchPerfectCount">0</strong>
-          </div>
-          <div class="catch-score-secondary">
-            <span class="catch-score-label">MISS</span>
-            <strong id="catchMissCount">0</strong>
-          </div>
-          <span class="catch-score-rhythm" aria-hidden="true">
-            <i></i><i></i><i></i><i></i>
-          </span>
         </div>
       </header>
 
@@ -4549,7 +4580,7 @@
 
       <footer class="footer-note">
         <p class="visually-hidden" id="storagePolicy">
-          联网后，个人功德与放生记录按不可逆 IP 哈希延续；抓啵消耗与上局称号保存在当前设备，原始 IP 与照片不会上传或保存
+          联网后，个人功德与放生记录通过匿名网络标识延续；抓啵消耗与上局称号保存在当前设备，照片不会上传或保存
         </p>
         <p class="signature-line">
           <span lang="en">Love from Suzhou</span> 爱来自苏州 @乱讲实验室 @黑糖不是黑桃
@@ -4571,16 +4602,20 @@
         <span class="catch-result-aura" aria-hidden="true">
           <span>CATCH!</span><span>NO KISS</span><span>FOR LOVE</span><span>SUZHOU</span>
         </span>
-        <p class="catch-result-location" id="catchResultLocation">📍苏州 · IP 未知</p>
+        <canvas
+          class="catch-result-scene"
+          id="catchResultSceneCanvas"
+          aria-hidden="true"
+        ></canvas>
         <p class="catch-result-eyebrow">
           <span id="catchResultEyebrow">今日抓啵签</span>
-          <strong class="catch-result-grade" id="catchResultGrade" aria-label="巡逻评级 C">RANK C</strong>
         </p>
         <div class="catch-result-count-block" role="group" aria-label="抓到亲嘴 0 对">
           <span class="catch-result-count-label">抓到亲嘴</span>
           <strong class="catch-result-count-value" id="catchResultCount">0</strong>
           <span class="catch-result-count-unit">对</span>
         </div>
+        <p class="catch-result-location" id="catchResultLocation">📍苏州</p>
         <h2
           class="catch-result-heading"
           id="catchResultTitle"
@@ -4601,6 +4636,15 @@
             <dd id="catchResultMiss">0</dd>
           </div>
         </dl>
+        <div class="catch-result-actions">
+          <button
+            class="catch-result-button catch-result-button-primary"
+            id="catchReplay"
+            type="button"
+          >
+            继续游戏
+          </button>
+        </div>
         <p class="catch-result-challenge">
           <strong id="catchResultChallenge">再抓一局，冲击下一个称号。</strong>
           <span>命中率 <strong id="catchResultAccuracy">0%</strong> · <span id="catchResultBest">本机最佳 0 对</span></span>
@@ -4623,7 +4667,7 @@
         <a
           class="catch-result-qr"
           href="https://babblelab.cn/"
-          aria-label="打开 babblelab.cn 挑战本局称号"
+          aria-label="打开 babblelab.cn，邀请朋友挑战抓啵称号"
         >
           <img
             alt="babblelab.cn 游戏网址二维码"
@@ -4634,15 +4678,6 @@
           <strong>扫码挑战</strong>
           <span>babblelab.cn</span>
         </a>
-        <div class="catch-result-actions">
-          <button
-            class="catch-result-button catch-result-button-primary"
-            id="catchReplay"
-            type="button"
-          >
-            继续游戏
-          </button>
-        </div>
       </section>
     </div>
 
@@ -4986,7 +5021,7 @@
           audioUnavailable: "当前浏览器不支持网页声音，计数仍可正常使用",
           audioBlocked: "浏览器暂时阻止了声音，请再次操作",
           bgmUnavailable: "背景音乐加载失败，音效与计数仍可正常使用",
-          locationUnavailable: "暂时无法获取 IP 所在地，已显示“苏州”",
+          locationUnavailable: "暂时无法获取城市信息，已显示“苏州”",
           ritualConnecting: "正在连接真实功德网络",
           ritualUnavailable: "真实功德网络暂不可用，本轮记录会保存在此设备并在恢复后重试",
           ritualSynced: "真实功德已同步",
@@ -5153,7 +5188,6 @@
         let context = sceneContext;
         const screen = document.querySelector(".screen");
         const idleHint = document.getElementById("idleHint");
-        const locationName = document.getElementById("locationName");
         const brandName = document.getElementById("brandName");
         const brandEnglish = document.getElementById("brandEnglish");
         const brandSubtitle = document.getElementById("brandSubtitle");
@@ -5222,11 +5256,12 @@
         const fortuneAuraItems = [...document.querySelectorAll(".fortune-aura span")];
         const catchResultOverlay = document.getElementById("catchResultOverlay");
         const catchResultCard = catchResultOverlay.querySelector(".catch-result-card");
+        const catchResultSceneCanvas = document.getElementById("catchResultSceneCanvas");
+        const catchResultSceneContext = catchResultSceneCanvas.getContext("2d", { alpha: false });
         const catchResultLocation = document.getElementById("catchResultLocation");
         const catchResultEyebrow = document.getElementById("catchResultEyebrow");
         const catchResultTitle = document.getElementById("catchResultTitle");
         const catchResultDescription = document.getElementById("catchResultDescription");
-        const catchResultGrade = document.getElementById("catchResultGrade");
         const catchResultCount = document.getElementById("catchResultCount");
         const catchResultCountBlock = catchResultCount.closest(".catch-result-count-block");
         const catchResultPerfect = document.getElementById("catchResultPerfect");
@@ -5376,16 +5411,16 @@
         let lastCatchTitle = "尚未出道";
         let lastCatchCount = 0;
         let lastCatchAccuracy = 0;
-        let lastCatchGrade = "C";
         let bestCatchCount = 0;
         let bestCatchScore = 0;
         let resolvedLocation = "苏州";
-        let resolvedIp = "IP 未知";
         let catchRoundActive = false;
         let catchRoundStartedAt = 0;
         let catchRoundPausedAt = 0;
         let catchRoundMeritSpent = 0;
         let catchResultOpen = false;
+        let catchResultSceneFrame = 0;
+        let catchResultSceneStartedAt = 0;
         let focusBeforeCatchResult = null;
         let lastCatchUiPairCount = 1;
         let catchCountdownVisualStep = "";
@@ -5732,15 +5767,216 @@
             + catchRoundBestStreak * 50
             + accuracy * 500
           );
-          const grade =
-            easternGateHitCount >= 18 && accuracy >= 0.8
-              ? "S"
-              : easternGateHitCount >= 13 && accuracy >= 0.7
-                ? "A"
-                : easternGateHitCount >= 8 && accuracy >= 0.58
-                  ? "B"
-                  : "C";
-          return { accuracy, score, grade };
+          return { accuracy, score };
+        }
+
+        function drawCatchResultScenePerson(targetContext, x, groundY, scale, tone, scatter) {
+          const headY = groundY - 17 * scale;
+          targetContext.save();
+          targetContext.translate(scatter.x, scatter.y);
+          targetContext.strokeStyle = colors.ink;
+          targetContext.lineWidth = Math.max(1.5, 2.2 * scale);
+          targetContext.lineCap = "round";
+          targetContext.fillStyle = tone;
+          targetContext.beginPath();
+          targetContext.moveTo(x - 5 * scale, groundY - 13 * scale);
+          targetContext.lineTo(x + 5 * scale, groundY - 13 * scale);
+          targetContext.lineTo(x + 7 * scale, groundY);
+          targetContext.lineTo(x - 7 * scale, groundY);
+          targetContext.closePath();
+          targetContext.fill();
+          targetContext.stroke();
+          targetContext.fillStyle = colors.washiDeep;
+          targetContext.beginPath();
+          targetContext.arc(x, headY, 5.3 * scale, 0, Math.PI * 2);
+          targetContext.fill();
+          targetContext.stroke();
+          targetContext.fillStyle = colors.ink;
+          targetContext.beginPath();
+          targetContext.arc(x, headY - 1.5 * scale, 5.5 * scale, Math.PI, Math.PI * 2);
+          targetContext.fill();
+          targetContext.beginPath();
+          targetContext.moveTo(x - 4 * scale, groundY);
+          targetContext.lineTo(x - 6 * scale, groundY + 8 * scale);
+          targetContext.moveTo(x + 4 * scale, groundY);
+          targetContext.lineTo(x + 6 * scale, groundY + 8 * scale);
+          targetContext.stroke();
+          targetContext.restore();
+        }
+
+        function drawCatchResultScene(time = performance.now(), staticPose = false) {
+          const bounds = catchResultSceneCanvas.getBoundingClientRect();
+          if (bounds.width < 1 || bounds.height < 1) return;
+          const pixelRatio = Math.min(2, window.devicePixelRatio || 1);
+          const width = Math.round(bounds.width);
+          const height = Math.round(bounds.height);
+          const backingWidth = Math.round(width * pixelRatio);
+          const backingHeight = Math.round(height * pixelRatio);
+          if (
+            catchResultSceneCanvas.width !== backingWidth
+            || catchResultSceneCanvas.height !== backingHeight
+          ) {
+            catchResultSceneCanvas.width = backingWidth;
+            catchResultSceneCanvas.height = backingHeight;
+          }
+          const targetContext = catchResultSceneContext;
+          targetContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+          targetContext.clearRect(0, 0, width, height);
+          targetContext.fillStyle = colors.lakeDeep;
+          targetContext.fillRect(0, 0, width, height);
+
+          const cycle = staticPose
+            ? 0.12
+            : positiveModulo(time - catchResultSceneStartedAt, 3200) / 3200;
+          const flash = staticPose
+            ? 0.86
+            : cycle < 0.24
+              ? Math.sin(cycle / 0.24 * Math.PI)
+              : 0;
+          const gateX = width * 0.34;
+          const groundY = height * 0.76;
+          const gateWidth = Math.min(width * 0.29, height * 0.7);
+          const gateTop = height * 0.08;
+          const gateBottom = groundY;
+
+          targetContext.fillStyle = colors.purple;
+          targetContext.strokeStyle = colors.ink;
+          targetContext.lineWidth = Math.max(2, height * 0.035);
+          targetContext.beginPath();
+          targetContext.moveTo(gateX - gateWidth * 0.5, gateBottom);
+          targetContext.lineTo(gateX - gateWidth * 0.42, gateTop + height * 0.16);
+          targetContext.lineTo(gateX - gateWidth * 0.16, gateTop);
+          targetContext.lineTo(gateX, gateTop + height * 0.08);
+          targetContext.lineTo(gateX + gateWidth * 0.16, gateTop);
+          targetContext.lineTo(gateX + gateWidth * 0.42, gateTop + height * 0.16);
+          targetContext.lineTo(gateX + gateWidth * 0.5, gateBottom);
+          targetContext.closePath();
+          targetContext.fill();
+          targetContext.stroke();
+
+          targetContext.fillStyle = colors.lakeDeep;
+          targetContext.beginPath();
+          targetContext.moveTo(gateX - gateWidth * 0.18, gateBottom);
+          targetContext.quadraticCurveTo(
+            gateX - gateWidth * 0.17,
+            gateTop + height * 0.2,
+            gateX,
+            gateTop + height * 0.13
+          );
+          targetContext.quadraticCurveTo(
+            gateX + gateWidth * 0.17,
+            gateTop + height * 0.2,
+            gateX + gateWidth * 0.18,
+            gateBottom
+          );
+          targetContext.closePath();
+          targetContext.fill();
+          targetContext.stroke();
+
+          targetContext.strokeStyle = colors.lime;
+          targetContext.globalAlpha = 0.74;
+          targetContext.lineWidth = Math.max(1, height * 0.012);
+          for (let band = 1; band < 6; band += 1) {
+            const bandY = gateTop + (gateBottom - gateTop) * band / 6;
+            targetContext.beginPath();
+            targetContext.moveTo(gateX - gateWidth * (0.2 + band * 0.045), bandY);
+            targetContext.lineTo(gateX + gateWidth * (0.2 + band * 0.045), bandY);
+            targetContext.stroke();
+          }
+          targetContext.globalAlpha = 1;
+
+          if (flash > 0.02) {
+            const beamStartX = gateX;
+            const beamStartY = gateTop + height * 0.18;
+            const beamEndX = width * 0.92;
+            const beamEndY = height * 0.26;
+            targetContext.save();
+            targetContext.strokeStyle = colors.ink;
+            targetContext.lineWidth = Math.max(8, height * 0.13 * flash);
+            targetContext.beginPath();
+            targetContext.moveTo(beamStartX, beamStartY);
+            targetContext.lineTo(beamEndX, beamEndY);
+            targetContext.stroke();
+            targetContext.strokeStyle = colors.pink;
+            targetContext.lineWidth = Math.max(5, height * 0.075 * flash);
+            targetContext.stroke();
+            targetContext.strokeStyle = colors.washiLight;
+            targetContext.lineWidth = Math.max(2, height * 0.025 * flash);
+            targetContext.stroke();
+            targetContext.translate(beamEndX, beamEndY);
+            targetContext.strokeStyle = colors.lime;
+            targetContext.lineWidth = Math.max(2, height * 0.025);
+            for (let ray = 0; ray < 8; ray += 1) {
+              const angle = ray / 8 * Math.PI * 2;
+              targetContext.beginPath();
+              targetContext.moveTo(Math.cos(angle) * height * 0.05, Math.sin(angle) * height * 0.05);
+              targetContext.lineTo(
+                Math.cos(angle) * height * (0.12 + flash * 0.08),
+                Math.sin(angle) * height * (0.12 + flash * 0.08)
+              );
+              targetContext.stroke();
+            }
+            targetContext.restore();
+          }
+
+          const people = [
+            { x: 0.12, scale: 0.78, direction: -1, tone: colors.pink },
+            { x: 0.22, scale: 0.9, direction: 1, tone: colors.lime },
+            { x: 0.49, scale: 0.82, direction: -1, tone: colors.orange },
+            { x: 0.62, scale: 0.96, direction: 1, tone: colors.washiLight },
+            { x: 0.76, scale: 0.76, direction: 1, tone: colors.pink }
+          ];
+          people.forEach((person, index) => {
+            const scatterStrength = flash * (8 + index * 1.8);
+            drawCatchResultScenePerson(
+              targetContext,
+              width * person.x,
+              groundY,
+              person.scale,
+              person.tone,
+              {
+                x: person.direction * scatterStrength,
+                y: -flash * (index % 2 === 0 ? 7 : 12)
+              }
+            );
+          });
+
+          targetContext.strokeStyle = colors.lime;
+          targetContext.lineWidth = Math.max(2, height * 0.02);
+          targetContext.beginPath();
+          targetContext.moveTo(width * 0.03, groundY + height * 0.09);
+          targetContext.lineTo(width * 0.97, groundY + height * 0.09);
+          targetContext.stroke();
+        }
+
+        function catchResultSceneStep(time) {
+          if (!catchResultOpen || catchResultOverlay.hidden || document.hidden || reducedMotion) {
+            catchResultSceneFrame = 0;
+            return;
+          }
+          drawCatchResultScene(time);
+          catchResultSceneFrame = window.requestAnimationFrame(catchResultSceneStep);
+        }
+
+        function startCatchResultScene() {
+          if (!catchResultOpen || catchResultOverlay.hidden || document.hidden) return;
+          if (catchResultSceneFrame) {
+            window.cancelAnimationFrame(catchResultSceneFrame);
+            catchResultSceneFrame = 0;
+          }
+          catchResultSceneStartedAt = performance.now();
+          if (reducedMotion) {
+            drawCatchResultScene(catchResultSceneStartedAt, true);
+            return;
+          }
+          catchResultSceneFrame = window.requestAnimationFrame(catchResultSceneStep);
+        }
+
+        function stopCatchResultScene() {
+          if (catchResultSceneFrame) {
+            window.cancelAnimationFrame(catchResultSceneFrame);
+            catchResultSceneFrame = 0;
+          }
         }
 
         function vibrateForTiming(timing, tone = "hit") {
@@ -5908,14 +6144,11 @@
           lastCatchTitle = title.title;
           lastCatchCount = easternGateHitCount;
           lastCatchAccuracy = metrics.accuracy;
-          lastCatchGrade = metrics.grade;
           catchResultCard.dataset.record = String(isNewRecord);
           catchResultEyebrow.textContent = isNewRecord
             ? "本机新纪录 · 本局称号"
             : "本局称号";
           catchResultTitle.textContent = title.title;
-          catchResultGrade.textContent = `RANK ${metrics.grade}`;
-          catchResultGrade.setAttribute("aria-label", `巡逻评级 ${metrics.grade}`);
           catchResultCount.textContent = formatter.format(easternGateHitCount);
           catchResultCountBlock.setAttribute(
             "aria-label",
@@ -5945,7 +6178,7 @@
               : "继续游戏 · 守擂"
             : "继续游戏 · 先积德";
           catchResultDescription.textContent =
-            `本局称号${title.title}，抓到 ${easternGateHitCount} 对情侣，巡逻评级 ${metrics.grade}，命中率 ${Math.round(metrics.accuracy * 100)}%，PERFECT ${catchRoundPerfectCount} 次。可继续游戏，或扫描二维码邀请朋友挑战。`;
+            `本局称号${title.title}，地点${resolvedLocation}，抓到 ${easternGateHitCount} 对情侣，PERFECT ${catchRoundPerfectCount} 次，MISS ${easternGateMissCount} 次，命中率 ${Math.round(metrics.accuracy * 100)}%。可继续游戏，或打开二维码贴纸邀请朋友挑战。`;
           saveState();
           renderUi();
 
@@ -5955,6 +6188,7 @@
           catchResultOverlay.hidden = false;
           screen.inert = true;
           screen.setAttribute("aria-hidden", "true");
+          startCatchResultScene();
           catchResultTitle.focus();
           return true;
         }
@@ -6022,6 +6256,7 @@
 
         function closeCatchResult(nextExperience = "catch") {
           if (!catchResultOpen) return;
+          stopCatchResultScene();
           screen.inert = false;
           screen.removeAttribute("aria-hidden");
           catchResultOverlay.hidden = true;
@@ -6387,11 +6622,12 @@
 
         async function resolveLocation() {
           const fallbackLocation = "苏州";
-          const applyLocation = (label, ip = "IP 未知") => {
+          const applyLocation = (label) => {
             resolvedLocation = label;
-            resolvedIp = ip;
-            locationName.textContent = label;
-            catchResultLocation.textContent = `📍${label} · ${ip}`;
+            catchResultLocation.textContent = `📍${label}`;
+            if (experienceMode === "merit") {
+              brandSubtitle.textContent = `在${label}，凡事只求半称心`;
+            }
             document.title = experienceMode === "catch"
               ? "不要在苏州园区亲嘴 · 佛了 for luck"
               : `佛了 for luck · ${label}`;
@@ -6416,10 +6652,7 @@
             const label = [payload.city, payload.region, payload.country]
               .find((value) => typeof value === "string" && value.trim()) || "";
             if (!label) throw new Error("Location response did not include a place name");
-            const ip = typeof payload.ip === "string" && payload.ip.trim()
-              ? payload.ip.trim()
-              : "IP 未知";
-            applyLocation(label.trim(), ip);
+            applyLocation(label.trim());
             announce(`当前所在地：${label.trim()}`);
           } catch (error) {
             applyLocation(fallbackLocation);
@@ -6652,10 +6885,6 @@
               lastCatchAccuracy = Number.isFinite(saved.lastCatchAccuracy)
                 ? Math.min(1, Math.max(0, saved.lastCatchAccuracy))
                 : 0;
-              lastCatchGrade = typeof saved.lastCatchGrade === "string"
-                && ["S", "A", "B", "C"].includes(saved.lastCatchGrade)
-                ? saved.lastCatchGrade
-                : "C";
               bestCatchCount = Number.isFinite(saved.bestCatchCount)
                 ? Math.max(lastCatchCount, Math.round(saved.bestCatchCount))
                 : lastCatchCount;
@@ -6709,7 +6938,6 @@
                 lastCatchTitle,
                 lastCatchCount,
                 lastCatchAccuracy,
-                lastCatchGrade,
                 bestCatchCount,
                 bestCatchScore,
                 themeSchemaVersion: THEME_SCHEMA_VERSION,
@@ -6779,7 +7007,7 @@
             release: normalized.global.release + pendingEventCount("release")
           };
           storageNote.textContent =
-            "个人功德按不可逆 IP 哈希延续；抓啵消耗与上局称号保存在当前设备。照片不会上传。";
+            "个人功德通过匿名网络标识延续；抓啵消耗与上局称号保存在当前设备。照片不会上传。";
         }
 
         async function flushPendingRitualEvents() {
@@ -7034,10 +7262,10 @@
           brandEnglish.textContent = catchExperience ? "FOR LOVE" : "FOR LUCK";
           brandSubtitle.textContent = catchExperience
             ? "他不是不爱你，他是要赶去上海的高铁"
-            : "在苏州，凡事只求半称心";
+            : `在${resolvedLocation}，凡事只求半称心`;
           document.title = catchExperience
             ? "不要在苏州园区亲嘴 · 佛了 for luck"
-            : "佛了 for luck · 苏州";
+            : `佛了 for luck · ${resolvedLocation}`;
           meritHudTitle.textContent = isCyberCatchActive()
             ? `赛博代抓 · 冰冻 ${getCyberCatchTimeLabel()}`
             : lastCatchTitle;
@@ -7773,6 +8001,13 @@
               * EASTERN_GATE_DANCE_DURATION_BEATS
               * quarterMs
           };
+        }
+
+        function getScubaDanceBounce(beat) {
+          if (reducedMotion) return 0;
+          const phase = positiveModulo(beat, 1);
+          const wave = Math.sin(phase * Math.PI * 2);
+          return wave * wave;
         }
 
         function isActionQuarterBeat(quarterIndex) {
@@ -12095,11 +12330,8 @@
           const groundY = y + size * 0.54;
           const coupleBeat = getEasternGateCoupleBeat(time);
           const danceBeatIndex = Math.floor(danceState.beat);
-          const danceBeatPhase = positiveModulo(danceState.beat, 1);
           const dancePulse = danceState.active
-            ? reducedMotion
-              ? 0
-              : Math.sin(danceBeatPhase * Math.PI)
+            ? getScubaDanceBounce(danceState.beat)
             : 0;
           const danceDirection = danceBeatIndex % 2 === 0 ? -1 : 1;
 
@@ -12777,18 +13009,14 @@
             context.lineWidth = Math.max(2, size * 0.009);
             if (dancing) {
               for (const armSide of [-1, 1]) {
+                if (armSide === scubaNoseSide) continue;
                 const shoulderX = armSide * size * 0.013;
                 const shoulderY = -size * 0.075;
-                const coversNose = armSide === scubaNoseSide;
-                const elbowX = coversNose
-                  ? armSide * size * 0.038
-                  : armSide * size * 0.025
-                    + danceArmDirection * size * 0.038;
-                const elbowY = coversNose ? -size * 0.108 : -size * 0.078;
-                const wristX = coversNose
-                  ? armSide * size * 0.006
-                  : danceArmDirection * size * (0.085 + danceAmount * 0.02);
-                const wristY = coversNose ? headY + size * 0.002 : -size * 0.068;
+                const elbowX = armSide * size * 0.025
+                  + danceArmDirection * size * 0.038;
+                const elbowY = -size * 0.078;
+                const wristX = danceArmDirection * size * (0.085 + danceAmount * 0.02);
+                const wristY = -size * 0.068;
                 context.beginPath();
                 context.moveTo(shoulderX, shoulderY);
                 context.lineTo(elbowX, elbowY);
@@ -12809,18 +13037,6 @@
             context.arc(0, headY, headRadius, 0, Math.PI * 2);
             context.fill();
             context.stroke();
-            if (dancing) {
-              context.fillStyle = partnerColor;
-              context.beginPath();
-              context.arc(
-                scubaNoseSide * headRadius * 0.12,
-                headY + headRadius * 0.02,
-                Math.max(1.5, size * 0.0065),
-                0,
-                Math.PI * 2
-              );
-              context.fill();
-            }
 
             context.fillStyle = hairColor;
             context.beginPath();
@@ -12865,6 +13081,52 @@
               context.lineTo(headRadius * 0.72, headY - headRadius * 0.66);
               context.closePath();
               context.fill();
+            }
+
+            if (dancing) {
+              const coverShoulderX = scubaNoseSide * size * 0.014;
+              const coverShoulderY = -size * 0.074;
+              const coverElbowX = scubaNoseSide * size * 0.044;
+              const coverElbowY = -size * 0.104;
+              const coverHandX = scubaNoseSide * headRadius * 0.08;
+              const coverHandY = headY + headRadius * 0.08;
+              context.strokeStyle = colors.ink;
+              context.lineWidth = Math.max(4, size * 0.014);
+              context.beginPath();
+              context.moveTo(coverShoulderX, coverShoulderY);
+              context.lineTo(coverElbowX, coverElbowY);
+              context.lineTo(coverHandX, coverHandY);
+              context.stroke();
+              context.strokeStyle = partnerColor;
+              context.lineWidth = Math.max(2.8, size * 0.009);
+              context.stroke();
+              context.save();
+              context.translate(coverHandX, coverHandY);
+              context.rotate(scubaNoseSide * -0.28);
+              context.fillStyle = colors.washiDeep;
+              context.strokeStyle = colors.ink;
+              context.lineWidth = Math.max(1.8, size * 0.005);
+              context.beginPath();
+              context.ellipse(
+                0,
+                0,
+                headRadius * 0.72,
+                headRadius * 0.38,
+                0,
+                0,
+                Math.PI * 2
+              );
+              context.fill();
+              context.stroke();
+              context.strokeStyle = partnerColor;
+              context.lineWidth = Math.max(1.4, size * 0.0035);
+              for (let finger = -1; finger <= 1; finger += 1) {
+                context.beginPath();
+                context.moveTo(-headRadius * 0.45, finger * headRadius * 0.13);
+                context.lineTo(headRadius * 0.5, finger * headRadius * 0.13);
+                context.stroke();
+              }
+              context.restore();
             }
 
             context.strokeStyle = colors.ink;
@@ -15794,6 +16056,7 @@
             window.clearTimeout(idleHintTimer);
             idleHint.hidden = true;
             stopAnimation();
+            stopCatchResultScene();
             stopAuto(false);
             bgmResumeOnVisible = isBgmPlaying();
             if (catchRoundActive) catchRoundPausedAt = performance.now();
@@ -15810,6 +16073,7 @@
             }
             if (sessionManualActionCount > 0) sessionMissAnchor = performance.now();
             startAnimation();
+            if (catchResultOpen) startCatchResultScene();
             resetIdleHint();
             void connectRitualStats(false, false);
             if (soundEnabled && bgmResumeOnVisible) {
@@ -15851,6 +16115,7 @@
           lakeMonsterAttack = null;
           window.clearTimeout(lakeMonsterAnnouncementTimer);
           lakeMonsterAnnouncementTimer = 0;
+          if (catchResultOpen) startCatchResultScene();
         };
         if (reducedMotionQuery.addEventListener) {
           reducedMotionQuery.addEventListener("change", handleReducedMotion);
@@ -16184,7 +16449,13 @@
                     ),
                     intervalBeats: EASTERN_GATE_DANCE_INTERVAL_BEATS,
                     durationBeats: EASTERN_GATE_DANCE_DURATION_BEATS,
-                    targetPaused: getEasternGateDanceState().active
+                    targetPaused: getEasternGateDanceState().active,
+                    bouncePeaksPerBeat: 2,
+                    bouncePulse: Number(
+                      getScubaDanceBounce(getEasternGateDanceState().beat).toFixed(3)
+                    ),
+                    faceCoveringHand: "foreground-overlap",
+                    sweepArm: "horizontal"
                   },
                   couples: getEasternGatePairCount(),
                   maxCouples: CATCH_MAX_PAIRS,
@@ -16297,6 +16568,12 @@
               catchGame: {
                 active: catchRoundActive,
                 resultOpen: catchResultOpen,
+                resultLocation: catchResultLocation.textContent,
+                resultHasGrade: false,
+                resultCountBadge: "top-right-overlap",
+                resultStatsPlacement: "directly-below-title",
+                resultQrSticker: "bottom-edge-overlap",
+                resultSceneAnimating: Boolean(catchResultSceneFrame),
                 durationSeconds: getCatchDurationSeconds(),
                 countdownSeconds: CATCH_COUNTDOWN_SECONDS,
                 countdownStep: getCatchCountdownStep(),

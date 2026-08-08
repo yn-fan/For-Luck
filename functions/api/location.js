@@ -5,7 +5,6 @@ const JSON_HEADERS = {
 };
 
 export function onRequestGet({ request }) {
-  const ip = request.headers.get("CF-Connecting-IP")?.trim() || "";
   const city = typeof request.cf?.city === "string" ? request.cf.city.trim() : "";
   const region = typeof request.cf?.region === "string" ? request.cf.region.trim() : "";
   const country =
@@ -13,7 +12,6 @@ export function onRequestGet({ request }) {
 
   return new Response(
     JSON.stringify({
-      ip,
       city,
       region,
       country,
